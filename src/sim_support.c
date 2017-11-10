@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#if MD5
-#include <openssl/md5.h>
-#endif
+
 #include "sim_support.h"
 #include "exmemwb.h"
 
@@ -104,59 +102,6 @@ void sim_command(void)
     cpu_set_pc(cpu_get_pc() + 0x4);
     do_reset = 0;
   }
-
-// Compute MD5 of memory
-#if MD5
-  if(md5[0] != 0) {
-    printf("Computing MD5!");
-    MD5_CTX c;
-    unsigned char digest[16];
-    int length;
-    char *ptr;
-
-    MD5_Init(&c);
-
-    // Do RAM first
-    length = RAM_SIZE - 1;
-    ptr = (char *)ram;
-    while(length > 0) {
-      if(length > 512) {
-        MD5_Update(&c, ptr, 512);
-      } else {
-        MD5_Update(&c, ptr, length);
-      }
-      length -= 512;
-      ptr += 512;
-    }
-
-    // Do flash next
-    length = FLASH_SIZE - 1;
-    ptr = (char *)flash;
-    while(length > 0) {
-      if(length > 512) {
-        MD5_Update(&c, ptr, 512);
-      } else {
-        MD5_Update(&c, ptr, length);
-      }
-      length -= 512;
-      ptr += 512;
-    }
-
-    //// Now low registers
-    //length = 8*4;
-    //ptr = (char*) cpu.gpr;
-    //MD5_Update(&c, ptr, length);
-
-    // PC, SP, LR
-    length = 3 * 4;
-    ptr = (char *)&(cpu.gpr[13]);
-    MD5_Update(&c, ptr, length);
-
-    MD5_Final((unsigned char *)&(md5[1]), &c);
-
-    md5[0] = 0;
-  }
-#endif
 }
 
 #if HOOK_GPR_ACCESSES
