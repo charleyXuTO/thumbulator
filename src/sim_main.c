@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     simLoadInsn(cpu_get_pc() - 0x4, &insn);
     diss_printf("%04X\n", insn);
 
-    decode(insn);
+    DECODE_RESULT decoded = decode(insn);
     exwbmem(insn, decoded);
 
     // Print any differences caused by the last instruction
