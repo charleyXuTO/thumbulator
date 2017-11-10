@@ -2,7 +2,7 @@
 #include "exmemwb.h"
 #include "decode.h"
 
-u32 breakpoint(void)
+uint32_t breakpoint(void)
 {
   return 0;
 }
@@ -45,11 +45,11 @@ int handle_bkpt(unsigned int bp, unsigned int arg)
 ///--- Move operations -------------------------------------------///
 
 // MOVS - write an immediate to the destination register
-u32 movs_i()
+uint32_t movs_i()
 {
   diss_printf("movs r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
-  u32 opA = zeroExtend32(decoded.imm);
+  uint32_t opA = zeroExtend32(decoded.imm);
   cpu_set_gpr(decoded.rD, opA);
 
   do_nflag(opA);
@@ -59,11 +59,11 @@ u32 movs_i()
 }
 
 // MOV - copy the source register value to the destination register
-u32 mov_r()
+uint32_t mov_r()
 {
   diss_printf("mov r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
+  uint32_t opA = cpu_get_gpr(decoded.rM);
 
   if(decoded.rD == GPR_PC)
     alu_write_pc(opA);
@@ -74,11 +74,11 @@ u32 mov_r()
 }
 
 // MOVS - copy the low source register value to the destination low register
-u32 movs_r()
+uint32_t movs_r()
 {
   diss_printf("movs r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
+  uint32_t opA = cpu_get_gpr(decoded.rM);
   cpu_set_gpr(decoded.rD, opA);
 
   do_nflag(opA);
@@ -90,11 +90,11 @@ u32 movs_r()
 ///--- Bit twiddling operations -------------------------------------------///
 
 // SXTB - Sign extend a byte to a word
-u32 sxtb()
+uint32_t sxtb()
 {
   diss_printf("sxtb r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 result = 0xFF & cpu_get_gpr(decoded.rM);
+  uint32_t result = 0xFF & cpu_get_gpr(decoded.rM);
   result = (result & 0x80) != 0 ? (result | 0xFFFFFF00) : result;
 
   cpu_set_gpr(decoded.rD, result);
@@ -103,11 +103,11 @@ u32 sxtb()
 }
 
 // SXTH - Sign extend a halfword to a word
-u32 sxth()
+uint32_t sxth()
 {
   diss_printf("sxth r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 result = 0xFFFF & cpu_get_gpr(decoded.rM);
+  uint32_t result = 0xFFFF & cpu_get_gpr(decoded.rM);
   result = (result & 0x8000) != 0 ? (result | 0xFFFF0000) : result;
 
   cpu_set_gpr(decoded.rD, result);
@@ -116,34 +116,34 @@ u32 sxth()
 }
 
 // UXTB - Extend a byte to a word
-u32 uxtb()
+uint32_t uxtb()
 {
   diss_printf("uxtb r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 result = 0xFF & cpu_get_gpr(decoded.rM);
+  uint32_t result = 0xFF & cpu_get_gpr(decoded.rM);
   cpu_set_gpr(decoded.rD, result);
 
   return 1;
 }
 
 // UXTH - Extend a halfword to a word
-u32 uxth()
+uint32_t uxth()
 {
   diss_printf("uxth r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 result = 0xFFFF & cpu_get_gpr(decoded.rM);
+  uint32_t result = 0xFFFF & cpu_get_gpr(decoded.rM);
   cpu_set_gpr(decoded.rD, result);
 
   return 1;
 }
 
 // REV - Reverse ordering of bytes in a word
-u32 rev()
+uint32_t rev()
 {
   diss_printf("rev r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
-  u32 result = opA << 24;
+  uint32_t opA = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA << 24;
   result |= (opA << 8) & 0xFF0000;
   result |= (opA >> 8) & 0xFF00;
   result |= (opA >> 24);
@@ -154,12 +154,12 @@ u32 rev()
 }
 
 // REV16 - Reverse ordering of bytes in a packed halfword
-u32 rev16()
+uint32_t rev16()
 {
   diss_printf("rev16 r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
-  u32 result = (opA << 8) & 0xFF000000;
+  uint32_t opA = cpu_get_gpr(decoded.rM);
+  uint32_t result = (opA << 8) & 0xFF000000;
   result |= (opA >> 8) & 0xFF0000;
   result |= (opA << 8) & 0xFF00;
   result |= (opA >> 8) & 0xFF;
@@ -170,12 +170,12 @@ u32 rev16()
 }
 
 // REVSH - Reverse ordering of bytes in a signed halfword
-u32 revsh()
+uint32_t revsh()
 {
   diss_printf("revsh r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
-  u32 result = (opA & 0x8) != 0 ? (0xFFFFFF00 | opA) : (0xFF & opA);
+  uint32_t opA = cpu_get_gpr(decoded.rM);
+  uint32_t result = (opA & 0x8) != 0 ? (0xFFFFFF00 | opA) : (0xFF & opA);
   result <<= 8;
   result |= (opA >> 8) & 0xFF;
 

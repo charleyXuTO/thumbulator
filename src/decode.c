@@ -7,14 +7,14 @@
 DECODE_RESULT decoded;
 
 // Various decodings
-void decode_3lo(const u16 pInsn)
+void decode_3lo(const uint16_t pInsn)
 {
   decoded.rD = pInsn & 0x7;
   decoded.rN = (pInsn >> 3) & 0x7;
   decoded.rM = (pInsn >> 6) & 0x7;
 }
 
-void decode_2loimm5(const u16 pInsn)
+void decode_2loimm5(const uint16_t pInsn)
 {
   decoded.rD = pInsn & 0x7;
 #if DECODE_SAFE
@@ -24,7 +24,7 @@ void decode_2loimm5(const u16 pInsn)
   decoded.imm = (pInsn >> 6) & 0x1F;
 }
 
-void decode_2loimm3(const u16 pInsn)
+void decode_2loimm3(const uint16_t pInsn)
 {
   decoded.rD = pInsn & 0x7;
 #if DECODE_SAFE
@@ -34,14 +34,14 @@ void decode_2loimm3(const u16 pInsn)
   decoded.imm = (pInsn >> 6) & 0x7;
 }
 
-void decode_2lo(const u16 pInsn)
+void decode_2lo(const uint16_t pInsn)
 {
   decoded.rD = pInsn & 0x7;
   decoded.rM = (pInsn >> 3) & 0x7;
   decoded.rN = (pInsn >> 3) & 0x7;
 }
 
-void decode_imm8lo(const u16 pInsn)
+void decode_imm8lo(const uint16_t pInsn)
 {
   decoded.rD = (pInsn >> 8) & 0x7;
 #if DECODE_SAFE
@@ -51,66 +51,66 @@ void decode_imm8lo(const u16 pInsn)
   decoded.imm = pInsn & 0xFF;
 }
 
-void decode_imm8(const u16 pInsn)
+void decode_imm8(const uint16_t pInsn)
 {
   decoded.imm = pInsn & 0xFF;
 }
 
-void decode_imm8c(const u16 pInsn)
+void decode_imm8c(const uint16_t pInsn)
 {
   decoded.imm = pInsn & 0xFF;
   decoded.cond = (pInsn >> 8) & 0xF;
 }
 
-void decode_imm7(const u16 pInsn)
+void decode_imm7(const uint16_t pInsn)
 {
   decoded.rD = GPR_SP;
   decoded.imm = pInsn & 0x7F;
 }
 
-void decode_imm11(const u16 pInsn)
+void decode_imm11(const uint16_t pInsn)
 {
   decoded.imm = pInsn & 0x7FF;
 }
 
-void decode_reglistlo(const u16 pInsn)
+void decode_reglistlo(const uint16_t pInsn)
 {
   decoded.rN = (pInsn >> 8) & 0x7;
   decoded.reg_list = pInsn & 0xFF;
 }
 
-void decode_pop(const u16 pInsn)
+void decode_pop(const uint16_t pInsn)
 {
   decoded.reg_list = ((pInsn & 0x100) << 7) | (pInsn & 0xFF);
 }
 
-void decode_push(const u16 pInsn)
+void decode_push(const uint16_t pInsn)
 {
   decoded.reg_list = (pInsn & 0xFF) | ((pInsn & 0x100) << 6);
 }
 
-void decode_bl(const u16 pInsn)
+void decode_bl(const uint16_t pInsn)
 {
-  u16 secondHalf;
+  uint16_t secondHalf;
   simLoadInsn(cpu_get_pc() - 0x2, &secondHalf);
 
-  u32 S = (pInsn >> 10) & 0x1;
-  u32 J1 = (secondHalf >> 13) & 0x1;
-  u32 J2 = (secondHalf >> 11) & 0x1;
-  u32 I1 = ~(J1 ^ S) & 0x1;
-  u32 I2 = ~(J2 ^ S) & 0x1;
-  u32 imm10 = pInsn & 0x3FF;
-  u32 imm11 = secondHalf & 0x7FF;
+  uint32_t S = (pInsn >> 10) & 0x1;
+  uint32_t J1 = (secondHalf >> 13) & 0x1;
+  uint32_t J2 = (secondHalf >> 11) & 0x1;
+  uint32_t I1 = ~(J1 ^ S) & 0x1;
+  uint32_t I2 = ~(J2 ^ S) & 0x1;
+  uint32_t imm10 = pInsn & 0x3FF;
+  uint32_t imm11 = secondHalf & 0x7FF;
 
   decoded.imm = (S << 23) | (I1 << 22) | (I2 << 21) | (imm10 << 11) | imm11;
 }
 
-void decode_1all(const u16 pInsn)
+void decode_1all(const uint16_t pInsn)
 {
   decoded.rM = (pInsn >> 3) & 0xF;
 }
 
-void decode_mov_r(const u16 pInsn)
+void decode_mov_r(const uint16_t pInsn)
 {
   decoded.rD = (pInsn & 0x7) | ((pInsn & 0x80) >> 4);
   decoded.rN = decoded.rD;
@@ -118,7 +118,7 @@ void decode_mov_r(const u16 pInsn)
 }
 
 // Stop simulation if we cannot decode the instruction
-void decode_error(const u16 pInsn)
+void decode_error(const uint16_t pInsn)
 {
   fprintf(stderr, "Error: Malformed instruction: Unable to decode: 0x%4.4X at 0x%08X\n", pInsn,
       cpu_get_pc() - 4);
@@ -126,29 +126,29 @@ void decode_error(const u16 pInsn)
 }
 
 // Decode functions that require more opcode bits than the first 6
-void (*decodeJumpTable17[4])(const u16 pInsn) = {
+void (*decodeJumpTable17[4])(const uint16_t pInsn) = {
     decode_mov_r,               /* 01_0001_0XXX (110 - 117) */
     decode_mov_r, decode_mov_r, /* 01_0001_10XX (118 - 11B) */
     decode_1all                 /* 01_0001_11XX (11C - 11F) */
 };
 
-void (*decodeJumpTable44[4])(const u16 pInsn) = {decode_imm7, /* 10_1100_00XX (2C0 - 2C3) */
+void (*decodeJumpTable44[4])(const uint16_t pInsn) = {decode_imm7, /* 10_1100_00XX (2C0 - 2C3) */
     decode_error, decode_2lo,                                 /* 10_1100_10XX (2C8 - 2CB) */
     decode_error};
 
-void (*decodeJumpTable47[4])(const u16 pInsn) = {decode_pop, /* 10_1111_0XXX (2F0 - 2F7) */
+void (*decodeJumpTable47[4])(const uint16_t pInsn) = {decode_pop, /* 10_1111_0XXX (2F0 - 2F7) */
     decode_pop, decode_imm8,                                 /* 10_1111_10XX (2F8 - 2FB) */
     decode_error};
 
-void decode_17(const u16 pInsn)
+void decode_17(const uint16_t pInsn)
 {
   decodeJumpTable17[(pInsn >> 8) & 0x3](pInsn);
 }
-void decode_44(const u16 pInsn)
+void decode_44(const uint16_t pInsn)
 {
   decodeJumpTable44[(pInsn >> 8) & 0x3](pInsn);
 }
-void decode_47(const u16 pInsn)
+void decode_47(const uint16_t pInsn)
 {
   decodeJumpTable47[(pInsn >> 8) & 0x3](pInsn);
 }
@@ -157,7 +157,7 @@ void decode_47(const u16 pInsn)
 // to make decoding fast
 // Indices 16, 17, 44, 47, 60, and 62 have multiple conflicting
 // decodings that need to be resolved outside the jump table
-void (*decodeJumpTable[64])(const u16 pInsn) = {decode_2loimm5, decode_2loimm5, decode_2loimm5,
+void (*decodeJumpTable[64])(const uint16_t pInsn) = {decode_2loimm5, decode_2loimm5, decode_2loimm5,
     decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_3lo, decode_2loimm3, decode_imm8lo,
     decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo,
     decode_imm8lo, decode_2lo, /* A5.2.2 - these are all decoded the same */
@@ -179,7 +179,7 @@ void (*decodeJumpTable[64])(const u16 pInsn) = {decode_2loimm5, decode_2loimm5, 
 // using the first 6 instruction opcode bits and then
 // executing the function pointed to
 // The decode functions update the global decode structure
-void decode(const u16 pInsn)
+void decode(const uint16_t pInsn)
 {
 // Clear the values from the previous decode
 #if DECODE_CLEAR

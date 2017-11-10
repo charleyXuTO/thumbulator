@@ -4,13 +4,13 @@
 ///--- Logical operations ----------------------------------------///
 
 // AND - logical AND two registers and update flags
-u32 ands()
+uint32_t ands()
 {
   diss_printf("ands r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM);
-  u32 result = opA & opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA & opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -22,13 +22,13 @@ u32 ands()
 
 // BIC - clears the bits in the destination register that are set in
 // the source register
-u32 bics()
+uint32_t bics()
 {
   diss_printf("bics r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM);
-  u32 result = opA & ~opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA & ~opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -39,13 +39,13 @@ u32 bics()
 }
 
 // EOR - exclusive OR two registers and update the flags
-u32 eors()
+uint32_t eors()
 {
   diss_printf("eors r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM);
-  u32 result = opA ^ opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA ^ opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -56,13 +56,13 @@ u32 eors()
 }
 
 // ORR - logical OR two registers and update the flags
-u32 orrs()
+uint32_t orrs()
 {
   diss_printf("orrs r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM);
-  u32 result = opA | opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA | opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -73,12 +73,12 @@ u32 orrs()
 }
 
 // MVN - Move while negating
-u32 mvns()
+uint32_t mvns()
 {
   diss_printf("mvns r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
-  u32 result = ~opA;
+  uint32_t opA = cpu_get_gpr(decoded.rM);
+  uint32_t result = ~opA;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -90,13 +90,13 @@ u32 mvns()
 
 ///--- Shift and rotate operations --------------------------------------------///
 
-u32 asrs_i()
+uint32_t asrs_i()
 {
   diss_printf("asrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
-  u32 opB = decoded.imm;
-  u32 result;
+  uint32_t opA = cpu_get_gpr(decoded.rM);
+  uint32_t opB = decoded.imm;
+  uint32_t result;
 
   // 0 really means 32 (A6.4.1)
   if(opB == 0) {
@@ -122,13 +122,13 @@ u32 asrs_i()
   return 1;
 }
 
-u32 asrs_r()
+uint32_t asrs_r()
 {
   diss_printf("asrs r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM) & 0xFF;
-  u32 result = 0;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM) & 0xFF;
+  uint32_t result = 0;
 
   if(opB == 0) {
     result = opA;
@@ -154,16 +154,16 @@ u32 asrs_r()
   return 1;
 }
 
-u32 lsls_i()
+uint32_t lsls_i()
 {
   if(decoded.imm == 0)
     diss_printf("mov r%u, r%u\n", decoded.rD, decoded.rM);
   else
     diss_printf("lsls r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
-  u32 opB = decoded.imm;
-  u32 result = opA << opB;
+  uint32_t opA = cpu_get_gpr(decoded.rM);
+  uint32_t opB = decoded.imm;
+  uint32_t result = opA << opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -174,14 +174,14 @@ u32 lsls_i()
   return 1;
 }
 
-u32 lsrs_i()
+uint32_t lsrs_i()
 {
   diss_printf("lsrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
-  u32 opA = cpu_get_gpr(decoded.rM);
-  u32 opB = decoded.imm;
+  uint32_t opA = cpu_get_gpr(decoded.rM);
+  uint32_t opB = decoded.imm;
   // 0 really means 32 (A6.4.1)
-  u32 result = opB ? opA >> opB : 0;
+  uint32_t result = opB ? opA >> opB : 0;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -192,13 +192,13 @@ u32 lsrs_i()
   return 1;
 }
 
-u32 lsls_r()
+uint32_t lsls_r()
 {
   diss_printf("lsls r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM) & 0xFF;
-  u32 result = (opB >= 32) ? 0 : opA << opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM) & 0xFF;
+  uint32_t result = (opB >= 32) ? 0 : opA << opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -209,13 +209,13 @@ u32 lsls_r()
   return 1;
 }
 
-u32 lsrs_r()
+uint32_t lsrs_r()
 {
   diss_printf("lsrs r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM) & 0xFF;
-  u32 result = (opB >= 32) ? 0 : opA >> opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM) & 0xFF;
+  uint32_t result = (opB >= 32) ? 0 : opA >> opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -226,14 +226,14 @@ u32 lsrs_r()
   return 1;
 }
 
-u32 rors()
+uint32_t rors()
 {
   diss_printf("rors r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM) & 0xFF;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM) & 0xFF;
 
-  u32 result = opA;
+  uint32_t result = opA;
   if(opB != 0) {
     opB &= 0x1F; // Everything above 32 is a multiple of 32
     result = (opB == 0) ? opA : opA >> opB | opA << (32 - opB);

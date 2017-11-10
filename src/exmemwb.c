@@ -3,100 +3,100 @@
 #include "decode.h"
 #include "except.h"
 
-u16 insn;
+uint16_t insn;
 
 #if HOOK_GPR_ACCESSES
-u32 cpu_get_gpr(u32 gpr)
+uint32_t cpu_get_gpr(uint32_t gpr)
 {
   gprReadHooks[gpr]();
   return cpu.gpr[gpr];
 }
 
-void cpu_set_gpr(u32 gpr, u32 value)
+void cpu_set_gpr(uint32_t gpr, uint32_t value)
 {
   gprWriteHooks[gpr]();
   cpu.gpr[gpr] = value;
 }
 #endif
 
-void do_cflag(u32 a, u32 b, u32 carry)
+void do_cflag(uint32_t a, uint32_t b, uint32_t carry)
 {
-  u32 result;
+  uint32_t result;
 
   result = (a & 0x7FFFFFFF) + (b & 0x7FFFFFFF) + carry; //carry in
   result = (result >> 31) + (a >> 31) + (b >> 31);      //carry out
   cpu_set_flag_c(result >> 1);
 }
 
-u32 adcs(void);
-u32 adds_i3(void);
-u32 adds_i8(void);
-u32 adds_r(void);
-u32 add_r(void);
-u32 add_sp(void);
-u32 adr(void);
-u32 subs_i3(void);
-u32 subs_i8(void);
-u32 subs(void);
-u32 sub_sp(void);
-u32 sbcs(void);
-u32 rsbs(void);
-u32 muls(void);
-u32 cmn(void);
-u32 cmp_i(void);
-u32 cmp_r(void);
-u32 tst(void);
-u32 b(void);
-u32 b_c(void);
-u32 blx(void);
-u32 bx(void);
-u32 bl(void);
-u32 ands(void);
-u32 bics(void);
-u32 eors(void);
-u32 orrs(void);
-u32 mvns(void);
-u32 asrs_i(void);
-u32 asrs_r(void);
-u32 lsls_i(void);
-u32 lsrs_i(void);
-u32 lsls_r(void);
-u32 lsrs_r(void);
-u32 rors(void);
-u32 ldm(void);
-u32 stm(void);
-u32 pop(void);
-u32 push(void);
-u32 ldr_i(void);
-u32 ldr_sp(void);
-u32 ldr_lit(void);
-u32 ldr_r(void);
-u32 ldrb_i(void);
-u32 ldrb_r(void);
-u32 ldrh_i(void);
-u32 ldrh_r(void);
-u32 ldrsb_r(void);
-u32 ldrsh_r(void);
-u32 str_i(void);
-u32 str_sp(void);
-u32 str_r(void);
-u32 strb_i(void);
-u32 strb_r(void);
-u32 strh_i(void);
-u32 strh_r(void);
-u32 movs_i(void);
-u32 mov_r(void);
-u32 movs_r(void);
-u32 sxtb(void);
-u32 sxth(void);
-u32 uxtb(void);
-u32 uxth(void);
-u32 rev(void);
-u32 rev16(void);
-u32 revsh(void);
-u32 breakpoint(void);
+uint32_t adcs(void);
+uint32_t adds_i3(void);
+uint32_t adds_i8(void);
+uint32_t adds_r(void);
+uint32_t add_r(void);
+uint32_t add_sp(void);
+uint32_t adr(void);
+uint32_t subs_i3(void);
+uint32_t subs_i8(void);
+uint32_t subs(void);
+uint32_t sub_sp(void);
+uint32_t sbcs(void);
+uint32_t rsbs(void);
+uint32_t muls(void);
+uint32_t cmn(void);
+uint32_t cmp_i(void);
+uint32_t cmp_r(void);
+uint32_t tst(void);
+uint32_t b(void);
+uint32_t b_c(void);
+uint32_t blx(void);
+uint32_t bx(void);
+uint32_t bl(void);
+uint32_t ands(void);
+uint32_t bics(void);
+uint32_t eors(void);
+uint32_t orrs(void);
+uint32_t mvns(void);
+uint32_t asrs_i(void);
+uint32_t asrs_r(void);
+uint32_t lsls_i(void);
+uint32_t lsrs_i(void);
+uint32_t lsls_r(void);
+uint32_t lsrs_r(void);
+uint32_t rors(void);
+uint32_t ldm(void);
+uint32_t stm(void);
+uint32_t pop(void);
+uint32_t push(void);
+uint32_t ldr_i(void);
+uint32_t ldr_sp(void);
+uint32_t ldr_lit(void);
+uint32_t ldr_r(void);
+uint32_t ldrb_i(void);
+uint32_t ldrb_r(void);
+uint32_t ldrh_i(void);
+uint32_t ldrh_r(void);
+uint32_t ldrsb_r(void);
+uint32_t ldrsh_r(void);
+uint32_t str_i(void);
+uint32_t str_sp(void);
+uint32_t str_r(void);
+uint32_t strb_i(void);
+uint32_t strb_r(void);
+uint32_t strh_i(void);
+uint32_t strh_r(void);
+uint32_t movs_i(void);
+uint32_t mov_r(void);
+uint32_t movs_r(void);
+uint32_t sxtb(void);
+uint32_t sxth(void);
+uint32_t uxtb(void);
+uint32_t uxth(void);
+uint32_t rev(void);
+uint32_t rev16(void);
+uint32_t revsh(void);
+uint32_t breakpoint(void);
 
-u32 exmemwb_error()
+uint32_t exmemwb_error()
 {
   fprintf(stderr, "Error: Unsupported instruction: Unable to execute\n");
   sim_exit(1);
@@ -104,35 +104,35 @@ u32 exmemwb_error()
 }
 
 // Execute functions that require more opcode bits than the first 6
-u32 (*executeJumpTable6[2])(void) = {
+uint32_t (*executeJumpTable6[2])(void) = {
     adds_r, /* 060 - 067 */
     subs    /* 068 - 06F */
 };
 
-u32 entry6(void)
+uint32_t entry6(void)
 {
   return executeJumpTable6[(insn >> 9) & 0x1]();
 }
 
-u32 (*executeJumpTable7[2])(void) = {
+uint32_t (*executeJumpTable7[2])(void) = {
     adds_i3, /* (070 - 077) */
     subs_i3  /* (078 - 07F) */
 };
 
-u32 entry7(void)
+uint32_t entry7(void)
 {
   return executeJumpTable7[(insn >> 9) & 0x1]();
 }
 
-u32 (*executeJumpTable16[16])(void) = {ands, eors, lsls_r, lsrs_r, asrs_r, adcs, sbcs, rors, tst,
+uint32_t (*executeJumpTable16[16])(void) = {ands, eors, lsls_r, lsrs_r, asrs_r, adcs, sbcs, rors, tst,
     rsbs, cmp_r, exmemwb_error, orrs, muls, bics, mvns};
 
-u32 entry16(void)
+uint32_t entry16(void)
 {
   return executeJumpTable16[(insn >> 6) & 0xF]();
 }
 
-u32 (*executeJumpTable17[8])(void) = {
+uint32_t (*executeJumpTable17[8])(void) = {
     add_r,        /* (110 - 113) */
     add_r, cmp_r, /* (114 - 117) */
     cmp_r, mov_r, /* (118 - 11B) */
@@ -140,81 +140,81 @@ u32 (*executeJumpTable17[8])(void) = {
     blx           /* (11E - 11F) */
 };
 
-u32 entry17(void)
+uint32_t entry17(void)
 {
   return executeJumpTable17[(insn >> 7) & 0x7]();
 }
 
-u32 (*executeJumpTable20[2])(void) = {
+uint32_t (*executeJumpTable20[2])(void) = {
     str_r, /* (140 - 147) */
     strh_r /* (148 - 14F) */
 };
 
-u32 entry20(void)
+uint32_t entry20(void)
 {
   return executeJumpTable20[(insn >> 9) & 0x1]();
 }
 
-u32 (*executeJumpTable21[2])(void) = {
+uint32_t (*executeJumpTable21[2])(void) = {
     strb_r, /* (150 - 157) */
     ldrsb_r /* (158 - 15F) */
 };
 
-u32 entry21(void)
+uint32_t entry21(void)
 {
   return executeJumpTable21[(insn >> 9) & 0x1]();
 }
 
-u32 (*executeJumpTable22[2])(void) = {
+uint32_t (*executeJumpTable22[2])(void) = {
     ldr_r, /* (160 - 167) */
     ldrh_r /* (168 - 16F) */
 };
 
-u32 entry22(void)
+uint32_t entry22(void)
 {
   return executeJumpTable22[(insn >> 9) & 0x1]();
 }
 
-u32 (*executeJumpTable23[2])(void) = {
+uint32_t (*executeJumpTable23[2])(void) = {
     ldrb_r, /* (170 - 177) */
     ldrsh_r /* (178 - 17F) */
 };
 
-u32 entry23(void)
+uint32_t entry23(void)
 {
   return executeJumpTable23[(insn >> 9) & 0x1]();
 }
 
-u32 (*executeJumpTable44[16])(void) = {add_sp, /* (2C0 - 2C1) */
+uint32_t (*executeJumpTable44[16])(void) = {add_sp, /* (2C0 - 2C1) */
     add_sp, sub_sp,                            /* (2C2 - 2C3) */
     sub_sp, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, sxth, sxtb, uxth, uxtb,
     exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error};
 
-u32 entry44(void)
+uint32_t entry44(void)
 {
   return executeJumpTable44[(insn >> 6) & 0xF]();
 }
 
-u32 (*executeJumpTable46[16])(void) = {exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error,
+uint32_t (*executeJumpTable46[16])(void) = {exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error,
     exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, rev, rev16, exmemwb_error,
     exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error};
 
-u32 entry46(void)
+uint32_t entry46(void)
 {
   return executeJumpTable46[(insn >> 6) & 0xF]();
 }
 
-u32 (*executeJumpTable47[2])(void) = {
+uint32_t (*executeJumpTable47[2])(void) = {
     pop,       /* (2F0 - 2F7) */
     breakpoint /* (2F8 - 2FB) */
 };
 
-u32 entry47(void)
+uint32_t entry47(void)
 {
   return executeJumpTable47[(insn >> 9) & 0x1]();
 }
 
-u32 entry55(void)
+uint32_t entry55(void)
 {
   if((insn & 0x0300) != 0x0300)
     return b_c();
@@ -230,7 +230,7 @@ u32 entry55(void)
   return exmemwb_error();
 }
 
-u32 (*executeJumpTable[64])() = {lsls_i, lsls_i, lsrs_i, lsrs_i, asrs_i, asrs_i, entry6, /* 6 */
+uint32_t (*executeJumpTable[64])() = {lsls_i, lsls_i, lsrs_i, lsrs_i, asrs_i, asrs_i, entry6, /* 6 */
     entry7,                                                                              /* 7 */
     movs_i, movs_i, cmp_i, cmp_i, adds_i8, adds_i8, subs_i8, subs_i8, entry16,           /* 16 */
     entry17,                                                                             /* 17 */
@@ -247,7 +247,7 @@ u32 (*executeJumpTable[64])() = {lsls_i, lsls_i, lsrs_i, lsrs_i, asrs_i, asrs_i,
     bl,                                                                /* 61 ignore udef */
     exmemwb_error, exmemwb_error};
 
-void exwbmem(const u16 pInsn)
+void exwbmem(const uint16_t pInsn)
 {
   ++insnCount;
   insn = pInsn;

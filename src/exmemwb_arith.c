@@ -6,13 +6,13 @@
 ///--- Add operations --------------------------------------------///
 
 // ADCS - add with carry and update flags
-u32 adcs()
+uint32_t adcs()
 {
   diss_printf("adcs r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM);
-  u32 result = opA + opB + cpu_get_flag_c();
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA + opB + cpu_get_flag_c();
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -25,13 +25,13 @@ u32 adcs()
 }
 
 // ADD - add small immediate to a register and update flags
-u32 adds_i3()
+uint32_t adds_i3()
 {
   diss_printf("adds r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
 
-  u32 opA = cpu_get_gpr(decoded.rN);
-  u32 opB = zeroExtend32(decoded.imm);
-  u32 result = opA + opB;
+  uint32_t opA = cpu_get_gpr(decoded.rN);
+  uint32_t opB = zeroExtend32(decoded.imm);
+  uint32_t result = opA + opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -44,13 +44,13 @@ u32 adds_i3()
 }
 
 // ADD - add large immediate to a register and update flags
-u32 adds_i8()
+uint32_t adds_i8()
 {
   diss_printf("adds r%u, #0x%X\n", decoded.rD, decoded.imm);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = zeroExtend32(decoded.imm);
-  u32 result = opA + opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = zeroExtend32(decoded.imm);
+  uint32_t result = opA + opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -63,13 +63,13 @@ u32 adds_i8()
 }
 
 // ADD - add two registers and update flags
-u32 adds_r()
+uint32_t adds_r()
 {
   diss_printf("adds r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rN);
-  u32 opB = cpu_get_gpr(decoded.rM);
-  u32 result = opA + opB;
+  uint32_t opA = cpu_get_gpr(decoded.rN);
+  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA + opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -82,7 +82,7 @@ u32 adds_r()
 }
 
 // ADD - add two registers, one or both high no flags
-u32 add_r()
+uint32_t add_r()
 {
   diss_printf("add r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -93,9 +93,9 @@ u32 add_r()
     sim_exit(1);
   }
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM);
-  u32 result = opA + opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA + opB;
 
   // If changing the PC, check that thumb mode maintained
   if(decoded.rD == GPR_PC)
@@ -108,13 +108,13 @@ u32 add_r()
 }
 
 // ADD - add an immpediate to SP
-u32 add_sp()
+uint32_t add_sp()
 {
   diss_printf("add r%u, SP, #0x%02X\n", decoded.rD, decoded.imm);
 
-  u32 opA = cpu_get_sp();
-  u32 opB = zeroExtend32(decoded.imm << 2);
-  u32 result = opA + opB;
+  uint32_t opA = cpu_get_sp();
+  uint32_t opB = zeroExtend32(decoded.imm << 2);
+  uint32_t result = opA + opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -122,15 +122,15 @@ u32 add_sp()
 }
 
 // ADR - add an immpediate to PC
-u32 adr()
+uint32_t adr()
 {
   diss_printf("adr r%u, PC, #0x%02X\n", decoded.rD, decoded.imm);
 
-  u32 opA = cpu_get_pc();
+  uint32_t opA = cpu_get_pc();
   // Align PC to 4 bytes
   opA = opA & 0xFFFFFFFC;
-  u32 opB = zeroExtend32(decoded.imm << 2);
-  u32 result = opA + opB;
+  uint32_t opB = zeroExtend32(decoded.imm << 2);
+  uint32_t result = opA + opB;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -139,13 +139,13 @@ u32 adr()
 
 ///--- Subtract operations --------------------------------------------///
 
-u32 subs_i3()
+uint32_t subs_i3()
 {
   diss_printf("subs r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
 
-  u32 opA = cpu_get_gpr(decoded.rN);
-  u32 opB = ~zeroExtend32(decoded.imm);
-  u32 result = opA + opB + 1;
+  uint32_t opA = cpu_get_gpr(decoded.rN);
+  uint32_t opB = ~zeroExtend32(decoded.imm);
+  uint32_t result = opA + opB + 1;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -157,13 +157,13 @@ u32 subs_i3()
   return 1;
 }
 
-u32 subs_i8()
+uint32_t subs_i8()
 {
   diss_printf("subs r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = ~zeroExtend32(decoded.imm);
-  u32 result = opA + opB + 1;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = ~zeroExtend32(decoded.imm);
+  uint32_t result = opA + opB + 1;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -175,13 +175,13 @@ u32 subs_i8()
   return 1;
 }
 
-u32 subs()
+uint32_t subs()
 {
   diss_printf("subs r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rN);
-  u32 opB = ~cpu_get_gpr(decoded.rM);
-  u32 result = opA + opB + 1;
+  uint32_t opA = cpu_get_gpr(decoded.rN);
+  uint32_t opB = ~cpu_get_gpr(decoded.rM);
+  uint32_t result = opA + opB + 1;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -193,26 +193,26 @@ u32 subs()
   return 1;
 }
 
-u32 sub_sp()
+uint32_t sub_sp()
 {
   diss_printf("sub SP, #0x%02X\n", decoded.imm);
 
-  u32 opA = cpu_get_sp();
-  u32 opB = ~zeroExtend32(decoded.imm << 2);
-  u32 result = opA + opB + 1;
+  uint32_t opA = cpu_get_sp();
+  uint32_t opB = ~zeroExtend32(decoded.imm << 2);
+  uint32_t result = opA + opB + 1;
 
   cpu_set_sp(result);
 
   return 1;
 }
 
-u32 sbcs()
+uint32_t sbcs()
 {
   diss_printf("sbcs r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = ~cpu_get_gpr(decoded.rM);
-  u32 result = opA + opB + cpu_get_flag_c();
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = ~cpu_get_gpr(decoded.rM);
+  uint32_t result = opA + opB + cpu_get_flag_c();
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -224,13 +224,13 @@ u32 sbcs()
   return 1;
 }
 
-u32 rsbs()
+uint32_t rsbs()
 {
   diss_printf("rsbs r%u, r%u\n, #0", decoded.rD, decoded.rN);
 
-  u32 opA = 0;
-  u32 opB = ~(cpu_get_gpr(decoded.rN));
-  u32 result = opA + opB + 1;
+  uint32_t opA = 0;
+  uint32_t opB = ~(cpu_get_gpr(decoded.rN));
+  uint32_t result = opA + opB + 1;
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -246,13 +246,13 @@ u32 rsbs()
 
 // MULS - multiply the source and destination and store 32-bits in dest
 // Does not update carry or overflow: simple mult
-u32 muls()
+uint32_t muls()
 {
   diss_printf("muls r%u, r%u\n", decoded.rD, decoded.rM);
 
-  u32 opA = cpu_get_gpr(decoded.rD);
-  u32 opB = cpu_get_gpr(decoded.rM);
-  u32 result = opA * opB;
+  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t result = opA * opB;
 
   cpu_set_gpr(decoded.rD, result);
 

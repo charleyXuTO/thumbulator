@@ -2,6 +2,8 @@
 #define SIMSUPPORT_HEADER
 
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #define RAM_START 0x40000000
 #define RAM_SIZE (1 << 23) // 8 MB
@@ -13,24 +15,19 @@
 #define MEMMAPIO_START 0x80000000
 #define MEMMAPIO_SIZE (4 * 19)
 
-typedef __uint32_t u32;
-typedef __uint64_t u64;
-typedef __uint16_t u16;
-typedef char bool;
-
 // Core CPU compenents
-extern u32 ram[RAM_SIZE >> 2];
-extern u32 flash[FLASH_SIZE >> 2];
+extern uint32_t ram[RAM_SIZE >> 2];
+extern uint32_t flash[FLASH_SIZE >> 2];
 extern bool takenBranch;   // Informs fetch that previous instruction caused a control flow change
 extern void sim_exit(int); // All sim ends lead through here
 void cpu_reset();          // Resets the CPU according to the specification
-char simLoadInsn(u32 address,
-    u16 *value); // All memory accesses one simulation starts should be through these interfaces
-char simLoadData(u32 address, u32 *value);
-char simLoadData_internal(u32 address,
-    u32 *value,
-    u32 falseRead); // falseRead says whether this is a read due to anything other than the program
-char simStoreData(u32 address, u32 value);
+char simLoadInsn(uint32_t address,
+    uint16_t *value); // All memory accesses one simulation starts should be through these interfaces
+char simLoadData(uint32_t address, uint32_t *value);
+char simLoadData_internal(uint32_t address,
+    uint32_t *value,
+    uint32_t falseRead); // falseRead says whether this is a read due to anything other than the program
+char simStoreData(uint32_t address, uint32_t value);
 
 // Controls whether the program output prints to the simulator's console or is not printed at all
 #define DISABLE_PROGRAM_PRINTING 1
@@ -88,23 +85,23 @@ char simStoreData(u32 address, u32 value);
 // Macros for Clank
 
 struct ADDRESS_LIST {
-  u32 address;
+  uint32_t address;
   struct ADDRESS_LIST *next;
 };
 typedef struct ADDRESS_LIST ADDRESS_LIST;
 
-extern u64 cycleCount;
-extern u64 insnCount;
-extern u32 cyclesSinceReset;
-extern u32 resetAfterCycles;
-extern u64 wastedCycles;
-extern u32 cyclesSinceCP;
-extern u32 addrOfCP;
-extern u32 addrOfRestoreCP;
-extern u32 do_reset;
-extern u32 wdt_val;
-extern u32 wdt_seed;
-extern u32 PRINT_STATE_DIFF;
+extern uint64_t cycleCount;
+extern uint64_t insnCount;
+extern uint32_t cyclesSinceReset;
+extern uint32_t resetAfterCycles;
+extern uint64_t wastedCycles;
+extern uint32_t cyclesSinceCP;
+extern uint32_t addrOfCP;
+extern uint32_t addrOfRestoreCP;
+extern uint32_t do_reset;
+extern uint32_t wdt_val;
+extern uint32_t wdt_seed;
+extern uint32_t PRINT_STATE_DIFF;
 #if MEM_COUNT_INST
 extern u32 store_count;
 extern u32 load_count;
@@ -116,7 +113,7 @@ void report_sp(void);
 void (*gprReadHooks[16])(void);
 void (*gprWriteHooks[16])(void);
 #endif
-char simValidMem(u32 address); // Interface for rsp (GDB) server
+char simValidMem(uint32_t address); // Interface for rsp (GDB) server
 
 //struct MEMMAPIO {
 //  u32 *cycleCountLSB;

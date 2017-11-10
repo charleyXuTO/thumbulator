@@ -16,7 +16,7 @@ static void fillState(const char *pFileName)
     sim_exit(1);
   }
 
-  fread(&flash, sizeof(u32), sizeof(flash) / sizeof(u32), fd);
+  fread(&flash, sizeof(uint32_t), sizeof(flash) / sizeof(uint32_t), fd);
 
   fclose(fd);
 }
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
   while(1) {
     struct CPU lastCPU;
 
-    u16 insn;
+    uint16_t insn;
     takenBranch = 0;
 
     if(PRINT_ALL_STATE) {

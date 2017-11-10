@@ -5,18 +5,18 @@
 ///--- Load/store multiple operations --------------------------------------------///
 
 // LDM - Load multiple registers from the stack
-u32 ldm()
+uint32_t ldm()
 {
   diss_printf("ldm r%u!, {0x%X}\n", decoded.rN, decoded.reg_list);
 
-  u32 numLoaded = 0;
-  u32 rNWritten = (1 << decoded.rN) & decoded.reg_list;
-  u32 address = cpu_get_gpr(decoded.rN);
+  uint32_t numLoaded = 0;
+  uint32_t rNWritten = (1 << decoded.rN) & decoded.reg_list;
+  uint32_t address = cpu_get_gpr(decoded.rN);
 
   for(int i = 0; i < 8; ++i) {
     int mask = 1 << i;
     if(decoded.reg_list & mask) {
-      u32 data = 0;
+      uint32_t data = 0;
       simLoadData(address, &data);
       cpu_set_gpr(i, data);
       address += 4;
@@ -31,12 +31,12 @@ u32 ldm()
 }
 
 // STM - Store multiple registers to the stack
-u32 stm()
+uint32_t stm()
 {
   diss_printf("stm r%u!, {0x%X}\n", decoded.rN, decoded.reg_list);
 
-  u32 numStored = 0;
-  u32 address = cpu_get_gpr(decoded.rN);
+  uint32_t numStored = 0;
+  uint32_t address = cpu_get_gpr(decoded.rN);
 
   for(int i = 0; i < 8; ++i) {
     int mask = 1 << i;
@@ -46,7 +46,7 @@ u32 stm()
         sim_exit(1);
       }
 
-      u32 data = cpu_get_gpr(i);
+      uint32_t data = cpu_get_gpr(i);
       simStoreData(address, data);
       address += 4;
       ++numStored;
@@ -61,17 +61,17 @@ u32 stm()
 ///--- Stack operations --------------------------------------------///
 
 // Pop multiple reg values from the stack and update SP
-u32 pop()
+uint32_t pop()
 {
   diss_printf("pop {0x%X}\n", decoded.reg_list);
 
-  u32 numLoaded = 0;
-  u32 address = cpu_get_sp();
+  uint32_t numLoaded = 0;
+  uint32_t address = cpu_get_sp();
 
   for(int i = 0; i < 16; ++i) {
     int mask = 1 << i;
     if(decoded.reg_list & mask) {
-      u32 data = 0;
+      uint32_t data = 0;
       simLoadData(address, &data);
       cpu_set_gpr(i, data);
       ++numLoaded;
@@ -91,18 +91,18 @@ u32 pop()
 }
 
 // Push multiple reg values to the stack and update SP
-u32 push()
+uint32_t push()
 {
   diss_printf("push {0x%4.4X}\n", decoded.reg_list);
 
-  u32 numStored = 0;
-  u32 address = cpu_get_sp();
+  uint32_t numStored = 0;
+  uint32_t address = cpu_get_sp();
 
   for(int i = 14; i >= 0; --i) {
     int mask = 1 << i;
     if(decoded.reg_list & mask) {
       address -= 4;
-      u32 data = cpu_get_gpr(i);
+      uint32_t data = cpu_get_gpr(i);
       simStoreData(address, data);
       ++numStored;
     }
@@ -120,15 +120,15 @@ u32 push()
 ///--- Single load operations --------------------------------------------///
 
 // LDR - Load from offset from register
-u32 ldr_i()
+uint32_t ldr_i()
 {
   diss_printf("ldr r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm << 2);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = zeroExtend32(decoded.imm << 2);
-  u32 effectiveAddress = base + offset;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = zeroExtend32(decoded.imm << 2);
+  uint32_t effectiveAddress = base + offset;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddress, &result);
 
   cpu_set_gpr(decoded.rD, result);
@@ -137,15 +137,15 @@ u32 ldr_i()
 }
 
 // LDR - Load from offset from SP
-u32 ldr_sp()
+uint32_t ldr_sp()
 {
   diss_printf("ldr r%u, [SP, #0x%X]\n", decoded.rD, decoded.imm << 2);
 
-  u32 base = cpu_get_sp();
-  u32 offset = zeroExtend32(decoded.imm << 2);
-  u32 effectiveAddress = base + offset;
+  uint32_t base = cpu_get_sp();
+  uint32_t offset = zeroExtend32(decoded.imm << 2);
+  uint32_t effectiveAddress = base + offset;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddress, &result);
 
   cpu_set_gpr(decoded.rD, result);
@@ -154,15 +154,15 @@ u32 ldr_sp()
 }
 
 // LDR - Load from offset from PC
-u32 ldr_lit()
+uint32_t ldr_lit()
 {
   diss_printf("ldr r%u, [PC, #%d]\n", decoded.rD, decoded.imm << 2);
 
-  u32 base = cpu_get_pc() & 0xFFFFFFFC;
-  u32 offset = zeroExtend32(decoded.imm << 2);
-  u32 effectiveAddress = base + offset;
+  uint32_t base = cpu_get_pc() & 0xFFFFFFFC;
+  uint32_t offset = zeroExtend32(decoded.imm << 2);
+  uint32_t effectiveAddress = base + offset;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddress, &result);
 
   cpu_set_gpr(decoded.rD, result);
@@ -171,15 +171,15 @@ u32 ldr_lit()
 }
 
 // LDR - Load from an offset from a reg based on another reg value
-u32 ldr_r()
+uint32_t ldr_r()
 {
   diss_printf("ldr r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = cpu_get_gpr(decoded.rM);
-  u32 effectiveAddress = base + offset;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = cpu_get_gpr(decoded.rM);
+  uint32_t effectiveAddress = base + offset;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddress, &result);
 
   cpu_set_gpr(decoded.rD, result);
@@ -188,16 +188,16 @@ u32 ldr_r()
 }
 
 // LDRB - Load byte from offset from register
-u32 ldrb_i()
+uint32_t ldrb_i()
 {
   diss_printf("ldrb r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = zeroExtend32(decoded.imm);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = zeroExtend32(decoded.imm);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddressWordAligned, &result);
 
   // Select the correct byte
@@ -222,16 +222,16 @@ u32 ldrb_i()
 }
 
 // LDRB - Load byte from an offset from a reg based on another reg value
-u32 ldrb_r()
+uint32_t ldrb_r()
 {
   diss_printf("ldrb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = cpu_get_gpr(decoded.rM);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = cpu_get_gpr(decoded.rM);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddressWordAligned, &result);
 
   // Select the correct byte
@@ -256,16 +256,16 @@ u32 ldrb_r()
 }
 
 // LDRH - Load halfword from offset from register
-u32 ldrh_i()
+uint32_t ldrh_i()
 {
   diss_printf("ldrh r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = zeroExtend32(decoded.imm << 1);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = zeroExtend32(decoded.imm << 1);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddressWordAligned, &result);
 
   // Select the correct halfword
@@ -285,16 +285,16 @@ u32 ldrh_i()
 }
 
 // LDRH - Load halfword from an offset from a reg based on another reg value
-u32 ldrh_r()
+uint32_t ldrh_r()
 {
   diss_printf("ldrh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = cpu_get_gpr(decoded.rM);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = cpu_get_gpr(decoded.rM);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddressWordAligned, &result);
 
   // Select the correct halfword
@@ -314,16 +314,16 @@ u32 ldrh_r()
 }
 
 // LDRSB - Load signed byte from an offset from a reg based on another reg value
-u32 ldrsb_r()
+uint32_t ldrsb_r()
 {
   diss_printf("ldrsb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = cpu_get_gpr(decoded.rM);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = cpu_get_gpr(decoded.rM);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddressWordAligned, &result);
 
   // Select the correct byte
@@ -348,16 +348,16 @@ u32 ldrsb_r()
 }
 
 // LDRSH - Load signed halfword from an offset from a reg based on another reg value
-u32 ldrsh_r()
+uint32_t ldrsh_r()
 {
   diss_printf("ldrsh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = cpu_get_gpr(decoded.rM);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = cpu_get_gpr(decoded.rM);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
-  u32 result = 0;
+  uint32_t result = 0;
   simLoadData(effectiveAddressWordAligned, &result);
 
   // Select the correct halfword
@@ -378,13 +378,13 @@ u32 ldrsh_r()
 ///--- Single store operations --------------------------------------------///
 
 // STR - Store to offset from register
-u32 str_i()
+uint32_t str_i()
 {
   diss_printf("str r%u, [r%u, #%d]\n", decoded.rD, decoded.rN, decoded.imm << 2);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = zeroExtend32(decoded.imm << 2);
-  u32 effectiveAddress = base + offset;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = zeroExtend32(decoded.imm << 2);
+  uint32_t effectiveAddress = base + offset;
 
   simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
 
@@ -396,13 +396,13 @@ u32 str_i()
 }
 
 // STR - Store to offset from SP
-u32 str_sp()
+uint32_t str_sp()
 {
   diss_printf("str r%u, [SP, #%d]\n", decoded.rD, decoded.imm << 2);
 
-  u32 base = cpu_get_sp();
-  u32 offset = zeroExtend32(decoded.imm << 2);
-  u32 effectiveAddress = base + offset;
+  uint32_t base = cpu_get_sp();
+  uint32_t offset = zeroExtend32(decoded.imm << 2);
+  uint32_t effectiveAddress = base + offset;
 
   simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
 
@@ -414,13 +414,13 @@ u32 str_sp()
 }
 
 // STR - Store to an offset from a reg based on another reg value
-u32 str_r()
+uint32_t str_r()
 {
   diss_printf("str r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = cpu_get_gpr(decoded.rM);
-  u32 effectiveAddress = base + offset;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = cpu_get_gpr(decoded.rM);
+  uint32_t effectiveAddress = base + offset;
 
   simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
 
@@ -432,17 +432,17 @@ u32 str_r()
 }
 
 // STRB - Store byte to offset from register
-u32 strb_i()
+uint32_t strb_i()
 {
   diss_printf("strb r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = zeroExtend32(decoded.imm);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
-  u32 data = cpu_get_gpr(decoded.rD) & 0xFF;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = zeroExtend32(decoded.imm);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t data = cpu_get_gpr(decoded.rD) & 0xFF;
 
-  u32 orig;
+  uint32_t orig;
   simLoadData_internal(effectiveAddressWordAligned, &orig, 1);
 
   // Select the correct byte
@@ -470,17 +470,17 @@ u32 strb_i()
 }
 
 // STRB - Store byte to an offset from a reg based on another reg value
-u32 strb_r()
+uint32_t strb_r()
 {
   diss_printf("strb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = cpu_get_gpr(decoded.rM);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
-  u32 data = cpu_get_gpr(decoded.rD) & 0xFF;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = cpu_get_gpr(decoded.rM);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t data = cpu_get_gpr(decoded.rD) & 0xFF;
 
-  u32 orig;
+  uint32_t orig;
   simLoadData_internal(effectiveAddressWordAligned, &orig, 1);
 
   // Select the correct byte
@@ -508,17 +508,17 @@ u32 strb_r()
 }
 
 // STRH - Store halfword to offset from register
-u32 strh_i()
+uint32_t strh_i()
 {
   diss_printf("strh r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = zeroExtend32(decoded.imm << 1);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
-  u32 data = cpu_get_gpr(decoded.rD) & 0xFFFF;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = zeroExtend32(decoded.imm << 1);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t data = cpu_get_gpr(decoded.rD) & 0xFFFF;
 
-  u32 orig;
+  uint32_t orig;
   simLoadData_internal(effectiveAddressWordAligned, &orig, 1);
 
   // Select the correct byte
@@ -540,17 +540,17 @@ u32 strh_i()
 }
 
 // STRH - Store halfword to an offset from a reg based on another reg value
-u32 strh_r()
+uint32_t strh_r()
 {
   diss_printf("strh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
-  u32 base = cpu_get_gpr(decoded.rN);
-  u32 offset = cpu_get_gpr(decoded.rM);
-  u32 effectiveAddress = base + offset;
-  u32 effectiveAddressWordAligned = effectiveAddress & ~0x3;
-  u32 data = cpu_get_gpr(decoded.rD) & 0xFFFF;
+  uint32_t base = cpu_get_gpr(decoded.rN);
+  uint32_t offset = cpu_get_gpr(decoded.rM);
+  uint32_t effectiveAddress = base + offset;
+  uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
+  uint32_t data = cpu_get_gpr(decoded.rD) & 0xFFFF;
 
-  u32 orig;
+  uint32_t orig;
   simLoadData_internal(effectiveAddressWordAligned, &orig, 1);
 
   // Select the correct byte

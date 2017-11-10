@@ -4,33 +4,33 @@
 #include "sim_support.h"
 #include "exmemwb.h"
 
-u64 cycleCount = 0;
-u64 insnCount = 0;
-u64 wastedCycles = 0;
-u32 cyclesSinceReset = 0;
-u32 cyclesSinceCP = 0;
-u32 resetAfterCycles = 0;
-u32 addrOfCP = 0;
-u32 addrOfRestoreCP = 0;
-u32 do_reset = 0;
-u32 wdt_seed = 0;
-u32 wdt_val = 0;
-u32 md5[4] = {0, 0, 0, 0, 0};
-u32 PRINT_STATE_DIFF = PRINT_STATE_DIFF_INIT;
+uint64_t cycleCount = 0;
+uint64_t insnCount = 0;
+uint64_t wastedCycles = 0;
+uint32_t cyclesSinceReset = 0;
+uint32_t cyclesSinceCP = 0;
+uint32_t resetAfterCycles = 0;
+uint32_t addrOfCP = 0;
+uint32_t addrOfRestoreCP = 0;
+uint32_t do_reset = 0;
+uint32_t wdt_seed = 0;
+uint32_t wdt_val = 0;
+uint32_t md5[4] = {0, 0, 0, 0, 0};
+uint32_t PRINT_STATE_DIFF = PRINT_STATE_DIFF_INIT;
 #if MEM_COUNT_INST
 u32 store_count = 0;
 u32 load_count = 0;
 u32 cp_count = 0;
 #endif
-u32 ram[RAM_SIZE >> 2];
-u32 flash[FLASH_SIZE >> 2];
+uint32_t ram[RAM_SIZE >> 2];
+uint32_t flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;
 
 // Reserve a space inside the simulator for variables that GDB and python can use to control the simulator
 // Essentially creates a new block of addresses on the bus of the processor that only the debug read and write commands can access
 //MEMMAPIO mmio = {.cycleCountLSB = &cycleCount, .cycleCountMSB = &cycleCount+4,
 //                 .cyclesSince = &cyclesSinceReset, .resetAfter = &resetAfterCycles};
-u32 *mmio[] = {&cycleCount, ((u32 *)&cycleCount) + 1, &wastedCycles, ((u32 *)&wastedCycles) + 1,
+uint32_t *mmio[] = {&cycleCount, ((uint32_t *)&cycleCount) + 1, &wastedCycles, ((uint32_t *)&wastedCycles) + 1,
     &cyclesSinceReset, &cyclesSinceCP, &addrOfCP, &addrOfRestoreCP, &resetAfterCycles, &do_reset,
     &PRINT_STATE_DIFF, &wdt_seed, &wdt_val, &(md5[0]), &(md5[1]), &(md5[2]), &(md5[3]), &(md5[4])};
 
@@ -61,7 +61,7 @@ void cpu_reset(void)
   cpu_set_sp(cpu.sp_main);
 
   // Set the program counter to the address of the reset exception vector
-  u32 startAddr;
+  uint32_t startAddr;
   simLoadData(0x4, &startAddr);
   cpu_set_pc(startAddr);
 
@@ -112,7 +112,7 @@ void (*gprWriteHooks[16])(void) = {do_nothing, do_nothing, do_nothing, do_nothin
 
 // Returns 1 if the passed list of addresses contains the passed
 // address, returns 0 otherwise
-char containsAddress(const ADDRESS_LIST *pList, const u32 pAddress)
+char containsAddress(const ADDRESS_LIST *pList, const uint32_t pAddress)
 {
   if(pList->address == pAddress)
     return 1;
@@ -126,7 +126,7 @@ char containsAddress(const ADDRESS_LIST *pList, const u32 pAddress)
 
 // Adds the passed address to the end of the list
 // Returns 0 if already present, 1 if added to end
-char addAddress(const ADDRESS_LIST *pList, const u32 pAddress)
+char addAddress(const ADDRESS_LIST *pList, const uint32_t pAddress)
 {
   ADDRESS_LIST *temp = pList;
   ADDRESS_LIST *temp_prev;
@@ -161,9 +161,9 @@ void clearList(ADDRESS_LIST *pList)
 }
 
 // Memory access functions assume that RAM has a higher address than Flash
-char simLoadInsn(u32 address, u16 *value)
+char simLoadInsn(uint32_t address, uint16_t *value)
 {
-  u32 fromMem;
+  uint32_t fromMem;
 
   if(address >= RAM_START) {
     if(address >= (RAM_START + RAM_SIZE)) {
@@ -184,14 +184,14 @@ char simLoadInsn(u32 address, u16 *value)
   }
 
   // Data 32-bits, but instruction 16-bits
-  *value = ((address & 0x2) != 0) ? (u16)(fromMem >> 16) : (u16)fromMem;
+  *value = ((address & 0x2) != 0) ? (uint16_t)(fromMem >> 16) : (uint16_t)fromMem;
 
   return 0;
 }
 
 // Normal interface for a program to load from memory
 // Increments load counter
-char simLoadData(u32 address, u32 *value)
+char simLoadData(uint32_t address, uint32_t *value)
 {
 #if MEM_COUNT_INST
   ++load_count;
@@ -199,7 +199,7 @@ char simLoadData(u32 address, u32 *value)
   return simLoadData_internal(address, value, 0);
 }
 
-char simLoadData_internal(u32 address, u32 *value, u32 falseRead)
+char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead)
 {
 #if MEM_CHECKS
   if((address & 0x3) != 0) {
@@ -218,7 +218,7 @@ char simLoadData_internal(u32 address, u32 *value, u32 falseRead)
 
       // Check for systick
       if((address >> 4) == 0xE000E01) {
-        *value = ((u32 *)&systick)[(address >> 2) & 0x3];
+        *value = ((uint32_t *)&systick)[(address >> 2) & 0x3];
         if(address == 0xE000E010)
           systick.control &= 0x00010000;
 
@@ -262,7 +262,7 @@ char simLoadData_internal(u32 address, u32 *value, u32 falseRead)
   return 0;
 }
 
-char simStoreData(u32 address, u32 value)
+char simStoreData(uint32_t address, uint32_t value)
 {
   unsigned int word;
 

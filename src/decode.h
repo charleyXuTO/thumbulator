@@ -14,9 +14,9 @@ typedef struct {
   unsigned char rD;
   unsigned char rM;
   unsigned char rN;
-  u32 imm;
-  u32 cond;
-  u32 reg_list;
+  uint32_t imm;
+  uint32_t cond;
+  uint32_t reg_list;
 } DECODE_RESULT;
 
 extern DECODE_RESULT decoded;
@@ -24,6 +24,6 @@ extern DECODE_RESULT decoded;
 // Interface to the decode stage
 // Sets the decode stage registers based upon the passed instruction
 // Prints a message and exits the simulator upon decoding error
-void decode(const u16 pInsn);
+void decode(const uint16_t pInsn);
 
 #endif

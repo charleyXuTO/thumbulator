@@ -7,25 +7,25 @@
 #define ESPR_T (1 << 24)
 
 struct CPU {
-  u32 gpr[16]; // General-purpose register plus FP, SP, LR, and PC
-  u32 apsr;    // Application program status reg: flags
-  u32 ipsr;    // Interrupt program status reg: except number
-  u32 espr;    // Execution program status reg: not SW readable
-  u32 primask;
-  u32 control;
-  u32 sp_main;
-  u32 sp_process;
-  u32 mode;
-  u32 exceptmask; // Bit mask of pending exceptions
+  uint32_t gpr[16]; // General-purpose register plus FP, SP, LR, and PC
+  uint32_t apsr;    // Application program status reg: flags
+  uint32_t ipsr;    // Interrupt program status reg: except number
+  uint32_t espr;    // Execution program status reg: not SW readable
+  uint32_t primask;
+  uint32_t control;
+  uint32_t sp_main;
+  uint32_t sp_process;
+  uint32_t mode;
+  uint32_t exceptmask; // Bit mask of pending exceptions
 };
 
 extern struct CPU cpu;
 
 struct SYSTICK {
-  u32 control;
-  u32 reload;
-  u32 value;
-  u32 calib;
+  uint32_t control;
+  uint32_t reload;
+  uint32_t value;
+  uint32_t calib;
 };
 
 extern struct SYSTICK systick;
@@ -42,8 +42,8 @@ extern struct SYSTICK systick;
 
 // GPR setters and getters
 #if HOOK_GPR_ACCESSES
-u32 cpu_get_gpr(u32 gpr);
-void cpu_set_gpr(u32 gpr, u32 value);
+uint32_t cpu_get_gpr(uint32_t gpr);
+void cpu_set_gpr(uint32_t gpr, uint32_t value);
 #else
 #define cpu_get_gpr(x) cpu.gpr[x]
 #define cpu_set_gpr(x, y) cpu.gpr[x] = y
@@ -75,7 +75,7 @@ void cpu_set_gpr(u32 gpr, u32 value);
 #define do_vflag(a, b, r) \
   cpu_set_flag_v(         \
       (((a) >> 31) & ((b) >> 31) & ~((r) >> 31)) | (~((a) >> 31) & ~((b) >> 31) & ((r) >> 31)))
-void do_cflag(u32 a, u32 b, u32 carry);
+void do_cflag(uint32_t a, uint32_t b, uint32_t carry);
 #define cpu_get_apsr() (cpu.apsr)
 #define cpu_set_apsr(x) cpu.apsr = (x)
 
@@ -110,7 +110,7 @@ void do_cflag(u32 a, u32 b, u32 carry);
     cpu_set_pc((x) | 0x1); \
   } while(0)
 
-void exwbmem(const u16 pInsn);
+void exwbmem(const uint16_t pInsn);
 
 // Timing model
 #define TIMING_BRANCH 2
