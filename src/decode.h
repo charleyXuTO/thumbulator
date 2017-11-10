@@ -3,9 +3,6 @@
 
 #include "sim_support.h"
 
-#define DECODE_SAFE \
-  1 // Breaks things! Sets duplicate decode registers just in-case the execute stage uses the wrong one
-
 // Registers that hold the results of instruction decoding
 // Passed to exectue, memory access, and write-back stage in decoded variable
 typedef struct {

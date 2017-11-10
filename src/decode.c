@@ -22,9 +22,7 @@ DECODE_RESULT decode_2loimm5(const uint16_t pInsn)
   DECODE_RESULT decoded;
 
   decoded.rD = pInsn & 0x7;
-#if DECODE_SAFE
-  decoded.rM = (pInsn >> 3) & 0x7; // Just to be safe
-#endif
+  decoded.rM = (pInsn >> 3) & 0x7;
   decoded.rN = (pInsn >> 3) & 0x7;
   decoded.imm = (pInsn >> 6) & 0x1F;
 
@@ -36,9 +34,7 @@ DECODE_RESULT decode_2loimm3(const uint16_t pInsn)
   DECODE_RESULT decoded;
 
   decoded.rD = pInsn & 0x7;
-#if DECODE_SAFE
   decoded.rM = (pInsn >> 3) & 0x7; // Just to be safe
-#endif
   decoded.rN = (pInsn >> 3) & 0x7;
   decoded.imm = (pInsn >> 6) & 0x7;
 
@@ -61,10 +57,8 @@ DECODE_RESULT decode_imm8lo(const uint16_t pInsn)
   DECODE_RESULT decoded;
 
   decoded.rD = (pInsn >> 8) & 0x7;
-#if DECODE_SAFE
   decoded.rM = decoded.rD; // Just to be safe
   decoded.rN = decoded.rD; // Just to be safe
-#endif
   decoded.imm = pInsn & 0xFF;
 
   return decoded;
@@ -104,6 +98,7 @@ DECODE_RESULT decode_imm11(const uint16_t pInsn)
   DECODE_RESULT decoded;
 
   decoded.imm = pInsn & 0x7FF;
+
   return decoded;
 }
 
@@ -113,6 +108,7 @@ DECODE_RESULT decode_reglistlo(const uint16_t pInsn)
 
   decoded.rN = (pInsn >> 8) & 0x7;
   decoded.reg_list = pInsn & 0xFF;
+
   return decoded;
 }
 
@@ -121,6 +117,7 @@ DECODE_RESULT decode_pop(const uint16_t pInsn)
   DECODE_RESULT decoded;
 
   decoded.reg_list = ((pInsn & 0x100) << 7) | (pInsn & 0xFF);
+
   return decoded;
 }
 
@@ -129,6 +126,7 @@ DECODE_RESULT decode_push(const uint16_t pInsn)
   DECODE_RESULT decoded;
 
   decoded.reg_list = (pInsn & 0xFF) | ((pInsn & 0x100) << 6);
+
   return decoded;
 }
 
@@ -148,6 +146,7 @@ DECODE_RESULT decode_bl(const uint16_t pInsn)
   uint32_t imm11 = secondHalf & 0x7FF;
 
   decoded.imm = (S << 23) | (I1 << 22) | (I2 << 21) | (imm10 << 11) | imm11;
+
   return decoded;
 }
 
@@ -156,6 +155,7 @@ DECODE_RESULT decode_1all(const uint16_t pInsn)
   DECODE_RESULT decoded;
 
   decoded.rM = (pInsn >> 3) & 0xF;
+
   return decoded;
 }
 
@@ -166,6 +166,7 @@ DECODE_RESULT decode_mov_r(const uint16_t pInsn)
   decoded.rD = (pInsn & 0x7) | ((pInsn & 0x80) >> 4);
   decoded.rN = decoded.rD;
   decoded.rM = (pInsn >> 3) & 0xF;
+
   return decoded;
 }
 
