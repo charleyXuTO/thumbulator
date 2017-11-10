@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #if MD5
 #include <openssl/md5.h>
 #endif
