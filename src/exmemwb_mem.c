@@ -5,7 +5,7 @@
 ///--- Load/store multiple operations --------------------------------------------///
 
 // LDM - Load multiple registers from the stack
-uint32_t ldm()
+uint32_t ldm(DECODE_RESULT decoded)
 {
   diss_printf("ldm r%u!, {0x%X}\n", decoded.rN, decoded.reg_list);
 
@@ -31,7 +31,7 @@ uint32_t ldm()
 }
 
 // STM - Store multiple registers to the stack
-uint32_t stm()
+uint32_t stm(DECODE_RESULT decoded)
 {
   diss_printf("stm r%u!, {0x%X}\n", decoded.rN, decoded.reg_list);
 
@@ -61,7 +61,7 @@ uint32_t stm()
 ///--- Stack operations --------------------------------------------///
 
 // Pop multiple reg values from the stack and update SP
-uint32_t pop()
+uint32_t pop(DECODE_RESULT decoded)
 {
   diss_printf("pop {0x%X}\n", decoded.reg_list);
 
@@ -91,7 +91,7 @@ uint32_t pop()
 }
 
 // Push multiple reg values to the stack and update SP
-uint32_t push()
+uint32_t push(DECODE_RESULT decoded)
 {
   diss_printf("push {0x%4.4X}\n", decoded.reg_list);
 
@@ -120,7 +120,7 @@ uint32_t push()
 ///--- Single load operations --------------------------------------------///
 
 // LDR - Load from offset from register
-uint32_t ldr_i()
+uint32_t ldr_i(DECODE_RESULT decoded)
 {
   diss_printf("ldr r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm << 2);
 
@@ -137,7 +137,7 @@ uint32_t ldr_i()
 }
 
 // LDR - Load from offset from SP
-uint32_t ldr_sp()
+uint32_t ldr_sp(DECODE_RESULT decoded)
 {
   diss_printf("ldr r%u, [SP, #0x%X]\n", decoded.rD, decoded.imm << 2);
 
@@ -154,7 +154,7 @@ uint32_t ldr_sp()
 }
 
 // LDR - Load from offset from PC
-uint32_t ldr_lit()
+uint32_t ldr_lit(DECODE_RESULT decoded)
 {
   diss_printf("ldr r%u, [PC, #%d]\n", decoded.rD, decoded.imm << 2);
 
@@ -171,7 +171,7 @@ uint32_t ldr_lit()
 }
 
 // LDR - Load from an offset from a reg based on another reg value
-uint32_t ldr_r()
+uint32_t ldr_r(DECODE_RESULT decoded)
 {
   diss_printf("ldr r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -188,7 +188,7 @@ uint32_t ldr_r()
 }
 
 // LDRB - Load byte from offset from register
-uint32_t ldrb_i()
+uint32_t ldrb_i(DECODE_RESULT decoded)
 {
   diss_printf("ldrb r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
@@ -222,7 +222,7 @@ uint32_t ldrb_i()
 }
 
 // LDRB - Load byte from an offset from a reg based on another reg value
-uint32_t ldrb_r()
+uint32_t ldrb_r(DECODE_RESULT decoded)
 {
   diss_printf("ldrb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -256,7 +256,7 @@ uint32_t ldrb_r()
 }
 
 // LDRH - Load halfword from offset from register
-uint32_t ldrh_i()
+uint32_t ldrh_i(DECODE_RESULT decoded)
 {
   diss_printf("ldrh r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
@@ -285,7 +285,7 @@ uint32_t ldrh_i()
 }
 
 // LDRH - Load halfword from an offset from a reg based on another reg value
-uint32_t ldrh_r()
+uint32_t ldrh_r(DECODE_RESULT decoded)
 {
   diss_printf("ldrh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -314,7 +314,7 @@ uint32_t ldrh_r()
 }
 
 // LDRSB - Load signed byte from an offset from a reg based on another reg value
-uint32_t ldrsb_r()
+uint32_t ldrsb_r(DECODE_RESULT decoded)
 {
   diss_printf("ldrsb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -348,7 +348,7 @@ uint32_t ldrsb_r()
 }
 
 // LDRSH - Load signed halfword from an offset from a reg based on another reg value
-uint32_t ldrsh_r()
+uint32_t ldrsh_r(DECODE_RESULT decoded)
 {
   diss_printf("ldrsh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -378,7 +378,7 @@ uint32_t ldrsh_r()
 ///--- Single store operations --------------------------------------------///
 
 // STR - Store to offset from register
-uint32_t str_i()
+uint32_t str_i(DECODE_RESULT decoded)
 {
   diss_printf("str r%u, [r%u, #%d]\n", decoded.rD, decoded.rN, decoded.imm << 2);
 
@@ -396,7 +396,7 @@ uint32_t str_i()
 }
 
 // STR - Store to offset from SP
-uint32_t str_sp()
+uint32_t str_sp(DECODE_RESULT decoded)
 {
   diss_printf("str r%u, [SP, #%d]\n", decoded.rD, decoded.imm << 2);
 
@@ -414,7 +414,7 @@ uint32_t str_sp()
 }
 
 // STR - Store to an offset from a reg based on another reg value
-uint32_t str_r()
+uint32_t str_r(DECODE_RESULT decoded)
 {
   diss_printf("str r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -432,7 +432,7 @@ uint32_t str_r()
 }
 
 // STRB - Store byte to offset from register
-uint32_t strb_i()
+uint32_t strb_i(DECODE_RESULT decoded)
 {
   diss_printf("strb r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
@@ -470,7 +470,7 @@ uint32_t strb_i()
 }
 
 // STRB - Store byte to an offset from a reg based on another reg value
-uint32_t strb_r()
+uint32_t strb_r(DECODE_RESULT decoded)
 {
   diss_printf("strb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -508,7 +508,7 @@ uint32_t strb_r()
 }
 
 // STRH - Store halfword to offset from register
-uint32_t strh_i()
+uint32_t strh_i(DECODE_RESULT decoded)
 {
   diss_printf("strh r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
@@ -540,7 +540,7 @@ uint32_t strh_i()
 }
 
 // STRH - Store halfword to an offset from a reg based on another reg value
-uint32_t strh_r()
+uint32_t strh_r(DECODE_RESULT decoded)
 {
   diss_printf("strh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 

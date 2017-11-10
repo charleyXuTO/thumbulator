@@ -3,6 +3,7 @@
 
 #include "sim_support.h"
 #include "except.h"
+#include "decode.h"
 
 #define ESPR_T (1 << 24)
 
@@ -110,7 +111,7 @@ void do_cflag(uint32_t a, uint32_t b, uint32_t carry);
     cpu_set_pc((x) | 0x1); \
   } while(0)
 
-void exwbmem(uint16_t pInsn);
+void exwbmem(uint16_t pInsn, DECODE_RESULT decoded);
 
 // Timing model
 #define TIMING_BRANCH 2

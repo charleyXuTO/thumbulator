@@ -4,7 +4,7 @@
 ///--- Logical operations ----------------------------------------///
 
 // AND - logical AND two registers and update flags
-uint32_t ands()
+uint32_t ands(DECODE_RESULT decoded)
 {
   diss_printf("ands r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -22,7 +22,7 @@ uint32_t ands()
 
 // BIC - clears the bits in the destination register that are set in
 // the source register
-uint32_t bics()
+uint32_t bics(DECODE_RESULT decoded)
 {
   diss_printf("bics r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -39,7 +39,7 @@ uint32_t bics()
 }
 
 // EOR - exclusive OR two registers and update the flags
-uint32_t eors()
+uint32_t eors(DECODE_RESULT decoded)
 {
   diss_printf("eors r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -56,7 +56,7 @@ uint32_t eors()
 }
 
 // ORR - logical OR two registers and update the flags
-uint32_t orrs()
+uint32_t orrs(DECODE_RESULT decoded)
 {
   diss_printf("orrs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -73,7 +73,7 @@ uint32_t orrs()
 }
 
 // MVN - Move while negating
-uint32_t mvns()
+uint32_t mvns(DECODE_RESULT decoded)
 {
   diss_printf("mvns r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -90,7 +90,7 @@ uint32_t mvns()
 
 ///--- Shift and rotate operations --------------------------------------------///
 
-uint32_t asrs_i()
+uint32_t asrs_i(DECODE_RESULT decoded)
 {
   diss_printf("asrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
@@ -122,7 +122,7 @@ uint32_t asrs_i()
   return 1;
 }
 
-uint32_t asrs_r()
+uint32_t asrs_r(DECODE_RESULT decoded)
 {
   diss_printf("asrs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -154,7 +154,7 @@ uint32_t asrs_r()
   return 1;
 }
 
-uint32_t lsls_i()
+uint32_t lsls_i(DECODE_RESULT decoded)
 {
   if(decoded.imm == 0)
     diss_printf("mov r%u, r%u\n", decoded.rD, decoded.rM);
@@ -174,7 +174,7 @@ uint32_t lsls_i()
   return 1;
 }
 
-uint32_t lsrs_i()
+uint32_t lsrs_i(DECODE_RESULT decoded)
 {
   diss_printf("lsrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
@@ -192,7 +192,7 @@ uint32_t lsrs_i()
   return 1;
 }
 
-uint32_t lsls_r()
+uint32_t lsls_r(DECODE_RESULT decoded)
 {
   diss_printf("lsls r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -209,7 +209,7 @@ uint32_t lsls_r()
   return 1;
 }
 
-uint32_t lsrs_r()
+uint32_t lsrs_r(DECODE_RESULT decoded)
 {
   diss_printf("lsrs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -226,7 +226,7 @@ uint32_t lsrs_r()
   return 1;
 }
 
-uint32_t rors()
+uint32_t rors(DECODE_RESULT decoded)
 {
   diss_printf("rors r%u, r%u\n", decoded.rD, decoded.rM);
 

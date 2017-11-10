@@ -1,10 +1,9 @@
 #include "exmemwb.h"
-#include "decode.h"
 
 ///--- Add operations --------------------------------------------///
 
 // ADCS - add with carry and update flags
-uint32_t adcs()
+uint32_t adcs(DECODE_RESULT decoded)
 {
   diss_printf("adcs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -23,7 +22,7 @@ uint32_t adcs()
 }
 
 // ADD - add small immediate to a register and update flags
-uint32_t adds_i3()
+uint32_t adds_i3(DECODE_RESULT decoded)
 {
   diss_printf("adds r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
 
@@ -42,7 +41,7 @@ uint32_t adds_i3()
 }
 
 // ADD - add large immediate to a register and update flags
-uint32_t adds_i8()
+uint32_t adds_i8(DECODE_RESULT decoded)
 {
   diss_printf("adds r%u, #0x%X\n", decoded.rD, decoded.imm);
 
@@ -61,7 +60,7 @@ uint32_t adds_i8()
 }
 
 // ADD - add two registers and update flags
-uint32_t adds_r()
+uint32_t adds_r(DECODE_RESULT decoded)
 {
   diss_printf("adds r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -80,7 +79,7 @@ uint32_t adds_r()
 }
 
 // ADD - add two registers, one or both high no flags
-uint32_t add_r()
+uint32_t add_r(DECODE_RESULT decoded)
 {
   diss_printf("add r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -106,7 +105,7 @@ uint32_t add_r()
 }
 
 // ADD - add an immpediate to SP
-uint32_t add_sp()
+uint32_t add_sp(DECODE_RESULT decoded)
 {
   diss_printf("add r%u, SP, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -120,7 +119,7 @@ uint32_t add_sp()
 }
 
 // ADR - add an immpediate to PC
-uint32_t adr()
+uint32_t adr(DECODE_RESULT decoded)
 {
   diss_printf("adr r%u, PC, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -137,7 +136,7 @@ uint32_t adr()
 
 ///--- Subtract operations --------------------------------------------///
 
-uint32_t subs_i3()
+uint32_t subs_i3(DECODE_RESULT decoded)
 {
   diss_printf("subs r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
 
@@ -155,7 +154,7 @@ uint32_t subs_i3()
   return 1;
 }
 
-uint32_t subs_i8()
+uint32_t subs_i8(DECODE_RESULT decoded)
 {
   diss_printf("subs r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -173,7 +172,7 @@ uint32_t subs_i8()
   return 1;
 }
 
-uint32_t subs()
+uint32_t subs(DECODE_RESULT decoded)
 {
   diss_printf("subs r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -191,7 +190,7 @@ uint32_t subs()
   return 1;
 }
 
-uint32_t sub_sp()
+uint32_t sub_sp(DECODE_RESULT decoded)
 {
   diss_printf("sub SP, #0x%02X\n", decoded.imm);
 
@@ -204,7 +203,7 @@ uint32_t sub_sp()
   return 1;
 }
 
-uint32_t sbcs()
+uint32_t sbcs(DECODE_RESULT decoded)
 {
   diss_printf("sbcs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -222,7 +221,7 @@ uint32_t sbcs()
   return 1;
 }
 
-uint32_t rsbs()
+uint32_t rsbs(DECODE_RESULT decoded)
 {
   diss_printf("rsbs r%u, r%u\n, #0", decoded.rD, decoded.rN);
 
@@ -244,7 +243,7 @@ uint32_t rsbs()
 
 // MULS - multiply the source and destination and store 32-bits in dest
 // Does not update carry or overflow: simple mult
-uint32_t muls()
+uint32_t muls(DECODE_RESULT decoded)
 {
   diss_printf("muls r%u, r%u\n", decoded.rD, decoded.rM);
 

@@ -1,7 +1,6 @@
 #include "exmemwb.h"
-#include "decode.h"
 
-uint32_t breakpoint(void)
+uint32_t breakpoint(DECODE_RESULT decoded)
 {
   return 0;
 }
@@ -9,7 +8,7 @@ uint32_t breakpoint(void)
 ///--- Move operations -------------------------------------------///
 
 // MOVS - write an immediate to the destination register
-uint32_t movs_i()
+uint32_t movs_i(DECODE_RESULT decoded)
 {
   diss_printf("movs r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -23,7 +22,7 @@ uint32_t movs_i()
 }
 
 // MOV - copy the source register value to the destination register
-uint32_t mov_r()
+uint32_t mov_r(DECODE_RESULT decoded)
 {
   diss_printf("mov r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -38,7 +37,7 @@ uint32_t mov_r()
 }
 
 // MOVS - copy the low source register value to the destination low register
-uint32_t movs_r()
+uint32_t movs_r(DECODE_RESULT decoded)
 {
   diss_printf("movs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -54,7 +53,7 @@ uint32_t movs_r()
 ///--- Bit twiddling operations -------------------------------------------///
 
 // SXTB - Sign extend a byte to a word
-uint32_t sxtb()
+uint32_t sxtb(DECODE_RESULT decoded)
 {
   diss_printf("sxtb r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -67,7 +66,7 @@ uint32_t sxtb()
 }
 
 // SXTH - Sign extend a halfword to a word
-uint32_t sxth()
+uint32_t sxth(DECODE_RESULT decoded)
 {
   diss_printf("sxth r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -80,7 +79,7 @@ uint32_t sxth()
 }
 
 // UXTB - Extend a byte to a word
-uint32_t uxtb()
+uint32_t uxtb(DECODE_RESULT decoded)
 {
   diss_printf("uxtb r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -91,7 +90,7 @@ uint32_t uxtb()
 }
 
 // UXTH - Extend a halfword to a word
-uint32_t uxth()
+uint32_t uxth(DECODE_RESULT decoded)
 {
   diss_printf("uxth r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -102,7 +101,7 @@ uint32_t uxth()
 }
 
 // REV - Reverse ordering of bytes in a word
-uint32_t rev()
+uint32_t rev(DECODE_RESULT decoded)
 {
   diss_printf("rev r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -118,7 +117,7 @@ uint32_t rev()
 }
 
 // REV16 - Reverse ordering of bytes in a packed halfword
-uint32_t rev16()
+uint32_t rev16(DECODE_RESULT decoded)
 {
   diss_printf("rev16 r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -134,7 +133,7 @@ uint32_t rev16()
 }
 
 // REVSH - Reverse ordering of bytes in a signed halfword
-uint32_t revsh()
+uint32_t revsh(DECODE_RESULT decoded)
 {
   diss_printf("revsh r%u, r%u\n", decoded.rD, decoded.rM);
 

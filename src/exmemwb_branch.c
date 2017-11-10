@@ -1,11 +1,8 @@
-#include <stdlib.h>
 #include "exmemwb.h"
-#include "decode.h"
-#include "except.h"
 
 ///--- Compare operations --------------------------------------------///
 
-uint32_t cmn()
+uint32_t cmn(DECODE_RESULT decoded)
 {
   diss_printf("cmns r%u, r%u\n", decoded.rM, decoded.rN);
 
@@ -21,7 +18,7 @@ uint32_t cmn()
   return 1;
 }
 
-uint32_t cmp_i()
+uint32_t cmp_i(DECODE_RESULT decoded)
 {
   diss_printf("cmp r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -37,7 +34,7 @@ uint32_t cmp_i()
   return 1;
 }
 
-uint32_t cmp_r()
+uint32_t cmp_r(DECODE_RESULT decoded)
 {
   diss_printf("cmp r%u, r%u\n", decoded.rD, decoded.rM); // rN to rD due to decoding
 
@@ -54,7 +51,7 @@ uint32_t cmp_r()
 }
 
 // TST - Test for matches
-uint32_t tst()
+uint32_t tst(DECODE_RESULT decoded)
 {
   diss_printf("tst r%u, r%u\n", decoded.rN, decoded.rD); // Switch operands to ease decoding
 
@@ -71,7 +68,7 @@ uint32_t tst()
 ///--- Branch operations --------------------------------------------///
 
 // B - Unconditional branch
-uint32_t b()
+uint32_t b(DECODE_RESULT decoded)
 {
   uint32_t offset = signExtend32(decoded.imm << 1, 12);
 
@@ -85,7 +82,7 @@ uint32_t b()
 }
 
 // B - Conditional branch
-uint32_t b_c()
+uint32_t b_c(DECODE_RESULT decoded)
 {
   diss_printf("Bcc 0x%08X\n", decoded.imm);
   uint32_t taken = 0;
@@ -180,7 +177,7 @@ uint32_t b_c()
 }
 
 // BLX - Unconditional branch and link with switch to ARM mode
-uint32_t blx()
+uint32_t blx(DECODE_RESULT decoded)
 {
   diss_printf("blx r%u\n", decoded.rM);
 
@@ -200,7 +197,7 @@ uint32_t blx()
 
 // BX - Unconditional branch with switch to ARM mode
 // Also may be used as exception return
-uint32_t bx()
+uint32_t bx(DECODE_RESULT decoded)
 {
   diss_printf("bx r%u\n", decoded.rM);
 
@@ -224,7 +221,7 @@ uint32_t bx()
 
 // BL - Unconditional branch and link
 // 32 bit instruction
-uint32_t bl()
+uint32_t bl(DECODE_RESULT decoded)
 {
   uint32_t result = signExtend32(decoded.imm << 1, 25);
 

@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
     diss_printf("%04X\n", insn);
 
     decode(insn);
-    exwbmem(insn);
+    exwbmem(insn, decoded);
 
     // Print any differences caused by the last instruction
     if(PRINT_STATE_DIFF)
