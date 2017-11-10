@@ -12,13 +12,9 @@
 #define CPU_FREQ 24000000
 #define MEMMAPIO_START 0x80000000
 #define MEMMAPIO_SIZE (4 * 19)
-#define WATCHPOINT_ADDR 0x80000010
 
 typedef __uint32_t u32;
 typedef __uint64_t u64;
-typedef __int32_t i32;
-typedef __int64_t i64;
-typedef __uint8_t u8;
 typedef __uint16_t u16;
 typedef char bool;
 
@@ -90,10 +86,7 @@ char simStoreData(u32 address, u32 value);
   }
 
 // Macros for Clank
-#define REPORT_IDEM_BREAKS 0
-#define IGNORE_ADDRESS 0x40000000
-void reportAndReset(
-    char pNumRegsPushed); // Reports on status of current idempotent section, then clears buffers
+
 struct ADDRESS_LIST {
   u32 address;
   struct ADDRESS_LIST *next;

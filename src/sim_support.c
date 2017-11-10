@@ -25,13 +25,6 @@ u32 cp_count = 0;
 u32 ram[RAM_SIZE >> 2];
 u32 flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;
-ADDRESS_LIST addressReadBeforeWriteList = {0, NULL};
-ADDRESS_LIST addressWriteBeforeReadList = {0, NULL};
-ADDRESS_LIST addressConflictList = {0, NULL};
-int addressConflicts = 0;
-int addressConflictsStack = 0;
-int addressWrites = 0;
-int addressReads = 0;
 
 // Reserve a space inside the simulator for variables that GDB and python can use to control the simulator
 // Essentially creates a new block of addresses on the bus of the processor that only the debug read and write commands can access
@@ -92,16 +85,6 @@ void cpu_reset(void)
   cyclesSinceReset = 0;
   cyclesSinceCP = 0;
   wdt_val = 0;
-}
-
-void sim_command(void)
-{
-  // Reset the CPU
-  if(do_reset != 0) {
-    cpu_reset();
-    cpu_set_pc(cpu_get_pc() + 0x4);
-    do_reset = 0;
-  }
 }
 
 #if HOOK_GPR_ACCESSES
@@ -378,145 +361,3 @@ char simStoreData(u32 address, u32 value)
   return 0;
 }
 
-//
-// Code below here is used by GDB interface
-//
-
-char simDebugRead(u32 address, unsigned char *value)
-{
-  unsigned int word;
-
-#if MEM_CHECKS
-  if((address & 0x3) != 0) {
-    fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
-    sim_exit(1);
-  }
-#endif
-
-  if(address >= RAM_START) {
-    if(address >= (RAM_START + RAM_SIZE)) {
-      // Check for UART
-      if(address == 0xE0000000) {
-        *value = 0;
-        return 0;
-      }
-
-      // Check for systick
-      if((address >> 4) == 0xE000E01) {
-        *value = ((u32 *)&systick)[(address >> 2) & 0x3];
-        if(address == 0xE000E010)
-          systick.control &= 0x00010000;
-
-        return 0;
-      }
-
-      // Check for cycle count
-      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START + MEMMAPIO_SIZE)) {
-        //word = *((u32 *) (((void*)mmio)+((address & 0xfffffffc)-MEMMAPIO_START))) & 0xffffffff;
-        word = *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]);
-        //if(address < (MEMMAPIO_START+4))
-        //  word = cyclesSinceReset & 0xffffffff;
-        //else if(address < (MEMMAPIO_START+8))
-        //  word = resetAfterCycles & 0xffffffff;
-        //else if(address < (MEMMAPIO_START+12))
-        //  word = cycleCount & 0xffffffff;
-        //else if(address < (MEMMAPIO_START+16))
-        //  word = (cycleCount >> 32) & 0xffffffff;
-
-        *value = (word >> (8 * (address % 4)));
-        return 0;
-      }
-
-      fprintf(
-          stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
-    }
-
-    word = ram[(address & RAM_ADDRESS_MASK) >> 2];
-  } else {
-    if(address >= (FLASH_START + FLASH_SIZE)) {
-      fprintf(
-          stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
-    }
-
-    word = flash[(address & FLASH_ADDRESS_MASK) >> 2];
-  }
-
-  *value = (word >> (8 * (address % 4))) & 0xff;
-
-  return 0;
-}
-
-char simDebugWrite(u32 address, unsigned char value)
-{
-  unsigned int word;
-
-#if MEM_CHECKS
-  if((address & 0x3) != 0) {
-    fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
-    sim_exit(1);
-  }
-#endif
-
-  if(address >= RAM_START) {
-    if(address >= (RAM_START + RAM_SIZE)) {
-      // Check for UART
-      if(address == 0xE0000000) {
-        return 0;
-      }
-
-      // Check for systick
-      if((address >> 4) == 0xE000E01) {
-        if(address == 0xE000E010)
-          systick.control &= 0x00010000;
-
-        return 0;
-      }
-
-      // Check for cycle count
-      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START + MEMMAPIO_SIZE)) {
-        word = *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]);
-        word &= ~(0xff << (8 * (address % 4)));
-        word |= (value << (8 * (address % 4)));
-        *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]) = word;
-
-        sim_command();
-
-        return 0;
-      }
-
-      fprintf(
-          stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
-    }
-
-    word = ram[(address & RAM_ADDRESS_MASK) >> 2];
-    word &= ~(0xff << (8 * (address % 4)));
-    word |= (value << (8 * (address % 4)));
-    ram[(address & RAM_ADDRESS_MASK) >> 2] = word;
-  } else {
-    if(address >= (FLASH_START + FLASH_SIZE)) {
-      fprintf(
-          stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
-    }
-
-    word = flash[(address & FLASH_ADDRESS_MASK) >> 2];
-    word &= ~(0xff << (8 * (address % 4)));
-    word |= (value << (8 * (address % 4)));
-    flash[(address & FLASH_ADDRESS_MASK) >> 2] = word;
-  }
-
-  return 0;
-}
-
-char simValidMem(u32 address)
-{
-  if((address >= RAM_START && address <= (RAM_START + RAM_SIZE)) ||
-      (address >= FLASH_START && address <= (FLASH_START + FLASH_SIZE)) ||
-      (address >= MEMMAPIO_START && address < MEMMAPIO_START + MEMMAPIO_SIZE))
-    return 1;
-  else
-    return 0;
-}
