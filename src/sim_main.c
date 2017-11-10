@@ -11,19 +11,13 @@ static void fillState(const char *pFileName)
   FILE *fd;
 
   fd = fopen(pFileName, "r");
-
-  // Check that the file opened correctly
   if(fd == NULL) {
     fprintf(stderr, "Error: Could not open file %s\n", pFileName);
     sim_exit(1);
   }
 
-  fread(&flash, sizeof(u32), sizeof(flash) / sizeof(u32), fd); // || !feof(fd) || ferror(fd))
-                                                               /*    {
-        fprintf(stderr, "Error: Progam too large for memory\n");
-        sim_exit(1);
-    }
-*/
+  fread(&flash, sizeof(u32), sizeof(flash) / sizeof(u32), fd);
+
   fclose(fd);
 }
 
