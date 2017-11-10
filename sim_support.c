@@ -4,7 +4,6 @@
 #endif
 #include "sim_support.h"
 #include "exmemwb.h"
-#include "rsp-server.h"
 
 u64 cycleCount = 0;
 u64 insnCount = 0;
@@ -494,8 +493,6 @@ char simStoreData(u32 address, u32 value)
         addressWrites += addAddress(&addressWriteBeforeReadList, address);
     }
 
-    rsp_check_watch(address);
-
     #if PRINT_RAM_WRITES || PRINT_ALL_MEM
       fprintf(stderr, "%8.8X: Ram write at 0x%8.8X=0x%8.8X\n", cpu_get_pc()-4, address, value);
     #endif
@@ -517,8 +514,6 @@ char simStoreData(u32 address, u32 value)
       fprintf(stderr, "Error: DSF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
-
-    rsp_check_watch(address);
 
     #if PRINT_FLASH_WRITES || PRINT_ALL_MEM
       fprintf(stderr, "%8.8X: Flash write at 0x%8.8X=0x%8.8X\n", cpu_get_pc()-4, address, value);

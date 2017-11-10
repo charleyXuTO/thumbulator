@@ -4,7 +4,6 @@
 #include "exmemwb.h"
 #include "except.h"
 #include "decode.h"
-#include "rsp-server.h"
 
 // Load a program into the simulator's RAM
 static void fillState(const char *pFileName)
@@ -78,18 +77,6 @@ void printState()
 
 void sim_exit(int i)
 {
-  if(cpu.debug)
-  {
-    rsp.stalled = cpu.debug;
-    rsp_trap(); 
-
-    if(i != 0)
-      fprintf(stderr, "Simulator exiting due to error...\n");
-    
-    while(rsp.stalled)
-      handle_rsp();
-  }
-
   exit(i);
 }
 
@@ -131,12 +118,6 @@ int main(int argc, char *argv[])
     
     // PC seen is PC + 4
     cpu_set_pc(cpu_get_pc() + 0x4);
-
-    if(cpu.debug){
-    rsp_init();
-    while(rsp.stalled)
-      handle_rsp();
-    }
 
     // Execute the program
     // Simulation will terminate when it executes insn == 0xBFAA
@@ -237,13 +218,6 @@ int main(int argc, char *argv[])
         if(((cpu_get_pc() - 4)&0xfffffffe) == addrOfRestoreCP)
           addToWasted = 1;
 
-      // Wait for commands from GDB
-      if(debug){
-      rsp_check_stall();
-
-      while(rsp.stalled)
-        handle_rsp();
-      }
     }
 
     return 0;
