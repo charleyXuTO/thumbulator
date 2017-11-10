@@ -8,20 +8,20 @@ project(
 
 add_executable(
   ${PROJECT_NAME}
-  decode.c
-  decode.h
-  except.c
-  except.h
-  exmemwb.c
-  exmemwb.h
-  exmemwb_arith.c
-  exmemwb_branch.c
-  exmemwb_logic.c
-  exmemwb_mem.c
-  exmemwb_misc.c
-  sim_main.c
-  sim_support.c
-  sim_support.h
+  src/decode.c
+  src/decode.h
+  src/except.c
+  src/except.h
+  src/exmemwb.c
+  src/exmemwb.h
+  src/exmemwb_arith.c
+  src/exmemwb_branch.c
+  src/exmemwb_logic.c
+  src/exmemwb_mem.c
+  src/exmemwb_misc.c
+  src/sim_main.c
+  src/sim_support.c
+  src/sim_support.h
 )
 
 set_target_properties(
