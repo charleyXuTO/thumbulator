@@ -110,7 +110,7 @@ void do_cflag(uint32_t a, uint32_t b, uint32_t carry);
     cpu_set_pc((x) | 0x1); \
   } while(0)
 
-void exwbmem(const uint16_t pInsn);
+void exwbmem(uint16_t pInsn);
 
 // Timing model
 #define TIMING_BRANCH 2

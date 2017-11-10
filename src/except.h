@@ -6,8 +6,8 @@
 void check_except(void);
 
 // Interface for starting a new exception
-void except_enter(const uint32_t exceptID);
+void except_enter(uint32_t exceptID);
 
 // Interface for returning from exceptions
 // Called from bx and pop instructions
-void except_exit(const uint32_t pType);
+void except_exit(uint32_t pType);

@@ -1,5 +1,3 @@
-#include <stdlib.h>
-#include <assert.h>
 #include "exmemwb.h"
 #include "decode.h"
 

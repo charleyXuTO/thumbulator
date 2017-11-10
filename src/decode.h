@@ -24,6 +24,6 @@ extern DECODE_RESULT decoded;
 // Interface to the decode stage
 // Sets the decode stage registers based upon the passed instruction
 // Prints a message and exits the simulator upon decoding error
-void decode(const uint16_t pInsn);
+void decode(uint16_t pInsn);
 
 #endif

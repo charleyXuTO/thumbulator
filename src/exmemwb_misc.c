@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "exmemwb.h"
 #include "decode.h"
 
@@ -6,41 +5,6 @@ uint32_t breakpoint(void)
 {
   return 0;
 }
-
-/*
-int handle_bkpt(unsigned int bp, unsigned int arg)
-{
-	int r = 1;
-	FILE *f;
-	int s, e, n;
-	unsigned int sp;
-
-	sp = read_register(13);
-	switch (arg) {
-		case 0x18:
-			fprintf(stderr, "Exiting.\n");
-			break;
-		case 0x80:
-			s = read32(sp + 8);
-			e = read32(sp + 4);
-			fprintf(stderr, "Dumping from %08X to %08X...\n",
-					s, e);
-			f = fopen(output_file_name, "wb");
-			while (s != e) {
-				n = read32(s);
-				fwrite(&n, 4, 1, f);
-				s += 4;
-			}
-			fclose(f);
-			write_register(13, sp + 12);
-			r = 0;
-			break;
-		default:
-			fprintf(stderr, "bkpt 0x%02X %08X\n", bp, arg);
-			break;
-	}
-	return r;
-}*/
 
 ///--- Move operations -------------------------------------------///
 

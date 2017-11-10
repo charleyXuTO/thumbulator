@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "exmemwb.h"
+
 #include "except.h"
+#include "exmemwb.h"
 #include "decode.h"
 
 // Load a program into the simulator's RAM

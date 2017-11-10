@@ -113,17 +113,5 @@ void report_sp(void);
 void (*gprReadHooks[16])(void);
 void (*gprWriteHooks[16])(void);
 #endif
-char simValidMem(uint32_t address); // Interface for rsp (GDB) server
-
-//struct MEMMAPIO {
-//  u32 *cycleCountLSB;
-//  u32 *cycleCountMSB;
-//  u32 *cyclesSince;
-//  u32 *resetAfter;
-//
-//  u32 *do_reset;
-//  u32 *do_logging;
-//};
-//typedef struct MEMMAPIO MEMMAPIO;
 
 #endif
