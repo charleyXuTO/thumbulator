@@ -15,7 +15,6 @@ struct CPU {
   u32 control;
   u32 sp_main;
   u32 sp_process;
-  u32 debug;
   u32 mode;
   u32 exceptmask; // Bit mask of pending exceptions
 };

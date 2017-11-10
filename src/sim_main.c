@@ -80,7 +80,6 @@ void sim_exit(int i)
 int main(int argc, char *argv[])
 {
   char *file = 0;
-  int debug = 0;
 
   if(argc < 2) {
     fprintf(stderr, "Usage: %s [-g] memory_file\n", argv[0]);
@@ -91,7 +90,6 @@ int main(int argc, char *argv[])
     file = argv[1];
   else if(0 == strncmp("-g", argv[1], strlen("-g"))) {
     file = argv[2];
-    debug = 1;
   }
 
   fprintf(stderr, "Simulating file %s\n", file);
@@ -107,7 +105,6 @@ int main(int argc, char *argv[])
 
   // Initialize CPU state
   cpu_reset();
-  cpu.debug = debug;
 
   // PC seen is PC + 4
   cpu_set_pc(cpu_get_pc() + 0x4);
