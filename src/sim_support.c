@@ -231,26 +231,6 @@ void clearList(ADDRESS_LIST *pList)
   pList->next = NULL;
 }
 
-// Called by branch and links
-int insnsPerConflict = 0;
-void reportAndReset(char pNumRegsPushed)
-{
-  if(!REPORT_IDEM_BREAKS)
-    return;
-
-  insnsPerConflict = cycleCount - insnsPerConflict;
-  fprintf(stderr, "%d,%d,%d,%d,%d,%d,%d\n", addressWrites, addressReads, addressConflicts,
-      addressConflicts - addressConflictsStack, insnsPerConflict, pNumRegsPushed, cpu_get_pc());
-  addressConflicts = 0;
-  addressConflictsStack = 0;
-  addressWrites = 0;
-  addressReads = 0;
-  insnsPerConflict = cycleCount;
-  clearList(&addressConflictList);
-  clearList(&addressReadBeforeWriteList);
-  clearList(&addressWriteBeforeReadList);
-}
-
 // Memory access functions assume that RAM has a higher address than Flash
 char simLoadInsn(u32 address, u16 *value)
 {
@@ -261,12 +241,6 @@ char simLoadInsn(u32 address, u16 *value)
       fprintf(
           stderr, "Error: ILR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
-    }
-
-    if(REPORT_IDEM_BREAKS) {
-      // Add addresses to the read list if they weren't written to first
-      if(!containsAddress(&addressWriteBeforeReadList, address))
-        addressReads += addAddress(&addressReadBeforeWriteList, address);
     }
 
     fromMem = ram[(address & RAM_ADDRESS_MASK) >> 2];
@@ -325,12 +299,6 @@ char simLoadData_internal(u32 address, u32 *value, u32 falseRead)
       fprintf(
           stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
-    }
-
-    // Add addresses to the read list if they weren't written to first
-    if(REPORT_IDEM_BREAKS && !falseRead) {
-      if(!containsAddress(&addressWriteBeforeReadList, address))
-        addressReads += addAddress(&addressReadBeforeWriteList, address);
     }
 
     *value = ram[(address & RAM_ADDRESS_MASK) >> 2];
@@ -422,24 +390,6 @@ char simStoreData(u32 address, u32 value)
       fprintf(
           stderr, "Error: DSR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
-    }
-
-    if(REPORT_IDEM_BREAKS && address != IGNORE_ADDRESS) {
-      // Conflict if we are writting to an address that was read
-      // from before being written to
-      if(containsAddress(&addressReadBeforeWriteList, address)) {
-        fprintf(stderr, "Error: Idempotency violation: address=0x%8.8X, pc=0x%8.8X\n", address,
-            cpu_get_pc());
-        int addressConflictsOrig = addressConflicts;
-
-        addressConflicts += addAddress(&addressConflictList, address);
-        if(address >= (cpu_get_sp() - 0x20) /*0x40001C00*/ &&
-            addressConflicts != addressConflictsOrig)
-          ++addressConflictsStack;
-      }
-      // Only track new write addresses that were not read from first
-      else
-        addressWrites += addAddress(&addressWriteBeforeReadList, address);
     }
 
 #if PRINT_RAM_WRITES || PRINT_ALL_MEM

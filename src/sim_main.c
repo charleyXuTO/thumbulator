@@ -175,7 +175,6 @@ int main(int argc, char *argv[])
 #if MEM_COUNT_INST
       cp_count++;
 #endif
-      reportAndReset(0);
 #if PRINT_CHECKPOINTS
       fprintf(stderr, "%08X: CP: %lu, Caller: %08X\n", cp_addr, cycleCount,
           (lastCPU.gpr[15] - 4 & (~0x1)));
