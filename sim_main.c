@@ -20,7 +20,7 @@ static void fillState(const char *pFileName)
         sim_exit(1);
     }
 
-    fread(&flash, sizeof(u32), sizeof(flash), fd);// || !feof(fd) || ferror(fd))
+    fread(&flash, sizeof(u32), sizeof(flash) / sizeof(u32), fd);// || !feof(fd) || ferror(fd))
 /*    {
         fprintf(stderr, "Error: Progam too large for memory\n");
         sim_exit(1);
