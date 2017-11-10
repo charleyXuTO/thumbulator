@@ -59,7 +59,7 @@ char simStoreData(u32 address, u32 value);
 // Macros for Ratchet
 #define PRINT_CHECKPOINTS 0                 // Print checkpoint info
 #define MEM_COUNT_INST 0                    // Track and report program loads, stores, and checkpoints
-#define PRINT_MEM_OPS 1                     // Prints detailed info for each program-generated memory access (Clank)
+#define PRINT_MEM_OPS 0                     // Prints detailed info for each program-generated memory access (Clank)
 #define INCREMENT_CYCLES(x) {\
   cycleCount += x;           \
   cyclesSinceReset += x;     \
