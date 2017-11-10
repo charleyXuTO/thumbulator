@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #if MD5
-   #include <openssl/md5.h>
+#include <openssl/md5.h>
 #endif
 #include "sim_support.h"
 #include "exmemwb.h"
@@ -16,12 +16,12 @@ u32 addrOfRestoreCP = 0;
 u32 do_reset = 0;
 u32 wdt_seed = 0;
 u32 wdt_val = 0;
-u32 md5[4] = {0,0,0,0,0};
+u32 md5[4] = {0, 0, 0, 0, 0};
 u32 PRINT_STATE_DIFF = PRINT_STATE_DIFF_INIT;
 #if MEM_COUNT_INST
-  u32 store_count = 0;
-  u32 load_count = 0;
-  u32 cp_count = 0;
+u32 store_count = 0;
+u32 load_count = 0;
+u32 cp_count = 0;
 #endif
 u32 ram[RAM_SIZE >> 2];
 u32 flash[FLASH_SIZE >> 2];
@@ -38,11 +38,9 @@ int addressReads = 0;
 // Essentially creates a new block of addresses on the bus of the processor that only the debug read and write commands can access
 //MEMMAPIO mmio = {.cycleCountLSB = &cycleCount, .cycleCountMSB = &cycleCount+4,
 //                 .cyclesSince = &cyclesSinceReset, .resetAfter = &resetAfterCycles};
-u32* mmio[] = {&cycleCount, ((u32*)&cycleCount)+1, &wastedCycles, ((u32*)&wastedCycles)+1,
-  &cyclesSinceReset, &cyclesSinceCP, &addrOfCP, &addrOfRestoreCP, 
-  &resetAfterCycles, &do_reset, &PRINT_STATE_DIFF, &wdt_seed, 
-  &wdt_val, &(md5[0]), &(md5[1]), &(md5[2]), 
-  &(md5[3]), &(md5[4])};
+u32 *mmio[] = {&cycleCount, ((u32 *)&cycleCount) + 1, &wastedCycles, ((u32 *)&wastedCycles) + 1,
+    &cyclesSinceReset, &cyclesSinceCP, &addrOfCP, &addrOfRestoreCP, &resetAfterCycles, &do_reset,
+    &PRINT_STATE_DIFF, &wdt_seed, &wdt_val, &(md5[0]), &(md5[1]), &(md5[2]), &(md5[3]), &(md5[4])};
 
 // Reset CPU state in accordance with B1.5.5 and B3.2.2
 void cpu_reset(void)
@@ -79,8 +77,7 @@ void cpu_reset(void)
   cpu.exceptmask = 0;
 
   // Check for attempts to go to ARM mode
-  if((cpu_get_pc() & 0x1) == 0)
-  {
+  if((cpu_get_pc() & 0x1) == 0) {
     printf("Error: Reset PC to an ARM address 0x%08X\n", cpu_get_pc());
     sim_exit(1);
   }
@@ -89,7 +86,7 @@ void cpu_reset(void)
   systick.control = 0x4;
   systick.reload = 0x0;
   systick.value = 0x0;
-  systick.calib = CPU_FREQ/100 | 0x80000000;
+  systick.calib = CPU_FREQ / 100 | 0x80000000;
 
   // Reset counters
   wastedCycles += cyclesSinceCP;
@@ -101,17 +98,15 @@ void cpu_reset(void)
 void sim_command(void)
 {
   // Reset the CPU
-  if(do_reset != 0)
-  {
+  if(do_reset != 0) {
     cpu_reset();
     cpu_set_pc(cpu_get_pc() + 0x4);
     do_reset = 0;
   }
 
-  // Compute MD5 of memory
+// Compute MD5 of memory
 #if MD5
-  if(md5[0] != 0)
-  {
+  if(md5[0] != 0) {
     printf("Computing MD5!");
     MD5_CTX c;
     unsigned char digest[16];
@@ -121,10 +116,10 @@ void sim_command(void)
     MD5_Init(&c);
 
     // Do RAM first
-    length = RAM_SIZE-1;
-    ptr = (char*) ram;
-    while (length > 0) {
-      if (length > 512) {
+    length = RAM_SIZE - 1;
+    ptr = (char *)ram;
+    while(length > 0) {
+      if(length > 512) {
         MD5_Update(&c, ptr, 512);
       } else {
         MD5_Update(&c, ptr, length);
@@ -132,12 +127,12 @@ void sim_command(void)
       length -= 512;
       ptr += 512;
     }
-    
-    // Do flash next 
-    length = FLASH_SIZE-1;
-    ptr = (char*) flash;
-    while (length > 0) {
-      if (length > 512) {
+
+    // Do flash next
+    length = FLASH_SIZE - 1;
+    ptr = (char *)flash;
+    while(length > 0) {
+      if(length > 512) {
         MD5_Update(&c, ptr, 512);
       } else {
         MD5_Update(&c, ptr, length);
@@ -150,70 +145,40 @@ void sim_command(void)
     //length = 8*4;
     //ptr = (char*) cpu.gpr;
     //MD5_Update(&c, ptr, length);
-    
+
     // PC, SP, LR
-    length = 3*4;
-    ptr = (char*) &(cpu.gpr[13]);
+    length = 3 * 4;
+    ptr = (char *)&(cpu.gpr[13]);
     MD5_Update(&c, ptr, length);
 
-    MD5_Final((unsigned char*) &(md5[1]), &c);
+    MD5_Final((unsigned char *)&(md5[1]), &c);
 
-    md5[0]=0;
+    md5[0] = 0;
   }
 #endif
-
 }
 
-
 #if HOOK_GPR_ACCESSES
-  void do_nothing(void){;}
+void do_nothing(void)
+{
+  ;
+}
 
-  void report_sp(void)
-  {
-    if(cpu_get_sp() < 0X40010000)
-    {
-      fprintf(stderr, "SP crosses heap: 0x%8.8X\n", cpu_get_sp());
-      fprintf(stderr, "PC: 0x%8.8X\n", cpu_get_pc());
-    }
+void report_sp(void)
+{
+  if(cpu_get_sp() < 0X40010000) {
+    fprintf(stderr, "SP crosses heap: 0x%8.8X\n", cpu_get_sp());
+    fprintf(stderr, "PC: 0x%8.8X\n", cpu_get_pc());
   }
+}
 
-  void (* gprReadHooks[16])(void) = { \
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing\
-  };
+void (*gprReadHooks[16])(void) = {do_nothing, do_nothing, do_nothing, do_nothing, do_nothing,
+    do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing,
+    do_nothing, do_nothing, do_nothing};
 
-  void (* gprWriteHooks[16])(void) = { \
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    do_nothing,\
-    report_sp,\
-    do_nothing\
-  };
+void (*gprWriteHooks[16])(void) = {do_nothing, do_nothing, do_nothing, do_nothing, do_nothing,
+    do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing,
+    do_nothing, report_sp, do_nothing};
 #endif
 
 // Returns 1 if the passed list of addresses contains the passed
@@ -238,8 +203,7 @@ char addAddress(const ADDRESS_LIST *pList, const u32 pAddress)
   ADDRESS_LIST *temp_prev;
 
   // Go to the end of the list
-  do
-  {
+  do {
     if(temp->address == pAddress)
       return 0;
     temp_prev = temp;
@@ -275,7 +239,8 @@ void reportAndReset(char pNumRegsPushed)
     return;
 
   insnsPerConflict = cycleCount - insnsPerConflict;
-  fprintf(stderr, "%d,%d,%d,%d,%d,%d,%d\n", addressWrites, addressReads, addressConflicts, addressConflicts - addressConflictsStack, insnsPerConflict, pNumRegsPushed, cpu_get_pc());
+  fprintf(stderr, "%d,%d,%d,%d,%d,%d,%d\n", addressWrites, addressReads, addressConflicts,
+      addressConflicts - addressConflictsStack, insnsPerConflict, pNumRegsPushed, cpu_get_pc());
   addressConflicts = 0;
   addressConflictsStack = 0;
   addressWrites = 0;
@@ -291,37 +256,33 @@ char simLoadInsn(u32 address, u16 *value)
 {
   u32 fromMem;
 
-  if(address >= RAM_START)
-  {
-    if(address >= (RAM_START + RAM_SIZE))
-    {
-      fprintf(stderr, "Error: ILR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+  if(address >= RAM_START) {
+    if(address >= (RAM_START + RAM_SIZE)) {
+      fprintf(
+          stderr, "Error: ILR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
-    if(REPORT_IDEM_BREAKS)
-    {
+    if(REPORT_IDEM_BREAKS) {
       // Add addresses to the read list if they weren't written to first
       if(!containsAddress(&addressWriteBeforeReadList, address))
         addressReads += addAddress(&addressReadBeforeWriteList, address);
     }
 
     fromMem = ram[(address & RAM_ADDRESS_MASK) >> 2];
-  }
-  else
-  {
-    if(address >= (FLASH_START + FLASH_SIZE))
-    {
-      fprintf(stderr, "Error: ILF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+  } else {
+    if(address >= (FLASH_START + FLASH_SIZE)) {
+      fprintf(
+          stderr, "Error: ILF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
     fromMem = flash[(address & FLASH_ADDRESS_MASK) >> 2];
   }
-    
+
   // Data 32-bits, but instruction 16-bits
   *value = ((address & 0x2) != 0) ? (u16)(fromMem >> 16) : (u16)fromMem;
-    
+
   return 0;
 }
 
@@ -329,36 +290,31 @@ char simLoadInsn(u32 address, u16 *value)
 // Increments load counter
 char simLoadData(u32 address, u32 *value)
 {
-  #if MEM_COUNT_INST
-    ++load_count;
-  #endif
+#if MEM_COUNT_INST
+  ++load_count;
+#endif
   return simLoadData_internal(address, value, 0);
 }
 
 char simLoadData_internal(u32 address, u32 *value, u32 falseRead)
 {
-  #if MEM_CHECKS
-    if((address & 0x3) != 0)
-    {
-      fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
-      sim_exit(1);
-    }
-  #endif
+#if MEM_CHECKS
+  if((address & 0x3) != 0) {
+    fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
+    sim_exit(1);
+  }
+#endif
 
-  if(address >= RAM_START)
-  {
-    if(address >= (RAM_START + RAM_SIZE))
-    {
+  if(address >= RAM_START) {
+    if(address >= (RAM_START + RAM_SIZE)) {
       // Check for UART
-      if(address == 0xE0000000)
-      {
+      if(address == 0xE0000000) {
         *value = 0;
         return 0;
       }
 
       // Check for systick
-      if((address >> 4) == 0xE000E01)
-      {
+      if((address >> 4) == 0xE000E01) {
         *value = ((u32 *)&systick)[(address >> 2) & 0x3];
         if(address == 0xE000E010)
           systick.control &= 0x00010000;
@@ -366,43 +322,43 @@ char simLoadData_internal(u32 address, u32 *value, u32 falseRead)
         return 0;
       }
 
-      fprintf(stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+      fprintf(
+          stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
     // Add addresses to the read list if they weren't written to first
-    if(REPORT_IDEM_BREAKS && !falseRead)
-    {
+    if(REPORT_IDEM_BREAKS && !falseRead) {
       if(!containsAddress(&addressWriteBeforeReadList, address))
         addressReads += addAddress(&addressReadBeforeWriteList, address);
     }
 
     *value = ram[(address & RAM_ADDRESS_MASK) >> 2];
-      
-    #if PRINT_MEM_OPS
-      if(!falseRead) printf("%llu\t%llu\tR\t%8.8X\t%d\n", cycleCount, insnCount, address, *value);
-    #endif
+
+#if PRINT_MEM_OPS
+    if(!falseRead)
+      printf("%llu\t%llu\tR\t%8.8X\t%d\n", cycleCount, insnCount, address, *value);
+#endif
 
 #if PRINT_ALL_MEM
-    fprintf(stderr, "%8.8X: Ram read at 0x%8.8X=0x%8.8X\n", cpu_get_pc()-4, address, *value);
+    fprintf(stderr, "%8.8X: Ram read at 0x%8.8X=0x%8.8X\n", cpu_get_pc() - 4, address, *value);
 #endif
-  }
-  else
-  {
-    if(address >= (FLASH_START + FLASH_SIZE))
-    {
-      fprintf(stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+  } else {
+    if(address >= (FLASH_START + FLASH_SIZE)) {
+      fprintf(
+          stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
     *value = flash[(address & FLASH_ADDRESS_MASK) >> 2];
 
-    #if PRINT_MEM_OPS
-      if(!falseRead) printf("%llu\t%llu\tR\t%8.8X\t%d\n", cycleCount, insnCount, address, *value);
-    #endif
-      
+#if PRINT_MEM_OPS
+    if(!falseRead)
+      printf("%llu\t%llu\tR\t%8.8X\t%d\n", cycleCount, insnCount, address, *value);
+#endif
+
 #if PRINT_ALL_MEM
-    fprintf(stderr, "%8.8X: Flash read at 0x%8.8X=0x%8.8X\n", cpu_get_pc()-4, address, *value);
+    fprintf(stderr, "%8.8X: Flash read at 0x%8.8X=0x%8.8X\n", cpu_get_pc() - 4, address, *value);
 #endif
   }
 
@@ -413,21 +369,18 @@ char simStoreData(u32 address, u32 value)
 {
   unsigned int word;
 
-  #if MEM_CHECKS
-    if((address & 0x3) != 0) // Thumb-mode requires LSB = 1
-    {
-      fprintf(stderr, "Unalinged data memory write: 0x%8.8X\n", address);
-      sim_exit(1);
-    }
-  #endif
-
-  if(address >= RAM_START)
+#if MEM_CHECKS
+  if((address & 0x3) != 0) // Thumb-mode requires LSB = 1
   {
-    if(address >= (RAM_START + RAM_SIZE))
-    {
+    fprintf(stderr, "Unalinged data memory write: 0x%8.8X\n", address);
+    sim_exit(1);
+  }
+#endif
+
+  if(address >= RAM_START) {
+    if(address >= (RAM_START + RAM_SIZE)) {
       // Check for UART
-      if(address == 0xE0000000)
-      {
+      if(address == 0xE0000000) {
 #if !DISABLE_PROGRAM_PRINTING
         printf("%c", value & 0xFF);
         fflush(stdout);
@@ -436,15 +389,12 @@ char simStoreData(u32 address, u32 value)
       }
 
       // Check for systick
-      if((address >> 4) == 0xE000E01 && address != 0xE000E01C)
-      {
-        if(address == 0xE000E010)
-        {
+      if((address >> 4) == 0xE000E01 && address != 0xE000E01C) {
+        if(address == 0xE000E010) {
           systick.control = (value & 0x1FFFD) | 0x4; // No external tick source, no interrupt
           if(value & 0x2)
             fprintf(stderr, "ERROR: SYSTICK interrupts not implemented...ignoring\n");
-        }
-        else if(address == 0xE000E014)
+        } else if(address == 0xE000E014)
           systick.reload = value & 0xFFFFFF;
         else if(address == 0xE000E018)
           systick.value = 0; // Reads clears current value
@@ -453,16 +403,14 @@ char simStoreData(u32 address, u32 value)
       }
 
       // Check for cycle count
-      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START+MEMMAPIO_SIZE))
-      {
-        word = *(mmio[((address & 0xfffffffc)-MEMMAPIO_START >> 2)]);
-        word &= ~(0xff << (8*(address%4)));
-        word |= (value << (8*(address%4)));
-        *(mmio[((address & 0xfffffffc)-MEMMAPIO_START >> 2)]) = word;
+      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START + MEMMAPIO_SIZE)) {
+        word = *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]);
+        word &= ~(0xff << (8 * (address % 4)));
+        word |= (value << (8 * (address % 4)));
+        *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]) = word;
 
         // If the variable updated is a request to reset, then do it
-        if(do_reset != 0)
-        {
+        if(do_reset != 0) {
           cpu_reset();
           cpu_set_pc(cpu_get_pc() + 0x4);
           do_reset = 0;
@@ -471,21 +419,22 @@ char simStoreData(u32 address, u32 value)
         return 0;
       }
 
-      fprintf(stderr, "Error: DSR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+      fprintf(
+          stderr, "Error: DSR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
-    if(REPORT_IDEM_BREAKS && address != IGNORE_ADDRESS)
-    {
+    if(REPORT_IDEM_BREAKS && address != IGNORE_ADDRESS) {
       // Conflict if we are writting to an address that was read
       // from before being written to
-      if(containsAddress(&addressReadBeforeWriteList, address))
-      {
-        fprintf(stderr, "Error: Idempotency violation: address=0x%8.8X, pc=0x%8.8X\n", address, cpu_get_pc());
+      if(containsAddress(&addressReadBeforeWriteList, address)) {
+        fprintf(stderr, "Error: Idempotency violation: address=0x%8.8X, pc=0x%8.8X\n", address,
+            cpu_get_pc());
         int addressConflictsOrig = addressConflicts;
 
         addressConflicts += addAddress(&addressConflictList, address);
-        if(address >= (cpu_get_sp() - 0x20) /*0x40001C00*/ && addressConflicts != addressConflictsOrig)
+        if(address >= (cpu_get_sp() - 0x20) /*0x40001C00*/ &&
+            addressConflicts != addressConflictsOrig)
           ++addressConflictsStack;
       }
       // Only track new write addresses that were not read from first
@@ -493,41 +442,41 @@ char simStoreData(u32 address, u32 value)
         addressWrites += addAddress(&addressWriteBeforeReadList, address);
     }
 
-    #if PRINT_RAM_WRITES || PRINT_ALL_MEM
-      fprintf(stderr, "%8.8X: Ram write at 0x%8.8X=0x%8.8X\n", cpu_get_pc()-4, address, value);
-    #endif
+#if PRINT_RAM_WRITES || PRINT_ALL_MEM
+    fprintf(stderr, "%8.8X: Ram write at 0x%8.8X=0x%8.8X\n", cpu_get_pc() - 4, address, value);
+#endif
 
-    #if PRINT_MEM_OPS
-      printf("%llu\t%llu\tW\t%8.8X\t%d\t%d\n", cycleCount, insnCount, address, ram[(address & RAM_ADDRESS_MASK) >> 2], value);
-    #endif
+#if PRINT_MEM_OPS
+    printf("%llu\t%llu\tW\t%8.8X\t%d\t%d\n", cycleCount, insnCount, address,
+        ram[(address & RAM_ADDRESS_MASK) >> 2], value);
+#endif
 
     ram[(address & RAM_ADDRESS_MASK) >> 2] = value;
-    
-    #if MEM_COUNT_INST
-      ++store_count;
-    #endif
-  }
-  else
-  {
-    if(address >= (FLASH_START + FLASH_SIZE))
-    {
-      fprintf(stderr, "Error: DSF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+
+#if MEM_COUNT_INST
+    ++store_count;
+#endif
+  } else {
+    if(address >= (FLASH_START + FLASH_SIZE)) {
+      fprintf(
+          stderr, "Error: DSF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
-    #if PRINT_FLASH_WRITES || PRINT_ALL_MEM
-      fprintf(stderr, "%8.8X: Flash write at 0x%8.8X=0x%8.8X\n", cpu_get_pc()-4, address, value);
-    #endif
+#if PRINT_FLASH_WRITES || PRINT_ALL_MEM
+    fprintf(stderr, "%8.8X: Flash write at 0x%8.8X=0x%8.8X\n", cpu_get_pc() - 4, address, value);
+#endif
 
-    #if PRINT_MEM_OPS
-      printf("%llu\t%llu\tW\t%8.8X\t%d\t%d\n", cycleCount, insnCount, address, flash[(address & FLASH_ADDRESS_MASK) >> 2], value);
-    #endif
-      
+#if PRINT_MEM_OPS
+    printf("%llu\t%llu\tW\t%8.8X\t%d\t%d\n", cycleCount, insnCount, address,
+        flash[(address & FLASH_ADDRESS_MASK) >> 2], value);
+#endif
+
     flash[(address & FLASH_ADDRESS_MASK) >> 2] = value;
-      
-    #if MEM_COUNT_INST
-      ++store_count;
-    #endif
+
+#if MEM_COUNT_INST
+    ++store_count;
+#endif
   }
 
   return 0;
@@ -537,32 +486,27 @@ char simStoreData(u32 address, u32 value)
 // Code below here is used by GDB interface
 //
 
-char simDebugRead(u32 address, unsigned char* value)
+char simDebugRead(u32 address, unsigned char *value)
 {
   unsigned int word;
 
-  #if MEM_CHECKS
-    if((address & 0x3) != 0)
-    {
-      fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
-      sim_exit(1);
-    }
-  #endif
-    
-  if(address >= RAM_START)
-  {
-    if(address >= (RAM_START + RAM_SIZE))
-    {
+#if MEM_CHECKS
+  if((address & 0x3) != 0) {
+    fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
+    sim_exit(1);
+  }
+#endif
+
+  if(address >= RAM_START) {
+    if(address >= (RAM_START + RAM_SIZE)) {
       // Check for UART
-      if(address == 0xE0000000)
-      {
+      if(address == 0xE0000000) {
         *value = 0;
         return 0;
       }
 
       // Check for systick
-      if((address >> 4) == 0xE000E01)
-      {
+      if((address >> 4) == 0xE000E01) {
         *value = ((u32 *)&systick)[(address >> 2) & 0x3];
         if(address == 0xE000E010)
           systick.control &= 0x00010000;
@@ -571,10 +515,9 @@ char simDebugRead(u32 address, unsigned char* value)
       }
 
       // Check for cycle count
-      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START+MEMMAPIO_SIZE))
-      {
+      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START + MEMMAPIO_SIZE)) {
         //word = *((u32 *) (((void*)mmio)+((address & 0xfffffffc)-MEMMAPIO_START))) & 0xffffffff;
-        word = *(mmio[((address & 0xfffffffc)-MEMMAPIO_START >> 2)]);
+        word = *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]);
         //if(address < (MEMMAPIO_START+4))
         //  word = cyclesSinceReset & 0xffffffff;
         //else if(address < (MEMMAPIO_START+8))
@@ -584,28 +527,27 @@ char simDebugRead(u32 address, unsigned char* value)
         //else if(address < (MEMMAPIO_START+16))
         //  word = (cycleCount >> 32) & 0xffffffff;
 
-        *value = (word >> (8*(address%4)));
+        *value = (word >> (8 * (address % 4)));
         return 0;
       }
 
-      fprintf(stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+      fprintf(
+          stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
-    word = ram[(address & RAM_ADDRESS_MASK) >> 2]; 
-  }
-  else
-  {
-    if(address >= (FLASH_START + FLASH_SIZE))
-    {
-      fprintf(stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+    word = ram[(address & RAM_ADDRESS_MASK) >> 2];
+  } else {
+    if(address >= (FLASH_START + FLASH_SIZE)) {
+      fprintf(
+          stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
     word = flash[(address & FLASH_ADDRESS_MASK) >> 2];
   }
 
-  *value = (word >> (8*(address %4))) & 0xff;
+  *value = (word >> (8 * (address % 4))) & 0xff;
 
   return 0;
 }
@@ -614,27 +556,22 @@ char simDebugWrite(u32 address, unsigned char value)
 {
   unsigned int word;
 
-  #if MEM_CHECKS
-    if((address & 0x3) != 0)
-    {
-      fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
-      sim_exit(1);
-    }
-  #endif
+#if MEM_CHECKS
+  if((address & 0x3) != 0) {
+    fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
+    sim_exit(1);
+  }
+#endif
 
-  if(address >= RAM_START)
-  {
-    if(address >= (RAM_START + RAM_SIZE))
-    {
+  if(address >= RAM_START) {
+    if(address >= (RAM_START + RAM_SIZE)) {
       // Check for UART
-      if(address == 0xE0000000)
-      {
+      if(address == 0xE0000000) {
         return 0;
       }
 
       // Check for systick
-      if((address >> 4) == 0xE000E01)
-      {
+      if((address >> 4) == 0xE000E01) {
         if(address == 0xE000E010)
           systick.control &= 0x00010000;
 
@@ -642,39 +579,36 @@ char simDebugWrite(u32 address, unsigned char value)
       }
 
       // Check for cycle count
-      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START+MEMMAPIO_SIZE))
-      {
-        word = *(mmio[((address & 0xfffffffc)-MEMMAPIO_START >> 2)]);
-        word &= ~(0xff << (8*(address%4)));
-        word |= (value << (8*(address%4)));
-        *(mmio[((address & 0xfffffffc)-MEMMAPIO_START >> 2)]) = word;
+      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START + MEMMAPIO_SIZE)) {
+        word = *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]);
+        word &= ~(0xff << (8 * (address % 4)));
+        word |= (value << (8 * (address % 4)));
+        *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]) = word;
 
         sim_command();
 
         return 0;
       }
 
-
-      fprintf(stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+      fprintf(
+          stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
-    word = ram[(address & RAM_ADDRESS_MASK) >> 2]; 
-    word &= ~(0xff << (8*(address%4)));
-    word |= (value << (8*(address%4)));
-    ram[(address & RAM_ADDRESS_MASK) >> 2] = word; 
-  }
-  else
-  {
-    if(address >= (FLASH_START + FLASH_SIZE))
-    {
-      fprintf(stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+    word = ram[(address & RAM_ADDRESS_MASK) >> 2];
+    word &= ~(0xff << (8 * (address % 4)));
+    word |= (value << (8 * (address % 4)));
+    ram[(address & RAM_ADDRESS_MASK) >> 2] = word;
+  } else {
+    if(address >= (FLASH_START + FLASH_SIZE)) {
+      fprintf(
+          stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       sim_exit(1);
     }
 
     word = flash[(address & FLASH_ADDRESS_MASK) >> 2];
-    word &= ~(0xff << (8*(address%4)));
-    word |= (value << (8*(address%4)));
+    word &= ~(0xff << (8 * (address % 4)));
+    word |= (value << (8 * (address % 4)));
     flash[(address & FLASH_ADDRESS_MASK) >> 2] = word;
   }
 
@@ -683,11 +617,10 @@ char simDebugWrite(u32 address, unsigned char value)
 
 char simValidMem(u32 address)
 {
-  if((address >= RAM_START && address <= (RAM_START+RAM_SIZE)) ||
-      (address >= FLASH_START && address <= (FLASH_START+FLASH_SIZE))||
-      (address >= MEMMAPIO_START && address < MEMMAPIO_START+MEMMAPIO_SIZE))
+  if((address >= RAM_START && address <= (RAM_START + RAM_SIZE)) ||
+      (address >= FLASH_START && address <= (FLASH_START + FLASH_SIZE)) ||
+      (address >= MEMMAPIO_START && address < MEMMAPIO_START + MEMMAPIO_SIZE))
     return 1;
   else
     return 0;
 }
-
