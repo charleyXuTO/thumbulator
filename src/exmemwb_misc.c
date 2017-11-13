@@ -1,6 +1,6 @@
 #include "exmemwb.h"
 
-uint32_t breakpoint(DECODE_RESULT decoded)
+uint32_t breakpoint(decode_result decoded)
 {
   return 0;
 }
@@ -8,7 +8,7 @@ uint32_t breakpoint(DECODE_RESULT decoded)
 ///--- Move operations -------------------------------------------///
 
 // MOVS - write an immediate to the destination register
-uint32_t movs_i(DECODE_RESULT decoded)
+uint32_t movs_i(decode_result decoded)
 {
   TRACE_INSTRUCTION("movs r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -22,7 +22,7 @@ uint32_t movs_i(DECODE_RESULT decoded)
 }
 
 // MOV - copy the source register value to the destination register
-uint32_t mov_r(DECODE_RESULT decoded)
+uint32_t mov_r(decode_result decoded)
 {
   TRACE_INSTRUCTION("mov r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -37,7 +37,7 @@ uint32_t mov_r(DECODE_RESULT decoded)
 }
 
 // MOVS - copy the low source register value to the destination low register
-uint32_t movs_r(DECODE_RESULT decoded)
+uint32_t movs_r(decode_result decoded)
 {
   TRACE_INSTRUCTION("movs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -53,7 +53,7 @@ uint32_t movs_r(DECODE_RESULT decoded)
 ///--- Bit twiddling operations -------------------------------------------///
 
 // SXTB - Sign extend a byte to a word
-uint32_t sxtb(DECODE_RESULT decoded)
+uint32_t sxtb(decode_result decoded)
 {
   TRACE_INSTRUCTION("sxtb r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -66,7 +66,7 @@ uint32_t sxtb(DECODE_RESULT decoded)
 }
 
 // SXTH - Sign extend a halfword to a word
-uint32_t sxth(DECODE_RESULT decoded)
+uint32_t sxth(decode_result decoded)
 {
   TRACE_INSTRUCTION("sxth r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -79,7 +79,7 @@ uint32_t sxth(DECODE_RESULT decoded)
 }
 
 // UXTB - Extend a byte to a word
-uint32_t uxtb(DECODE_RESULT decoded)
+uint32_t uxtb(decode_result decoded)
 {
   TRACE_INSTRUCTION("uxtb r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -90,7 +90,7 @@ uint32_t uxtb(DECODE_RESULT decoded)
 }
 
 // UXTH - Extend a halfword to a word
-uint32_t uxth(DECODE_RESULT decoded)
+uint32_t uxth(decode_result decoded)
 {
   TRACE_INSTRUCTION("uxth r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -101,7 +101,7 @@ uint32_t uxth(DECODE_RESULT decoded)
 }
 
 // REV - Reverse ordering of bytes in a word
-uint32_t rev(DECODE_RESULT decoded)
+uint32_t rev(decode_result decoded)
 {
   TRACE_INSTRUCTION("rev r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -117,7 +117,7 @@ uint32_t rev(DECODE_RESULT decoded)
 }
 
 // REV16 - Reverse ordering of bytes in a packed halfword
-uint32_t rev16(DECODE_RESULT decoded)
+uint32_t rev16(decode_result decoded)
 {
   TRACE_INSTRUCTION("rev16 r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -133,7 +133,7 @@ uint32_t rev16(DECODE_RESULT decoded)
 }
 
 // REVSH - Reverse ordering of bytes in a signed halfword
-uint32_t revsh(DECODE_RESULT decoded)
+uint32_t revsh(decode_result decoded)
 {
   TRACE_INSTRUCTION("revsh r%u, r%u\n", decoded.rD, decoded.rM);
 

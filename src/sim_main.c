@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     uint16_t insn;
     fetch_instruction(cpu_get_pc() - 0x4, &insn);
     // decode
-    DECODE_RESULT const decoded = decode(insn);
+    decode_result const decoded = decode(insn);
     // execute
     uint32_t const insnTicks = exwbmem(insn, decoded);
 

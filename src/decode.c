@@ -3,12 +3,12 @@
 
 // Holds the result of decoding
 // Passed to exmemwb stage
-DECODE_RESULT decoded;
+decode_result decoded;
 
 // Various decodings
-DECODE_RESULT decode_3lo(const uint16_t pInsn)
+decode_result decode_3lo(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rD = pInsn & 0x7;
   decoded.rN = (pInsn >> 3) & 0x7;
@@ -17,9 +17,9 @@ DECODE_RESULT decode_3lo(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_2loimm5(const uint16_t pInsn)
+decode_result decode_2loimm5(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rD = pInsn & 0x7;
   decoded.rM = (pInsn >> 3) & 0x7;
@@ -29,9 +29,9 @@ DECODE_RESULT decode_2loimm5(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_2loimm3(const uint16_t pInsn)
+decode_result decode_2loimm3(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rD = pInsn & 0x7;
   decoded.rM = (pInsn >> 3) & 0x7; // Just to be safe
@@ -41,9 +41,9 @@ DECODE_RESULT decode_2loimm3(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_2lo(const uint16_t pInsn)
+decode_result decode_2lo(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rD = pInsn & 0x7;
   decoded.rM = (pInsn >> 3) & 0x7;
@@ -52,9 +52,9 @@ DECODE_RESULT decode_2lo(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_imm8lo(const uint16_t pInsn)
+decode_result decode_imm8lo(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rD = (pInsn >> 8) & 0x7;
   decoded.rM = decoded.rD; // Just to be safe
@@ -64,18 +64,18 @@ DECODE_RESULT decode_imm8lo(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_imm8(const uint16_t pInsn)
+decode_result decode_imm8(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.imm = pInsn & 0xFF;
 
   return decoded;
 }
 
-DECODE_RESULT decode_imm8c(const uint16_t pInsn)
+decode_result decode_imm8c(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.imm = pInsn & 0xFF;
   decoded.cond = (pInsn >> 8) & 0xF;
@@ -83,9 +83,9 @@ DECODE_RESULT decode_imm8c(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_imm7(const uint16_t pInsn)
+decode_result decode_imm7(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rD = GPR_SP;
   decoded.imm = pInsn & 0x7F;
@@ -93,18 +93,18 @@ DECODE_RESULT decode_imm7(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_imm11(const uint16_t pInsn)
+decode_result decode_imm11(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.imm = pInsn & 0x7FF;
 
   return decoded;
 }
 
-DECODE_RESULT decode_reglistlo(const uint16_t pInsn)
+decode_result decode_reglistlo(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rN = (pInsn >> 8) & 0x7;
   decoded.reg_list = pInsn & 0xFF;
@@ -112,27 +112,27 @@ DECODE_RESULT decode_reglistlo(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_pop(const uint16_t pInsn)
+decode_result decode_pop(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.reg_list = ((pInsn & 0x100) << 7) | (pInsn & 0xFF);
 
   return decoded;
 }
 
-DECODE_RESULT decode_push(const uint16_t pInsn)
+decode_result decode_push(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.reg_list = (pInsn & 0xFF) | ((pInsn & 0x100) << 6);
 
   return decoded;
 }
 
-DECODE_RESULT decode_bl(const uint16_t pInsn)
+decode_result decode_bl(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   uint16_t secondHalf;
   fetch_instruction(cpu_get_pc() - 0x2, &secondHalf);
@@ -150,18 +150,18 @@ DECODE_RESULT decode_bl(const uint16_t pInsn)
   return decoded;
 }
 
-DECODE_RESULT decode_1all(const uint16_t pInsn)
+decode_result decode_1all(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rM = (pInsn >> 3) & 0xF;
 
   return decoded;
 }
 
-DECODE_RESULT decode_mov_r(const uint16_t pInsn)
+decode_result decode_mov_r(const uint16_t pInsn)
 {
-  DECODE_RESULT decoded;
+  decode_result decoded;
 
   decoded.rD = (pInsn & 0x7) | ((pInsn & 0x80) >> 4);
   decoded.rN = decoded.rD;
@@ -171,7 +171,7 @@ DECODE_RESULT decode_mov_r(const uint16_t pInsn)
 }
 
 // Stop simulation if we cannot decode the instruction
-DECODE_RESULT decode_error(const uint16_t pInsn)
+decode_result decode_error(const uint16_t pInsn)
 {
   fprintf(stderr, "Error: Malformed instruction: Unable to decode: 0x%4.4X at 0x%08X\n", pInsn,
       cpu_get_pc() - 4);
@@ -179,32 +179,32 @@ DECODE_RESULT decode_error(const uint16_t pInsn)
 }
 
 // Decode functions that require more opcode bits than the first 6
-DECODE_RESULT(*decodeJumpTable17[4])
+decode_result(*decodeJumpTable17[4])
 (const uint16_t pInsn) = {
     decode_mov_r,               /* 01_0001_0XXX (110 - 117) */
     decode_mov_r, decode_mov_r, /* 01_0001_10XX (118 - 11B) */
     decode_1all                 /* 01_0001_11XX (11C - 11F) */
 };
 
-DECODE_RESULT(*decodeJumpTable44[4])
+decode_result(*decodeJumpTable44[4])
 (const uint16_t pInsn) = {decode_imm7, /* 10_1100_00XX (2C0 - 2C3) */
     decode_error, decode_2lo,          /* 10_1100_10XX (2C8 - 2CB) */
     decode_error};
 
-DECODE_RESULT(*decodeJumpTable47[4])
+decode_result(*decodeJumpTable47[4])
 (const uint16_t pInsn) = {decode_pop, /* 10_1111_0XXX (2F0 - 2F7) */
     decode_pop, decode_imm8,          /* 10_1111_10XX (2F8 - 2FB) */
     decode_error};
 
-DECODE_RESULT decode_17(const uint16_t pInsn)
+decode_result decode_17(const uint16_t pInsn)
 {
   decodeJumpTable17[(pInsn >> 8) & 0x3](pInsn);
 }
-DECODE_RESULT decode_44(const uint16_t pInsn)
+decode_result decode_44(const uint16_t pInsn)
 {
   decodeJumpTable44[(pInsn >> 8) & 0x3](pInsn);
 }
-DECODE_RESULT decode_47(const uint16_t pInsn)
+decode_result decode_47(const uint16_t pInsn)
 {
   decodeJumpTable47[(pInsn >> 8) & 0x3](pInsn);
 }
@@ -213,7 +213,7 @@ DECODE_RESULT decode_47(const uint16_t pInsn)
 // to make decoding fast
 // Indices 16, 17, 44, 47, 60, and 62 have multiple conflicting
 // decodings that need to be resolved outside the jump table
-DECODE_RESULT(*decodeJumpTable[64])
+decode_result(*decodeJumpTable[64])
 (const uint16_t pInsn) = {decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_2loimm5,
     decode_2loimm5, decode_2loimm5, decode_3lo, decode_2loimm3, decode_imm8lo, decode_imm8lo,
     decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo,
@@ -236,7 +236,7 @@ DECODE_RESULT(*decodeJumpTable[64])
 // using the first 6 instruction opcode bits and then
 // executing the function pointed to
 // The decode functions update the global decode structure
-DECODE_RESULT decode(const uint16_t pInsn)
+decode_result decode(const uint16_t instruction)
 {
-  return decodeJumpTable[pInsn >> 10](pInsn);
+  return decodeJumpTable[instruction >> 10](instruction);
 }

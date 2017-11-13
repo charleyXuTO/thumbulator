@@ -4,7 +4,7 @@
 ///--- Logical operations ----------------------------------------///
 
 // AND - logical AND two registers and update flags
-uint32_t ands(DECODE_RESULT decoded)
+uint32_t ands(decode_result decoded)
 {
   TRACE_INSTRUCTION("ands r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -22,7 +22,7 @@ uint32_t ands(DECODE_RESULT decoded)
 
 // BIC - clears the bits in the destination register that are set in
 // the source register
-uint32_t bics(DECODE_RESULT decoded)
+uint32_t bics(decode_result decoded)
 {
   TRACE_INSTRUCTION("bics r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -39,7 +39,7 @@ uint32_t bics(DECODE_RESULT decoded)
 }
 
 // EOR - exclusive OR two registers and update the flags
-uint32_t eors(DECODE_RESULT decoded)
+uint32_t eors(decode_result decoded)
 {
   TRACE_INSTRUCTION("eors r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -56,7 +56,7 @@ uint32_t eors(DECODE_RESULT decoded)
 }
 
 // ORR - logical OR two registers and update the flags
-uint32_t orrs(DECODE_RESULT decoded)
+uint32_t orrs(decode_result decoded)
 {
   TRACE_INSTRUCTION("orrs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -73,7 +73,7 @@ uint32_t orrs(DECODE_RESULT decoded)
 }
 
 // MVN - Move while negating
-uint32_t mvns(DECODE_RESULT decoded)
+uint32_t mvns(decode_result decoded)
 {
   TRACE_INSTRUCTION("mvns r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -90,7 +90,7 @@ uint32_t mvns(DECODE_RESULT decoded)
 
 ///--- Shift and rotate operations --------------------------------------------///
 
-uint32_t asrs_i(DECODE_RESULT decoded)
+uint32_t asrs_i(decode_result decoded)
 {
   TRACE_INSTRUCTION("asrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
@@ -122,7 +122,7 @@ uint32_t asrs_i(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t asrs_r(DECODE_RESULT decoded)
+uint32_t asrs_r(decode_result decoded)
 {
   TRACE_INSTRUCTION("asrs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -154,7 +154,7 @@ uint32_t asrs_r(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t lsls_i(DECODE_RESULT decoded)
+uint32_t lsls_i(decode_result decoded)
 {
   if(decoded.imm == 0)
     TRACE_INSTRUCTION("mov r%u, r%u\n", decoded.rD, decoded.rM);
@@ -174,7 +174,7 @@ uint32_t lsls_i(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t lsrs_i(DECODE_RESULT decoded)
+uint32_t lsrs_i(decode_result decoded)
 {
   TRACE_INSTRUCTION("lsrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
@@ -192,7 +192,7 @@ uint32_t lsrs_i(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t lsls_r(DECODE_RESULT decoded)
+uint32_t lsls_r(decode_result decoded)
 {
   TRACE_INSTRUCTION("lsls r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -209,7 +209,7 @@ uint32_t lsls_r(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t lsrs_r(DECODE_RESULT decoded)
+uint32_t lsrs_r(decode_result decoded)
 {
   TRACE_INSTRUCTION("lsrs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -226,7 +226,7 @@ uint32_t lsrs_r(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t rors(DECODE_RESULT decoded)
+uint32_t rors(decode_result decoded)
 {
   TRACE_INSTRUCTION("rors r%u, r%u\n", decoded.rD, decoded.rM);
 

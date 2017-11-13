@@ -2,7 +2,7 @@
 
 ///--- Compare operations --------------------------------------------///
 
-uint32_t cmn(DECODE_RESULT decoded)
+uint32_t cmn(decode_result decoded)
 {
   TRACE_INSTRUCTION("cmns r%u, r%u\n", decoded.rM, decoded.rN);
 
@@ -18,7 +18,7 @@ uint32_t cmn(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t cmp_i(DECODE_RESULT decoded)
+uint32_t cmp_i(decode_result decoded)
 {
   TRACE_INSTRUCTION("cmp r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -34,7 +34,7 @@ uint32_t cmp_i(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t cmp_r(DECODE_RESULT decoded)
+uint32_t cmp_r(decode_result decoded)
 {
   TRACE_INSTRUCTION("cmp r%u, r%u\n", decoded.rD, decoded.rM); // rN to rD due to decoding
 
@@ -51,7 +51,7 @@ uint32_t cmp_r(DECODE_RESULT decoded)
 }
 
 // TST - Test for matches
-uint32_t tst(DECODE_RESULT decoded)
+uint32_t tst(decode_result decoded)
 {
   TRACE_INSTRUCTION("tst r%u, r%u\n", decoded.rN, decoded.rD); // Switch operands to ease decoding
 
@@ -68,7 +68,7 @@ uint32_t tst(DECODE_RESULT decoded)
 ///--- Branch operations --------------------------------------------///
 
 // B - Unconditional branch
-uint32_t b(DECODE_RESULT decoded)
+uint32_t b(decode_result decoded)
 {
   uint32_t offset = signExtend32(decoded.imm << 1, 12);
 
@@ -82,7 +82,7 @@ uint32_t b(DECODE_RESULT decoded)
 }
 
 // B - Conditional branch
-uint32_t b_c(DECODE_RESULT decoded)
+uint32_t b_c(decode_result decoded)
 {
   TRACE_INSTRUCTION("Bcc 0x%08X\n", decoded.imm);
   uint32_t taken = 0;
@@ -177,7 +177,7 @@ uint32_t b_c(DECODE_RESULT decoded)
 }
 
 // BLX - Unconditional branch and link with switch to ARM mode
-uint32_t blx(DECODE_RESULT decoded)
+uint32_t blx(decode_result decoded)
 {
   TRACE_INSTRUCTION("blx r%u\n", decoded.rM);
 
@@ -197,7 +197,7 @@ uint32_t blx(DECODE_RESULT decoded)
 
 // BX - Unconditional branch with switch to ARM mode
 // Also may be used as exception return
-uint32_t bx(DECODE_RESULT decoded)
+uint32_t bx(decode_result decoded)
 {
   TRACE_INSTRUCTION("bx r%u\n", decoded.rM);
 
@@ -221,7 +221,7 @@ uint32_t bx(DECODE_RESULT decoded)
 
 // BL - Unconditional branch and link
 // 32 bit instruction
-uint32_t bl(DECODE_RESULT decoded)
+uint32_t bl(decode_result decoded)
 {
   uint32_t result = signExtend32(decoded.imm << 1, 25);
 

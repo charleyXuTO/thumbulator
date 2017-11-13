@@ -3,7 +3,7 @@
 ///--- Add operations --------------------------------------------///
 
 // ADCS - add with carry and update flags
-uint32_t adcs(DECODE_RESULT decoded)
+uint32_t adcs(decode_result decoded)
 {
   TRACE_INSTRUCTION("adcs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -22,7 +22,7 @@ uint32_t adcs(DECODE_RESULT decoded)
 }
 
 // ADD - add small immediate to a register and update flags
-uint32_t adds_i3(DECODE_RESULT decoded)
+uint32_t adds_i3(decode_result decoded)
 {
   TRACE_INSTRUCTION("adds r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
 
@@ -41,7 +41,7 @@ uint32_t adds_i3(DECODE_RESULT decoded)
 }
 
 // ADD - add large immediate to a register and update flags
-uint32_t adds_i8(DECODE_RESULT decoded)
+uint32_t adds_i8(decode_result decoded)
 {
   TRACE_INSTRUCTION("adds r%u, #0x%X\n", decoded.rD, decoded.imm);
 
@@ -60,7 +60,7 @@ uint32_t adds_i8(DECODE_RESULT decoded)
 }
 
 // ADD - add two registers and update flags
-uint32_t adds_r(DECODE_RESULT decoded)
+uint32_t adds_r(decode_result decoded)
 {
   TRACE_INSTRUCTION("adds r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -79,7 +79,7 @@ uint32_t adds_r(DECODE_RESULT decoded)
 }
 
 // ADD - add two registers, one or both high no flags
-uint32_t add_r(DECODE_RESULT decoded)
+uint32_t add_r(decode_result decoded)
 {
   TRACE_INSTRUCTION("add r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -105,7 +105,7 @@ uint32_t add_r(DECODE_RESULT decoded)
 }
 
 // ADD - add an immpediate to SP
-uint32_t add_sp(DECODE_RESULT decoded)
+uint32_t add_sp(decode_result decoded)
 {
   TRACE_INSTRUCTION("add r%u, SP, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -119,7 +119,7 @@ uint32_t add_sp(DECODE_RESULT decoded)
 }
 
 // ADR - add an immpediate to PC
-uint32_t adr(DECODE_RESULT decoded)
+uint32_t adr(decode_result decoded)
 {
   TRACE_INSTRUCTION("adr r%u, PC, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -136,7 +136,7 @@ uint32_t adr(DECODE_RESULT decoded)
 
 ///--- Subtract operations --------------------------------------------///
 
-uint32_t subs_i3(DECODE_RESULT decoded)
+uint32_t subs_i3(decode_result decoded)
 {
   TRACE_INSTRUCTION("subs r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
 
@@ -154,7 +154,7 @@ uint32_t subs_i3(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t subs_i8(DECODE_RESULT decoded)
+uint32_t subs_i8(decode_result decoded)
 {
   TRACE_INSTRUCTION("subs r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
@@ -172,7 +172,7 @@ uint32_t subs_i8(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t subs(DECODE_RESULT decoded)
+uint32_t subs(decode_result decoded)
 {
   TRACE_INSTRUCTION("subs r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
 
@@ -190,7 +190,7 @@ uint32_t subs(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t sub_sp(DECODE_RESULT decoded)
+uint32_t sub_sp(decode_result decoded)
 {
   TRACE_INSTRUCTION("sub SP, #0x%02X\n", decoded.imm);
 
@@ -203,7 +203,7 @@ uint32_t sub_sp(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t sbcs(DECODE_RESULT decoded)
+uint32_t sbcs(decode_result decoded)
 {
   TRACE_INSTRUCTION("sbcs r%u, r%u\n", decoded.rD, decoded.rM);
 
@@ -221,7 +221,7 @@ uint32_t sbcs(DECODE_RESULT decoded)
   return 1;
 }
 
-uint32_t rsbs(DECODE_RESULT decoded)
+uint32_t rsbs(decode_result decoded)
 {
   TRACE_INSTRUCTION("rsbs r%u, r%u, #0\n", decoded.rD, decoded.rN);
 
@@ -243,7 +243,7 @@ uint32_t rsbs(DECODE_RESULT decoded)
 
 // MULS - multiply the source and destination and store 32-bits in dest
 // Does not update carry or overflow: simple mult
-uint32_t muls(DECODE_RESULT decoded)
+uint32_t muls(decode_result decoded)
 {
   TRACE_INSTRUCTION("muls r%u, r%u\n", decoded.rD, decoded.rM);
 
