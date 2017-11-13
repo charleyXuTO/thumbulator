@@ -68,6 +68,7 @@ void printState()
 
 void sim_exit(int i)
 {
+  printf("Simulation terminated after\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
   exit(i);
 }
 
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   bool addToWasted = 0;
-  while(1) {
+  while(simulate) {
     struct CPU lastCPU;
 
     uint16_t insn;
@@ -181,6 +182,8 @@ int main(int argc, char *argv[])
     if(((cpu_get_pc() - 4) & 0xfffffffe) == addrOfRestoreCP)
       addToWasted = 1;
   }
+
+  printf("Simulation finished in\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
 
   return 0;
 }

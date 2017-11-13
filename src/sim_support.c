@@ -20,6 +20,7 @@ uint32_t PRINT_STATE_DIFF = PRINT_STATE_DIFF_INIT;
 uint32_t ram[RAM_SIZE >> 2];
 uint32_t flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;
+bool simulate = true;
 
 // Reserve a space inside the simulator for variables that GDB and python can use to control the simulator
 // Essentially creates a new block of addresses on the bus of the processor that only the debug read and write commands can access

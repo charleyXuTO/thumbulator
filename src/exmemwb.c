@@ -86,6 +86,13 @@ uint32_t exmemwb_error(DECODE_RESULT decoded)
   return 0;
 }
 
+uint32_t exmemwb_exit_simulation(DECODE_RESULT decoded)
+{
+  printf("Exit instruction encountered.");
+  simulate = false;
+  return 0;
+}
+
 // Execute functions that require more opcode bits than the first 6
 uint32_t (*executeJumpTable6[2])(DECODE_RESULT) = {
     adds_r, /* 060 - 067 */
@@ -199,12 +206,12 @@ uint32_t entry47(DECODE_RESULT decoded)
 
 uint32_t entry55(DECODE_RESULT decoded)
 {
-  if((insn & 0x0300) != 0x0300)
+  if((insn & 0x0300) != 0x0300) {
     return b_c(decoded);
+  }
 
   if(insn == 0xDF01) {
-    printf("Program exit after\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
-    sim_exit(0);
+    return exmemwb_exit_simulation(decoded);
   }
 
   return exmemwb_error(decoded);

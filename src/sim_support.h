@@ -20,6 +20,10 @@ extern uint32_t ram[RAM_SIZE >> 2];
 extern uint32_t flash[FLASH_SIZE >> 2];
 // Informs fetch that previous instruction caused a control flow change
 extern bool takenBranch;
+/**
+ * Whether or not the simulation should continue.
+ */
+extern bool simulate;
 // All sim ends lead through here
 extern void sim_exit(int);
 // Resets the CPU according to the specification
