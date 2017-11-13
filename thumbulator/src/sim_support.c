@@ -2,6 +2,7 @@
 
 #include "thumbulator/exmemwb.h"
 #include <string.h>
+#include <stdlib.h>
 
 uint64_t cycleCount = 0;
 uint64_t insnCount = 0;
@@ -12,6 +13,13 @@ uint32_t ram[RAM_SIZE >> 2];
 uint32_t flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;
 bool simulate = true;
+
+void terminate_simulation(int exit_code)
+{
+  printf("Simulation terminated after\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
+
+  exit(exit_code);
+}
 
 // Reset CPU state in accordance with B1.5.5 and B3.2.2
 void cpu_reset(void)
