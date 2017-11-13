@@ -7,13 +7,11 @@
 #include "thumbulator/sim_support.h"
 
 // Load a program into the simulator's RAM
-static void fillState(const char *pFileName)
+static void load_program(char const *file_name)
 {
-  FILE *fd;
-
-  fd = fopen(pFileName, "r");
+  FILE *fd = fopen(file_name, "r");
   if(fd == NULL) {
-    fprintf(stderr, "Error: Could not open file %s\n", pFileName);
+    fprintf(stderr, "Error: Could not open file %s\n", file_name);
     terminate_simulation(1);
   }
 
@@ -46,7 +44,7 @@ int main(int argc, char *argv[])
   // Reset memory, then load program to memory
   memset(ram, 0, sizeof(ram));
   memset(flash, 0, sizeof(flash));
-  fillState(file);
+  load_program(file);
 
   // Initialize CPU state
   cpu_reset();
