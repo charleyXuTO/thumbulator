@@ -52,7 +52,6 @@ char simStoreData(uint32_t address, uint32_t value);
   {                             \
     cycleCount += (x);          \
     cyclesSinceReset += (x);    \
-    cyclesSinceCP += (x);       \
     if(wdt_seed != 0) {         \
       wdt_val += (x);           \
       if(wdt_val >= wdt_seed) { \
@@ -71,10 +70,6 @@ typedef struct ADDRESS_LIST ADDRESS_LIST;
 extern uint64_t cycleCount;
 extern uint64_t insnCount;
 extern uint32_t cyclesSinceReset;
-extern uint64_t wastedCycles;
-extern uint32_t cyclesSinceCP;
-extern uint32_t addrOfCP;
-extern uint32_t addrOfRestoreCP;
 extern uint32_t wdt_val;
 extern uint32_t wdt_seed;
 

@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
-  bool addToWasted = 0;
   while(simulate) {
     struct CPU lastCPU;
 
@@ -72,7 +71,6 @@ int main(int argc, char *argv[])
     takenBranch = 0;
 
     // Backup CPU state
-    //if(PRINT_STATE_DIFF)
     memcpy(&lastCPU, &cpu, sizeof(struct CPU));
 
 #if THUMB_CHECK
@@ -106,10 +104,6 @@ int main(int argc, char *argv[])
     } else
       cpu_set_pc(cpu_get_pc() + 0x4);
 
-    // Increment counters
-    if(((cpu_get_pc() - 6) & 0xfffffffe) == addrOfCP)
-      cyclesSinceCP = 0;
-
     unsigned cp_addr = (cpu.gpr[15] - 4) & (~0x1);
     switch(cp_addr) {
     case 0x000000d8:
@@ -126,15 +120,6 @@ int main(int argc, char *argv[])
     default:
       break;
     }
-
-    if(addToWasted) {
-      addToWasted = 0;
-      wastedCycles += cyclesSinceCP;
-      cyclesSinceCP = 0;
-    }
-
-    if(((cpu_get_pc() - 4) & 0xfffffffe) == addrOfRestoreCP)
-      addToWasted = 1;
   }
 
   printf("Simulation finished in\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);

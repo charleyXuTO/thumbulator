@@ -6,11 +6,7 @@
 
 uint64_t cycleCount = 0;
 uint64_t insnCount = 0;
-uint64_t wastedCycles = 0;
 uint32_t cyclesSinceReset = 0;
-uint32_t cyclesSinceCP = 0;
-uint32_t addrOfCP = 0;
-uint32_t addrOfRestoreCP = 0;
 uint32_t wdt_seed = 0;
 uint32_t wdt_val = 0;
 uint32_t ram[RAM_SIZE >> 2];
@@ -65,9 +61,7 @@ void cpu_reset(void)
   systick.calib = CPU_FREQ / 100 | 0x80000000;
 
   // Reset counters
-  wastedCycles += cyclesSinceCP;
   cyclesSinceReset = 0;
-  cyclesSinceCP = 0;
   wdt_val = 0;
 }
 
