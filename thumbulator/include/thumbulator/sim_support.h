@@ -69,14 +69,4 @@ void store(uint32_t address, uint32_t value);
     }                                                 \
   } while(0)
 
-#define INCREMENT_CYCLES(x)  \
-  {                          \
-    cycleCount += (x);       \
-    cyclesSinceReset += (x); \
-  }
-
-extern uint64_t cycleCount;
-extern uint64_t insnCount;
-extern uint32_t cyclesSinceReset;
-
 #endif

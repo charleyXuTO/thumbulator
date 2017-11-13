@@ -53,6 +53,10 @@ int main(int argc, char *argv[])
   // PC seen is PC + 4
   cpu_set_pc(cpu_get_pc() + 0x4);
 
+  // stats tracking
+  uint32_t insnCount = 0;
+  uint32_t cycleCount = 0;
+
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   while(simulate) {
@@ -77,7 +81,7 @@ int main(int argc, char *argv[])
 
     // update statistics
     ++insnCount;
-    INCREMENT_CYCLES(insnTicks);
+    cycleCount += insnTicks;
 
     if(cpu_get_except() != 0) {
       lastCPU.exceptmask = cpu.exceptmask;
@@ -98,7 +102,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  printf("Simulation finished in\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
+  printf("Simulation finished in\n\t%u ticks\n\t%u instructions\n", cycleCount, insnCount);
 
   return 0;
 }

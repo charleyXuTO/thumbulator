@@ -6,9 +6,6 @@
 
 #define ESPR_T (1 << 24)
 
-uint64_t cycleCount = 0;
-uint64_t insnCount = 0;
-uint32_t cyclesSinceReset = 0;
 uint32_t ram[RAM_SIZE >> 2];
 uint32_t flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;
@@ -16,8 +13,7 @@ bool simulate = true;
 
 void terminate_simulation(int exit_code)
 {
-  printf("Simulation terminated after\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
-
+  printf("Simulation was terminated prematurely.\n");
   exit(exit_code);
 }
 
@@ -66,9 +62,6 @@ void cpu_reset(void)
   systick.reload = 0x0;
   systick.value = 0x0;
   systick.calib = CPU_FREQ / 100 | 0x80000000;
-
-  // Reset counters
-  cyclesSinceReset = 0;
 }
 
 // Memory access functions assume that RAM has a higher address than Flash
