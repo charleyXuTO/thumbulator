@@ -1,49 +1,49 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
+extern "C" {
 #include "thumbulator/cpu.h"
 #include "thumbulator/exception.h"
 #include "thumbulator/sim_support.h"
+}
 
 // Load a program into the simulator's RAM
 static void load_program(char const *file_name)
 {
-  FILE *fd = fopen(file_name, "r");
-  if(fd == NULL) {
-    fprintf(stderr, "Error: Could not open file %s\n", file_name);
+  std::FILE *fd = std::fopen(file_name, "r");
+  if(fd == nullptr) {
+    std::fprintf(stderr, "Error: Could not open file %s\n", file_name);
     terminate_simulation(1);
   }
 
-  fread(&FLASH_MEMORY, sizeof(uint32_t), sizeof(FLASH_MEMORY) / sizeof(uint32_t), fd);
+  std::fread(&FLASH_MEMORY, sizeof(uint32_t), sizeof(FLASH_MEMORY) / sizeof(uint32_t), fd);
 
-  fclose(fd);
+  std::fclose(fd);
 }
 
 int main(int argc, char *argv[])
 {
-  char *file = 0;
-
   if(argc < 2) {
-    fprintf(stderr, "Usage: %s [-g] memory_file\n", argv[0]);
+    std::fprintf(stderr, "Usage: %s [-g] memory_file\n", argv[0]);
     return 1;
   }
 
-  if(argc == 2)
+  char *file = nullptr;
+  if(argc == 2) {
     file = argv[1];
-  else if(0 == strncmp("-g", argv[1], strlen("-g"))) {
+  } else if(0 == strncmp("-g", argv[1], strlen("-g"))) {
     file = argv[2];
   }
 
-  fprintf(stderr, "Simulating file %s\n", file);
-  fprintf(stderr, "Flash start:\t0x%8.8X\n", FLASH_START);
-  fprintf(stderr, "Flash end:\t0x%8.8X\n", (FLASH_START + FLASH_SIZE));
-  fprintf(stderr, "Ram start:\t0x%8.8X\n", RAM_START);
-  fprintf(stderr, "Ram end:\t0x%8.8X\n", (RAM_START + RAM_SIZE));
+  std::fprintf(stderr, "Simulating file %s\n", file);
+  std::fprintf(stderr, "Flash start:\t0x%8.8X\n", FLASH_START);
+  std::fprintf(stderr, "Flash end:\t0x%8.8X\n", (FLASH_START + FLASH_SIZE));
+  std::fprintf(stderr, "Ram start:\t0x%8.8X\n", RAM_START);
+  std::fprintf(stderr, "Ram end:\t0x%8.8X\n", (RAM_START + RAM_SIZE));
 
   // Reset memory, then load program to memory
-  memset(RAM, 0, sizeof(RAM));
-  memset(FLASH_MEMORY, 0, sizeof(FLASH_MEMORY));
+  std::memset(RAM, 0, sizeof(RAM));
+  std::memset(FLASH_MEMORY, 0, sizeof(FLASH_MEMORY));
   load_program(file);
 
   // Initialize CPU state
@@ -59,14 +59,14 @@ int main(int argc, char *argv[])
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   while(simulate) {
-    takenBranch = 0;
+    takenBranch = false;
 
     // Backup CPU state
-    cpu_state lastCPU;
-    memcpy(&lastCPU, &cpu, sizeof(cpu_state));
+    cpu_state lastCPU{};
+    std::memcpy(&lastCPU, &cpu, sizeof(cpu_state));
 
     if((cpu_get_pc() & 0x1) == 0) {
-      fprintf(stderr, "ERROR: PC moved out of thumb mode: %08X\n", (cpu_get_pc() - 0x4));
+      std::fprintf(stderr, "ERROR: PC moved out of thumb mode: %08X\n", (cpu_get_pc() - 0x4));
       terminate_simulation(1);
     }
 
@@ -84,14 +84,14 @@ int main(int argc, char *argv[])
 
     if(cpu_get_exception() != 0) {
       lastCPU.exceptmask = cpu.exceptmask;
-      memcpy(&cpu, &lastCPU, sizeof(cpu_state));
+      std::memcpy(&cpu, &lastCPU, sizeof(cpu_state));
       check_except();
     }
 
     // Hacky way to advance PC if no jumps
     if(!takenBranch) {
       if(cpu_get_pc() != lastCPU.gpr[15]) {
-        fprintf(stderr, "Error: Break in control flow not accounted for\n");
+        std::fprintf(stderr, "Error: Break in control flow not accounted for\n");
         terminate_simulation(1);
       }
 
