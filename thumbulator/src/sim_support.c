@@ -7,8 +7,6 @@
 uint64_t cycleCount = 0;
 uint64_t insnCount = 0;
 uint32_t cyclesSinceReset = 0;
-uint32_t wdt_seed = 0;
-uint32_t wdt_val = 0;
 uint32_t ram[RAM_SIZE >> 2];
 uint32_t flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;
@@ -69,7 +67,6 @@ void cpu_reset(void)
 
   // Reset counters
   cyclesSinceReset = 0;
-  wdt_val = 0;
 }
 
 // Memory access functions assume that RAM has a higher address than Flash
