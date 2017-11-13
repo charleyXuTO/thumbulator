@@ -15,7 +15,7 @@ uint32_t ldm(DECODE_RESULT decoded)
     int mask = 1 << i;
     if(decoded.reg_list & mask) {
       uint32_t data = 0;
-      simLoadData(address, &data);
+      load(address, &data, 0);
       cpu_set_gpr(i, data);
       address += 4;
       ++numLoaded;
@@ -45,7 +45,7 @@ uint32_t stm(DECODE_RESULT decoded)
       }
 
       uint32_t data = cpu_get_gpr(i);
-      simStoreData(address, data);
+      store(address, data);
       address += 4;
       ++numStored;
     }
@@ -70,7 +70,7 @@ uint32_t pop(DECODE_RESULT decoded)
     int mask = 1 << i;
     if(decoded.reg_list & mask) {
       uint32_t data = 0;
-      simLoadData(address, &data);
+      load(address, &data, 0);
       cpu_set_gpr(i, data);
       ++numLoaded;
       if(i == 15)
@@ -101,7 +101,7 @@ uint32_t push(DECODE_RESULT decoded)
     if(decoded.reg_list & mask) {
       address -= 4;
       uint32_t data = cpu_get_gpr(i);
-      simStoreData(address, data);
+      store(address, data);
       ++numStored;
     }
 
@@ -127,7 +127,7 @@ uint32_t ldr_i(DECODE_RESULT decoded)
   uint32_t effectiveAddress = base + offset;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddress, &result);
+  load(effectiveAddress, &result, 0);
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -144,7 +144,7 @@ uint32_t ldr_sp(DECODE_RESULT decoded)
   uint32_t effectiveAddress = base + offset;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddress, &result);
+  load(effectiveAddress, &result, 0);
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -161,7 +161,7 @@ uint32_t ldr_lit(DECODE_RESULT decoded)
   uint32_t effectiveAddress = base + offset;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddress, &result);
+  load(effectiveAddress, &result, 0);
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -178,7 +178,7 @@ uint32_t ldr_r(DECODE_RESULT decoded)
   uint32_t effectiveAddress = base + offset;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddress, &result);
+  load(effectiveAddress, &result, 0);
 
   cpu_set_gpr(decoded.rD, result);
 
@@ -196,7 +196,7 @@ uint32_t ldrb_i(DECODE_RESULT decoded)
   uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddressWordAligned, &result);
+  load(effectiveAddressWordAligned, &result, 0);
 
   // Select the correct byte
   switch(effectiveAddress & 0x3) {
@@ -230,7 +230,7 @@ uint32_t ldrb_r(DECODE_RESULT decoded)
   uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddressWordAligned, &result);
+  load(effectiveAddressWordAligned, &result, 0);
 
   // Select the correct byte
   switch(effectiveAddress & 0x3) {
@@ -264,7 +264,7 @@ uint32_t ldrh_i(DECODE_RESULT decoded)
   uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddressWordAligned, &result);
+  load(effectiveAddressWordAligned, &result, 0);
 
   // Select the correct halfword
   switch(effectiveAddress & 0x2) {
@@ -293,7 +293,7 @@ uint32_t ldrh_r(DECODE_RESULT decoded)
   uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddressWordAligned, &result);
+  load(effectiveAddressWordAligned, &result, 0);
 
   // Select the correct halfword
   switch(effectiveAddress & 0x2) {
@@ -322,7 +322,7 @@ uint32_t ldrsb_r(DECODE_RESULT decoded)
   uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddressWordAligned, &result);
+  load(effectiveAddressWordAligned, &result, 0);
 
   // Select the correct byte
   switch(effectiveAddress & 0x3) {
@@ -356,7 +356,7 @@ uint32_t ldrsh_r(DECODE_RESULT decoded)
   uint32_t effectiveAddressWordAligned = effectiveAddress & ~0x3;
 
   uint32_t result = 0;
-  simLoadData(effectiveAddressWordAligned, &result);
+  load(effectiveAddressWordAligned, &result, 0);
 
   // Select the correct halfword
   switch(effectiveAddress & 0x2) {
@@ -384,7 +384,7 @@ uint32_t str_i(DECODE_RESULT decoded)
   uint32_t offset = zeroExtend32(decoded.imm << 2);
   uint32_t effectiveAddress = base + offset;
 
-  simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
+  store(effectiveAddress, cpu_get_gpr(decoded.rD));
 
   return TIMING_MEM;
 }
@@ -398,7 +398,7 @@ uint32_t str_sp(DECODE_RESULT decoded)
   uint32_t offset = zeroExtend32(decoded.imm << 2);
   uint32_t effectiveAddress = base + offset;
 
-  simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
+  store(effectiveAddress, cpu_get_gpr(decoded.rD));
 
   return TIMING_MEM;
 }
@@ -412,7 +412,7 @@ uint32_t str_r(DECODE_RESULT decoded)
   uint32_t offset = cpu_get_gpr(decoded.rM);
   uint32_t effectiveAddress = base + offset;
 
-  simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
+  store(effectiveAddress, cpu_get_gpr(decoded.rD));
 
   return TIMING_MEM;
 }
@@ -429,7 +429,7 @@ uint32_t strb_i(DECODE_RESULT decoded)
   uint32_t data = cpu_get_gpr(decoded.rD) & 0xFF;
 
   uint32_t orig;
-  simLoadData_internal(effectiveAddressWordAligned, &orig, 1);
+  load(effectiveAddressWordAligned, &orig, 1);
 
   // Select the correct byte
   switch(effectiveAddress & 0x3) {
@@ -446,7 +446,7 @@ uint32_t strb_i(DECODE_RESULT decoded)
     orig = (orig & 0x00FFFFFF) | (data << 24);
   }
 
-  simStoreData(effectiveAddressWordAligned, orig);
+  store(effectiveAddressWordAligned, orig);
 
   return TIMING_MEM;
 }
@@ -463,7 +463,7 @@ uint32_t strb_r(DECODE_RESULT decoded)
   uint32_t data = cpu_get_gpr(decoded.rD) & 0xFF;
 
   uint32_t orig;
-  simLoadData_internal(effectiveAddressWordAligned, &orig, 1);
+  load(effectiveAddressWordAligned, &orig, 1);
 
   // Select the correct byte
   switch(effectiveAddress & 0x3) {
@@ -480,7 +480,7 @@ uint32_t strb_r(DECODE_RESULT decoded)
     orig = (orig & 0x00FFFFFF) | (data << 24);
   }
 
-  simStoreData(effectiveAddressWordAligned, orig);
+  store(effectiveAddressWordAligned, orig);
 
   return TIMING_MEM;
 }
@@ -497,7 +497,7 @@ uint32_t strh_i(DECODE_RESULT decoded)
   uint32_t data = cpu_get_gpr(decoded.rD) & 0xFFFF;
 
   uint32_t orig;
-  simLoadData_internal(effectiveAddressWordAligned, &orig, 1);
+  load(effectiveAddressWordAligned, &orig, 1);
 
   // Select the correct byte
   switch(effectiveAddress & 0x2) {
@@ -508,7 +508,7 @@ uint32_t strh_i(DECODE_RESULT decoded)
     orig = (orig & 0x0000FFFF) | (data << 16);
   }
 
-  simStoreData(effectiveAddressWordAligned, orig);
+  store(effectiveAddressWordAligned, orig);
 
   return TIMING_MEM;
 }
@@ -525,7 +525,7 @@ uint32_t strh_r(DECODE_RESULT decoded)
   uint32_t data = cpu_get_gpr(decoded.rD) & 0xFFFF;
 
   uint32_t orig;
-  simLoadData_internal(effectiveAddressWordAligned, &orig, 1);
+  load(effectiveAddressWordAligned, &orig, 1);
 
   // Select the correct byte
   switch(effectiveAddress & 0x2) {
@@ -536,7 +536,7 @@ uint32_t strh_r(DECODE_RESULT decoded)
     orig = (orig & 0x0000FFFF) | (data << 16);
   }
 
-  simStoreData(effectiveAddressWordAligned, orig);
+  store(effectiveAddressWordAligned, orig);
 
   return TIMING_MEM;
 }

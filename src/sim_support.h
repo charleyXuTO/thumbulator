@@ -26,12 +26,31 @@ extern bool simulate;
 extern void sim_exit(int);
 // Resets the CPU according to the specification
 void cpu_reset();
-// All memory accesses one simulation starts should be through these interfaces
-char simLoadInsn(uint32_t address, uint16_t *value);
-char simLoadData(uint32_t address, uint32_t *value);
-// falseRead says whether this is a read due to anything other than the program
-char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead);
-char simStoreData(uint32_t address, uint32_t value);
+
+/**
+ * Fetch an instruction from memory.
+ *
+ * @param address The address to fetch.
+ * @param value The data in memory at that address.
+ */
+void fetch_instruction(uint32_t address, uint16_t *value);
+
+/**
+ * Load data from memory.
+ *
+ * @param address The address to load data from.
+ * @param value The data in memory at that address.
+ * @param falseRead true if this is a read due to anything other than the program.
+ */
+void load(uint32_t address, uint32_t *value, uint32_t falseRead);
+
+/**
+ * Store data into memory.
+ *
+ * @param address The address to store the data to.
+ * @param value The data to store at that address.
+ */
+void store(uint32_t address, uint32_t value);
 
 #define ENABLE_INSTRUCTION_TRACE 0
 #define TRACE_INSTRUCTION(format, ...)                \

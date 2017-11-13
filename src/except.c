@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "exmemwb.h"
 
 // Clear pending exception after handled
@@ -27,16 +26,16 @@ void except_enter(const uint32_t exceptID)
   // Exception can be mapped as a normal function call
   // so we need to backup the callee-saved registers for
   // the interrupted function
-  simStoreData((uint32_t)&frame_ptr[0], cpu_get_gpr(0));
-  simStoreData((uint32_t)&frame_ptr[1], cpu_get_gpr(1));
-  simStoreData((uint32_t)&frame_ptr[2], cpu_get_gpr(2));
-  simStoreData((uint32_t)&frame_ptr[3], cpu_get_gpr(3));
-  simStoreData((uint32_t)&frame_ptr[4], cpu_get_gpr(12));
-  simStoreData((uint32_t)&frame_ptr[5], cpu_get_lr());
-  simStoreData((uint32_t)&frame_ptr[6], cpu_get_pc() - 0x4);
+  store((uint32_t)&frame_ptr[0], cpu_get_gpr(0));
+  store((uint32_t)&frame_ptr[1], cpu_get_gpr(1));
+  store((uint32_t)&frame_ptr[2], cpu_get_gpr(2));
+  store((uint32_t)&frame_ptr[3], cpu_get_gpr(3));
+  store((uint32_t)&frame_ptr[4], cpu_get_gpr(12));
+  store((uint32_t)&frame_ptr[5], cpu_get_lr());
+  store((uint32_t)&frame_ptr[6], cpu_get_pc() - 0x4);
 
   uint32_t psr = cpu_get_apsr();
-  simStoreData((uint32_t)&frame_ptr[7], (psr & 0xFFFFFC00) | (frame_align << 9) | (psr & 0x1FF));
+  store((uint32_t)&frame_ptr[7], (psr & 0xFFFFFC00) | (frame_align << 9) | (psr & 0x1FF));
 
   // Encode the mode of the cpu at time of exception in LR value
   if(cpu_mode_is_handler())
@@ -51,7 +50,7 @@ void except_enter(const uint32_t exceptID)
   cpu_set_ipsr(exceptID);
   cpu_stack_use_main();
   uint32_t handlerAddress = 0;
-  simLoadData(exceptID << 2, &handlerAddress);
+  load(exceptID << 2, &handlerAddress, 0);
   cpu_set_pc(handlerAddress);
 
   // This counts as a branch
@@ -82,28 +81,28 @@ void except_exit(const uint32_t pType)
   uint32_t *frame_ptr = (uint32_t *)cpu_get_sp();
   uint32_t value;
 
-  simLoadData((uint32_t)&frame_ptr[0], &value);
+  load((uint32_t)&frame_ptr[0], &value, 0);
   cpu_set_gpr(0, value);
 
-  simLoadData((uint32_t)&frame_ptr[1], &value);
+  load((uint32_t)&frame_ptr[1], &value, 0);
   cpu_set_gpr(1, value);
 
-  simLoadData((uint32_t)&frame_ptr[2], &value);
+  load((uint32_t)&frame_ptr[2], &value, 0);
   cpu_set_gpr(2, value);
 
-  simLoadData((uint32_t)&frame_ptr[3], &value);
+  load((uint32_t)&frame_ptr[3], &value, 0);
   cpu_set_gpr(3, value);
 
-  simLoadData((uint32_t)&frame_ptr[4], &value);
+  load((uint32_t)&frame_ptr[4], &value, 0);
   cpu_set_gpr(12, value);
 
-  simLoadData((uint32_t)&frame_ptr[5], &value);
+  load((uint32_t)&frame_ptr[5], &value, 0);
   cpu_set_lr(value);
 
-  simLoadData((uint32_t)&frame_ptr[6], &value);
+  load((uint32_t)&frame_ptr[6], &value, 0);
   cpu_set_pc(value);
 
-  simLoadData((uint32_t)&frame_ptr[7], &value);
+  load((uint32_t)&frame_ptr[7], &value, 0);
   cpu_set_apsr(value);
 
   // Set special-purpose registers

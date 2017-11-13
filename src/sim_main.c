@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
       sim_exit(1);
     }
 
-    simLoadInsn(cpu_get_pc() - 0x4, &insn);
+    fetch_instruction(cpu_get_pc() - 0x4, &insn);
 
     DECODE_RESULT decoded = decode(insn);
     exwbmem(insn, decoded);

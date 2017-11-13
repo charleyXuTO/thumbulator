@@ -1,8 +1,7 @@
-#include <stdlib.h>
-#include <string.h>
-
 #include "sim_support.h"
+
 #include "exmemwb.h"
+#include <string.h>
 
 uint64_t cycleCount = 0;
 uint64_t insnCount = 0;
@@ -35,14 +34,14 @@ void cpu_reset(void)
   // May need to add logic to send writes and reads to the
   // correct stack pointer
   // Set the stack pointers
-  simLoadData(0, &cpu.sp_main);
+  load(0, &cpu.sp_main, 0);
   cpu.sp_main &= 0xFFFFFFFC;
   cpu.sp_process = 0;
   cpu_set_sp(cpu.sp_main);
 
   // Set the program counter to the address of the reset exception vector
   uint32_t startAddr;
-  simLoadData(0x4, &startAddr);
+  load(0x4, &startAddr, 0);
   cpu_set_pc(startAddr);
 
   // No pending exceptions
@@ -66,7 +65,7 @@ void cpu_reset(void)
 }
 
 // Memory access functions assume that RAM has a higher address than Flash
-char simLoadInsn(uint32_t address, uint16_t *value)
+void fetch_instruction(uint32_t address, uint16_t *value)
 {
   uint32_t fromMem;
 
@@ -90,25 +89,16 @@ char simLoadInsn(uint32_t address, uint16_t *value)
 
   // Data 32-bits, but instruction 16-bits
   *value = ((address & 0x2) != 0) ? (uint16_t)(fromMem >> 16) : (uint16_t)fromMem;
-
-  return 0;
 }
 
-// Normal interface for a program to load from memory
-// Increments load counter
-char simLoadData(uint32_t address, uint32_t *value)
-{
-  return simLoadData_internal(address, value, 0);
-}
-
-char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead)
+void load(uint32_t address, uint32_t *value, uint32_t falseRead)
 {
   if(address >= RAM_START) {
     if(address >= (RAM_START + RAM_SIZE)) {
       // Check for UART
       if(address == 0xE0000000) {
         *value = 0;
-        return 0;
+        return;
       }
 
       // Check for systick
@@ -117,7 +107,7 @@ char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead)
         if(address == 0xE000E010)
           systick.control &= 0x00010000;
 
-        return 0;
+        return;
       }
 
       fprintf(
@@ -135,33 +125,33 @@ char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead)
 
     *value = flash[(address & FLASH_ADDRESS_MASK) >> 2];
   }
-
-  return 0;
 }
 
-char simStoreData(uint32_t address, uint32_t value)
+void store(uint32_t address, uint32_t value)
 {
-  unsigned int word;
-
   if(address >= RAM_START) {
     if(address >= (RAM_START + RAM_SIZE)) {
       // Check for UART
       if(address == 0xE0000000) {
-        return 0;
+        return;
       }
 
       // Check for systick
       if((address >> 4) == 0xE000E01 && address != 0xE000E01C) {
         if(address == 0xE000E010) {
           systick.control = (value & 0x1FFFD) | 0x4; // No external tick source, no interrupt
-          if(value & 0x2)
-            fprintf(stderr, "ERROR: SYSTICK interrupts not implemented...ignoring\n");
-        } else if(address == 0xE000E014)
-          systick.reload = value & 0xFFFFFF;
-        else if(address == 0xE000E018)
-          systick.value = 0; // Reads clears current value
 
-        return 0;
+          if(value & 0x2) {
+            fprintf(stderr, "Warning: SYSTICK interrupts not implemented, ignoring\n");
+          }
+        } else if(address == 0xE000E014) {
+          systick.reload = value & 0xFFFFFF;
+        } else if(address == 0xE000E018) {
+          // Reads clears current value
+          systick.value = 0;
+        }
+
+        return;
       }
 
       fprintf(
@@ -179,6 +169,4 @@ char simStoreData(uint32_t address, uint32_t value)
 
     flash[(address & FLASH_ADDRESS_MASK) >> 2] = value;
   }
-
-  return 0;
 }
