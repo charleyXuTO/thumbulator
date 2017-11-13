@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define ESPR_T (1 << 24)
+
 uint64_t cycleCount = 0;
 uint64_t insnCount = 0;
 uint32_t cyclesSinceReset = 0;

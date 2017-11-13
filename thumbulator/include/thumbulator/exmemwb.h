@@ -5,8 +5,6 @@
 #include "except.h"
 #include "decode.h"
 
-#define ESPR_T (1 << 24)
-
 struct CPU {
   uint32_t gpr[16]; // General-purpose register plus FP, SP, LR, and PC
   uint32_t apsr;    // Application program status reg: flags
