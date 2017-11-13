@@ -8,6 +8,7 @@ project(
 
 add_library(
   ${PROJECT_NAME}
+  include/thumbulator/cpu.h
   include/thumbulator/decode.h
   include/thumbulator/except.h
   include/thumbulator/exmemwb.h

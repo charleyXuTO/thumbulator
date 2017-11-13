@@ -1,5 +1,5 @@
-#ifndef SIMSUPPORT_HEADER
-#define SIMSUPPORT_HEADER
+#ifndef THUMBULATOR_SIM_SUPPORT_H
+#define THUMBULATOR_SIM_SUPPORT_H
 
 #include <stdio.h>
 #include <stdint.h>

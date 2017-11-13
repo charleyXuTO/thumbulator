@@ -1,5 +1,5 @@
-#ifndef EXWBMEM_HEADER
-#define EXWBMEM_HEADER
+#ifndef THUMBULATOR_EXWBMEM_H
+#define THUMBULATOR_EXWBMEM_H
 
 #include "sim_support.h"
 #include "except.h"
