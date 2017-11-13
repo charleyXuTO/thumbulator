@@ -18,24 +18,27 @@
 // Core CPU compenents
 extern uint32_t ram[RAM_SIZE >> 2];
 extern uint32_t flash[FLASH_SIZE >> 2];
-extern bool takenBranch;   // Informs fetch that previous instruction caused a control flow change
-extern void sim_exit(int); // All sim ends lead through here
-void cpu_reset();          // Resets the CPU according to the specification
-char simLoadInsn(uint32_t address,
-    uint16_t *value); // All memory accesses one simulation starts should be through these interfaces
+// Informs fetch that previous instruction caused a control flow change
+extern bool takenBranch;
+// All sim ends lead through here
+extern void sim_exit(int);
+// Resets the CPU according to the specification
+void cpu_reset();
+// All memory accesses one simulation starts should be through these interfaces
+char simLoadInsn(uint32_t address, uint16_t *value);
 char simLoadData(uint32_t address, uint32_t *value);
-char simLoadData_internal(uint32_t address,
-    uint32_t *value,
-    uint32_t falseRead); // falseRead says whether this is a read due to anything other than the program
+// falseRead says whether this is a read due to anything other than the program
+char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead);
 char simStoreData(uint32_t address, uint32_t value);
 
-// Simulator debugging
-#define PRINT_INST 0 // diss_printf(): disassembly printing?
-#define PRINT_ALL_STATE \
-  0 // Print all registers after each instruction? Used for comparing to original Thumbulator.
-#define PRINT_STATE_DIFF_INIT \
-  (0 & (PRINT_ALL_STATE)) // Print changed registers after each instruction?
-#define PRINT_STORES_WITH_STATE (0 & (PRINT_ALL_STATE)) // Print memory written with state updates?
+// diss_printf(): disassembly printing?
+#define PRINT_INST 0
+// Print all registers after each instruction? Used for comparing to original Thumbulator.
+#define PRINT_ALL_STATE 0
+// Print changed registers after each instruction?
+#define PRINT_STATE_DIFF_INIT (0 & (PRINT_ALL_STATE))
+// Print memory written with state updates?
+#define PRINT_STORES_WITH_STATE (0 & (PRINT_ALL_STATE))
 
 // Simulator correctness checks: tradeoff speed for safety
 #define VERIFY_BRANCHES_TAGGED 1 // Make sure that all control flow changes come from known paths
@@ -56,11 +59,11 @@ char simStoreData(uint32_t address, uint32_t value);
 
 #define INCREMENT_CYCLES(x)     \
   {                             \
-    cycleCount += (x);            \
-    cyclesSinceReset += (x);      \
-    cyclesSinceCP += (x);         \
+    cycleCount += (x);          \
+    cyclesSinceReset += (x);    \
+    cyclesSinceCP += (x);       \
     if(wdt_seed != 0) {         \
-      wdt_val += (x);             \
+      wdt_val += (x);           \
       if(wdt_val >= wdt_seed) { \
         wdt_val = 0;            \
         cpu_set_except(16);     \
