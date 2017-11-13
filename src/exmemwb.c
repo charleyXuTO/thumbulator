@@ -235,13 +235,11 @@ uint32_t (*executeJumpTable[64])(DECODE_RESULT) = {lsls_i, lsls_i, lsrs_i, lsrs_
     bl,                                                                /* 61 ignore udef */
     exmemwb_error, exmemwb_error};
 
-void exwbmem(uint16_t pInsn, DECODE_RESULT decoded)
+uint32_t exwbmem(uint16_t pInsn, DECODE_RESULT decoded)
 {
-  ++insnCount;
   insn = pInsn;
 
-  unsigned int insnTicks = executeJumpTable[pInsn >> 10](decoded);
-  INCREMENT_CYCLES(insnTicks);
+  uint32_t insnTicks = executeJumpTable[pInsn >> 10](decoded);
 
   // Update the systick unit and look for resets
   if(systick.control & 0x1) {
@@ -254,4 +252,6 @@ void exwbmem(uint16_t pInsn, DECODE_RESULT decoded)
     } else
       systick.value -= insnTicks;
   }
+
+  return  insnTicks;
 }

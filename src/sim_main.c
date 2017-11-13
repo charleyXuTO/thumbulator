@@ -65,12 +65,10 @@ int main(int argc, char *argv[])
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   while(simulate) {
-    struct CPU lastCPU;
-
-    uint16_t insn;
     takenBranch = 0;
 
     // Backup CPU state
+    struct CPU lastCPU;
     memcpy(&lastCPU, &cpu, sizeof(struct CPU));
 
     if((cpu_get_pc() & 0x1) == 0) {
@@ -78,10 +76,17 @@ int main(int argc, char *argv[])
       sim_exit(1);
     }
 
+    // fetch
+    uint16_t insn;
     fetch_instruction(cpu_get_pc() - 0x4, &insn);
+    // decode
+    DECODE_RESULT const decoded = decode(insn);
+    // execute
+    uint32_t const insnTicks = exwbmem(insn, decoded);
 
-    DECODE_RESULT decoded = decode(insn);
-    exwbmem(insn, decoded);
+    // update statistics
+    ++insnCount;
+    INCREMENT_CYCLES(insnTicks);
 
     if(cpu_get_except() != 0) {
       lastCPU.exceptmask = cpu.exceptmask;
@@ -95,25 +100,10 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: Break in control flow not accounted for\n");
         sim_exit(1);
       }
-      cpu_set_pc(cpu_get_pc() + 0x2);
-    } else
-      cpu_set_pc(cpu_get_pc() + 0x4);
 
-    unsigned cp_addr = (cpu.gpr[15] - 4) & (~0x1);
-    switch(cp_addr) {
-    case 0x000000d8:
-    case 0x000000f0:
-    case 0x00000102:
-    case 0x00000116:
-    case 0x0000012a:
-    case 0x0000013e:
-    case 0x00000152:
-    case 0x00000168:
-    case 0x00000180:
-    case 0x0000019c:
-      break;
-    default:
-      break;
+      cpu_set_pc(cpu_get_pc() + 0x2);
+    } else {
+      cpu_set_pc(cpu_get_pc() + 0x4);
     }
   }
 
