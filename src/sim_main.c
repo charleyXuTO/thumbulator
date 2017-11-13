@@ -73,12 +73,10 @@ int main(int argc, char *argv[])
     // Backup CPU state
     memcpy(&lastCPU, &cpu, sizeof(struct CPU));
 
-#if THUMB_CHECK
     if((cpu_get_pc() & 0x1) == 0) {
       fprintf(stderr, "ERROR: PC moved out of thumb mode: %08X\n", (cpu_get_pc() - 0x4));
       sim_exit(1);
     }
-#endif
 
     simLoadInsn(cpu_get_pc() - 0x4, &insn);
 
@@ -93,12 +91,10 @@ int main(int argc, char *argv[])
 
     // Hacky way to advance PC if no jumps
     if(!takenBranch) {
-#if VERIFY_BRANCHES_TAGGED
       if(cpu_get_pc() != lastCPU.gpr[15]) {
         fprintf(stderr, "Error: Break in control flow not accounted for\n");
         sim_exit(1);
       }
-#endif
       cpu_set_pc(cpu_get_pc() + 0x2);
     } else
       cpu_set_pc(cpu_get_pc() + 0x4);

@@ -33,10 +33,6 @@ char simLoadData(uint32_t address, uint32_t *value);
 char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead);
 char simStoreData(uint32_t address, uint32_t value);
 
-// Simulator correctness checks: tradeoff speed for safety
-#define VERIFY_BRANCHES_TAGGED 1 // Make sure that all control flow changes come from known paths
-#define THUMB_CHECK 1            // Verify that the PC stays in thumb mode
-
 #define ENABLE_INSTRUCTION_TRACE 0
 #define TRACE_INSTRUCTION(format, ...)                \
   do {                                                \
