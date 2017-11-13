@@ -175,7 +175,7 @@ DECODE_RESULT decode_error(const uint16_t pInsn)
 {
   fprintf(stderr, "Error: Malformed instruction: Unable to decode: 0x%4.4X at 0x%08X\n", pInsn,
       cpu_get_pc() - 4);
-  sim_exit(1);
+  terminate_simulation(1);
 }
 
 // Decode functions that require more opcode bits than the first 6

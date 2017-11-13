@@ -72,7 +72,7 @@ void except_exit(const uint32_t pType)
     cpu_stack_use_process();
   } else {
     fprintf(stderr, "ERROR: Invalid exception return\n");
-    sim_exit(1);
+    terminate_simulation(1);
   }
 
   cpu_set_ipsr(0);

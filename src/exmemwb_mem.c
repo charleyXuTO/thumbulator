@@ -41,7 +41,7 @@ uint32_t stm(DECODE_RESULT decoded)
     if(decoded.reg_list & mask) {
       if(i == decoded.rN && numStored == 0) {
         fprintf(stderr, "Error: Malformed instruction!\n");
-        sim_exit(1);
+        terminate_simulation(1);
       }
 
       uint32_t data = cpu_get_gpr(i);

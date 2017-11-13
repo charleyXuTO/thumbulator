@@ -87,7 +87,7 @@ uint32_t add_r(DECODE_RESULT decoded)
   if(decoded.rD == 15 && decoded.rM == 15) {
     //UNPREDICTABLE
     fprintf(stderr, "Error: Instruction format error.\n");
-    sim_exit(1);
+    terminate_simulation(1);
   }
 
   uint32_t opA = cpu_get_gpr(decoded.rD);

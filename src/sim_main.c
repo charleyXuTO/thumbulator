@@ -13,7 +13,7 @@ static void fillState(const char *pFileName)
   fd = fopen(pFileName, "r");
   if(fd == NULL) {
     fprintf(stderr, "Error: Could not open file %s\n", pFileName);
-    sim_exit(1);
+    terminate_simulation(1);
   }
 
   fread(&flash, sizeof(uint32_t), sizeof(flash) / sizeof(uint32_t), fd);
@@ -24,10 +24,11 @@ static void fillState(const char *pFileName)
 struct CPU cpu;
 struct SYSTICK systick;
 
-void sim_exit(int i)
+void terminate_simulation(int exit_code)
 {
   printf("Simulation terminated after\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
-  exit(i);
+
+  exit(exit_code);
 }
 
 int main(int argc, char *argv[])
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
 
     if((cpu_get_pc() & 0x1) == 0) {
       fprintf(stderr, "ERROR: PC moved out of thumb mode: %08X\n", (cpu_get_pc() - 0x4));
-      sim_exit(1);
+      terminate_simulation(1);
     }
 
     // fetch
@@ -98,7 +99,7 @@ int main(int argc, char *argv[])
     if(!takenBranch) {
       if(cpu_get_pc() != lastCPU.gpr[15]) {
         fprintf(stderr, "Error: Break in control flow not accounted for\n");
-        sim_exit(1);
+        terminate_simulation(1);
       }
 
       cpu_set_pc(cpu_get_pc() + 0x2);

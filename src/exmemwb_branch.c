@@ -160,7 +160,7 @@ uint32_t b_c(DECODE_RESULT decoded)
     break;
   default:
     fprintf(stderr, "Error: Malformed instruction!");
-    sim_exit(1);
+    terminate_simulation(1);
   }
 
   if(taken == 0) {
@@ -185,7 +185,7 @@ uint32_t blx(DECODE_RESULT decoded)
 
   if((address & 0x1) == 0) {
     fprintf(stderr, "Error: Interworking not supported: 0x%8.8X\n", address);
-    sim_exit(1);
+    terminate_simulation(1);
   }
 
   cpu_set_lr(cpu_get_pc() - 0x2);
@@ -205,7 +205,7 @@ uint32_t bx(DECODE_RESULT decoded)
 
   if((address & 0x1) == 0) {
     fprintf(stderr, "Error: Interworking not supported: 0x%8.8X\n", address);
-    sim_exit(1);
+    terminate_simulation(1);
   }
 
   // Check for exception return

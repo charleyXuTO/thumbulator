@@ -82,7 +82,7 @@ uint32_t breakpoint(DECODE_RESULT);
 uint32_t exmemwb_error(DECODE_RESULT decoded)
 {
   fprintf(stderr, "Error: Unsupported instruction: Unable to execute\n");
-  sim_exit(1);
+  terminate_simulation(1);
   return 0;
 }
 

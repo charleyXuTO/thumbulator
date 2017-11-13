@@ -50,7 +50,7 @@ void cpu_reset(void)
   // Check for attempts to go to ARM mode
   if((cpu_get_pc() & 0x1) == 0) {
     printf("Error: Reset PC to an ARM address 0x%08X\n", cpu_get_pc());
-    sim_exit(1);
+    terminate_simulation(1);
   }
 
   // Reset the systick unit
@@ -73,7 +73,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
     if(address >= (RAM_START + RAM_SIZE)) {
       fprintf(
           stderr, "Error: ILR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
+      terminate_simulation(1);
     }
 
     fromMem = ram[(address & RAM_ADDRESS_MASK) >> 2];
@@ -81,7 +81,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
     if(address >= (FLASH_START + FLASH_SIZE)) {
       fprintf(
           stderr, "Error: ILF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
+      terminate_simulation(1);
     }
 
     fromMem = flash[(address & FLASH_ADDRESS_MASK) >> 2];
@@ -112,7 +112,7 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead)
 
       fprintf(
           stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
+      terminate_simulation(1);
     }
 
     *value = ram[(address & RAM_ADDRESS_MASK) >> 2];
@@ -120,7 +120,7 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead)
     if(address >= (FLASH_START + FLASH_SIZE)) {
       fprintf(
           stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
+      terminate_simulation(1);
     }
 
     *value = flash[(address & FLASH_ADDRESS_MASK) >> 2];
@@ -156,7 +156,7 @@ void store(uint32_t address, uint32_t value)
 
       fprintf(
           stderr, "Error: DSR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
+      terminate_simulation(1);
     }
 
     ram[(address & RAM_ADDRESS_MASK) >> 2] = value;
@@ -164,7 +164,7 @@ void store(uint32_t address, uint32_t value)
     if(address >= (FLASH_START + FLASH_SIZE)) {
       fprintf(
           stderr, "Error: DSF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      sim_exit(1);
+      terminate_simulation(1);
     }
 
     flash[(address & FLASH_ADDRESS_MASK) >> 2] = value;
