@@ -17,11 +17,6 @@ uint32_t wdt_seed = 0;
 uint32_t wdt_val = 0;
 uint32_t md5[4] = {0, 0, 0, 0, 0};
 uint32_t PRINT_STATE_DIFF = PRINT_STATE_DIFF_INIT;
-#if MEM_COUNT_INST
-u32 store_count = 0;
-u32 load_count = 0;
-u32 cp_count = 0;
-#endif
 uint32_t ram[RAM_SIZE >> 2];
 uint32_t flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;
@@ -30,9 +25,10 @@ bool takenBranch = 0;
 // Essentially creates a new block of addresses on the bus of the processor that only the debug read and write commands can access
 //MEMMAPIO mmio = {.cycleCountLSB = &cycleCount, .cycleCountMSB = &cycleCount+4,
 //                 .cyclesSince = &cyclesSinceReset, .resetAfter = &resetAfterCycles};
-uint32_t *mmio[] = {&cycleCount, ((uint32_t *)&cycleCount) + 1, &wastedCycles, ((uint32_t *)&wastedCycles) + 1,
-    &cyclesSinceReset, &cyclesSinceCP, &addrOfCP, &addrOfRestoreCP, &resetAfterCycles, &do_reset,
-    &PRINT_STATE_DIFF, &wdt_seed, &wdt_val, &(md5[0]), &(md5[1]), &(md5[2]), &(md5[3]), &(md5[4])};
+uint32_t *mmio[] = {&cycleCount, ((uint32_t *)&cycleCount) + 1, &wastedCycles,
+    ((uint32_t *)&wastedCycles) + 1, &cyclesSinceReset, &cyclesSinceCP, &addrOfCP, &addrOfRestoreCP,
+    &resetAfterCycles, &do_reset, &PRINT_STATE_DIFF, &wdt_seed, &wdt_val, &(md5[0]), &(md5[1]),
+    &(md5[2]), &(md5[3]), &(md5[4])};
 
 // Reset CPU state in accordance with B1.5.5 and B3.2.2
 void cpu_reset(void)
@@ -193,21 +189,11 @@ char simLoadInsn(uint32_t address, uint16_t *value)
 // Increments load counter
 char simLoadData(uint32_t address, uint32_t *value)
 {
-#if MEM_COUNT_INST
-  ++load_count;
-#endif
   return simLoadData_internal(address, value, 0);
 }
 
 char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead)
 {
-#if MEM_CHECKS
-  if((address & 0x3) != 0) {
-    fprintf(stderr, "Unalinged data memory read: 0x%8.8X\n", address);
-    sim_exit(1);
-  }
-#endif
-
   if(address >= RAM_START) {
     if(address >= (RAM_START + RAM_SIZE)) {
       // Check for UART
@@ -231,15 +217,6 @@ char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead)
     }
 
     *value = ram[(address & RAM_ADDRESS_MASK) >> 2];
-
-#if PRINT_MEM_OPS
-    if(!falseRead)
-      printf("%llu\t%llu\tR\t%8.8X\t%d\n", cycleCount, insnCount, address, *value);
-#endif
-
-#if PRINT_ALL_MEM
-    fprintf(stderr, "%8.8X: Ram read at 0x%8.8X=0x%8.8X\n", cpu_get_pc() - 4, address, *value);
-#endif
   } else {
     if(address >= (FLASH_START + FLASH_SIZE)) {
       fprintf(
@@ -248,15 +225,6 @@ char simLoadData_internal(uint32_t address, uint32_t *value, uint32_t falseRead)
     }
 
     *value = flash[(address & FLASH_ADDRESS_MASK) >> 2];
-
-#if PRINT_MEM_OPS
-    if(!falseRead)
-      printf("%llu\t%llu\tR\t%8.8X\t%d\n", cycleCount, insnCount, address, *value);
-#endif
-
-#if PRINT_ALL_MEM
-    fprintf(stderr, "%8.8X: Flash read at 0x%8.8X=0x%8.8X\n", cpu_get_pc() - 4, address, *value);
-#endif
   }
 
   return 0;
@@ -266,22 +234,10 @@ char simStoreData(uint32_t address, uint32_t value)
 {
   unsigned int word;
 
-#if MEM_CHECKS
-  if((address & 0x3) != 0) // Thumb-mode requires LSB = 1
-  {
-    fprintf(stderr, "Unalinged data memory write: 0x%8.8X\n", address);
-    sim_exit(1);
-  }
-#endif
-
   if(address >= RAM_START) {
     if(address >= (RAM_START + RAM_SIZE)) {
       // Check for UART
       if(address == 0xE0000000) {
-#if !DISABLE_PROGRAM_PRINTING
-        printf("%c", value & 0xFF);
-        fflush(stdout);
-#endif
         return 0;
       }
 
@@ -321,20 +277,7 @@ char simStoreData(uint32_t address, uint32_t value)
       sim_exit(1);
     }
 
-#if PRINT_RAM_WRITES || PRINT_ALL_MEM
-    fprintf(stderr, "%8.8X: Ram write at 0x%8.8X=0x%8.8X\n", cpu_get_pc() - 4, address, value);
-#endif
-
-#if PRINT_MEM_OPS
-    printf("%llu\t%llu\tW\t%8.8X\t%d\t%d\n", cycleCount, insnCount, address,
-        ram[(address & RAM_ADDRESS_MASK) >> 2], value);
-#endif
-
     ram[(address & RAM_ADDRESS_MASK) >> 2] = value;
-
-#if MEM_COUNT_INST
-    ++store_count;
-#endif
   } else {
     if(address >= (FLASH_START + FLASH_SIZE)) {
       fprintf(
@@ -342,22 +285,8 @@ char simStoreData(uint32_t address, uint32_t value)
       sim_exit(1);
     }
 
-#if PRINT_FLASH_WRITES || PRINT_ALL_MEM
-    fprintf(stderr, "%8.8X: Flash write at 0x%8.8X=0x%8.8X\n", cpu_get_pc() - 4, address, value);
-#endif
-
-#if PRINT_MEM_OPS
-    printf("%llu\t%llu\tW\t%8.8X\t%d\t%d\n", cycleCount, insnCount, address,
-        flash[(address & FLASH_ADDRESS_MASK) >> 2], value);
-#endif
-
     flash[(address & FLASH_ADDRESS_MASK) >> 2] = value;
-
-#if MEM_COUNT_INST
-    ++store_count;
-#endif
   }
 
   return 0;
 }
-

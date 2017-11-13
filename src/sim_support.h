@@ -29,9 +29,6 @@ char simLoadData_internal(uint32_t address,
     uint32_t falseRead); // falseRead says whether this is a read due to anything other than the program
 char simStoreData(uint32_t address, uint32_t value);
 
-// Controls whether the program output prints to the simulator's console or is not printed at all
-#define DISABLE_PROGRAM_PRINTING 1
-
 // Simulator debugging
 #define PRINT_INST 0 // diss_printf(): disassembly printing?
 #define PRINT_ALL_STATE \
@@ -39,12 +36,8 @@ char simStoreData(uint32_t address, uint32_t value);
 #define PRINT_STATE_DIFF_INIT \
   (0 & (PRINT_ALL_STATE)) // Print changed registers after each instruction?
 #define PRINT_STORES_WITH_STATE (0 & (PRINT_ALL_STATE)) // Print memory written with state updates?
-#define PRINT_ALL_MEM 0                                 // Print all memory accesses?
-#define PRINT_FLASH_WRITES 0                            // Print all writes to flash?
-#define PRINT_RAM_WRITES 0                              // Print all writes to ram?
 
 // Simulator correctness checks: tradeoff speed for safety
-#define MEM_CHECKS 0             // Check memory access alignment
 #define VERIFY_BRANCHES_TAGGED 1 // Make sure that all control flow changes come from known paths
 #define THUMB_CHECK 1            // Verify that the PC stays in thumb mode
 
@@ -64,10 +57,6 @@ char simStoreData(uint32_t address, uint32_t value);
 // Hooks to run code every time a GPR is accessed
 #define HOOK_GPR_ACCESSES 1 // Currently set to see if stack crosses heap
 
-// Macros for Ratchet
-#define PRINT_CHECKPOINTS 0 // Print checkpoint info
-#define MEM_COUNT_INST 0    // Track and report program loads, stores, and checkpoints
-#define PRINT_MEM_OPS 0     // Prints detailed info for each program-generated memory access (Clank)
 #define INCREMENT_CYCLES(x)     \
   {                             \
     cycleCount += x;            \
@@ -81,8 +70,6 @@ char simStoreData(uint32_t address, uint32_t value);
       }                         \
     }                           \
   }
-
-// Macros for Clank
 
 struct ADDRESS_LIST {
   uint32_t address;
@@ -102,11 +89,6 @@ extern uint32_t do_reset;
 extern uint32_t wdt_val;
 extern uint32_t wdt_seed;
 extern uint32_t PRINT_STATE_DIFF;
-#if MEM_COUNT_INST
-extern u32 store_count;
-extern u32 load_count;
-extern u32 cp_count;
-#endif
 #if HOOK_GPR_ACCESSES
 void do_nothing(void);
 void report_sp(void);

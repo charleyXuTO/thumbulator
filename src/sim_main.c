@@ -4,7 +4,6 @@
 
 #include "except.h"
 #include "exmemwb.h"
-#include "decode.h"
 
 // Load a program into the simulator's RAM
 static void fillState(const char *pFileName)
@@ -113,11 +112,6 @@ int main(int argc, char *argv[])
     uint16_t insn;
     takenBranch = 0;
 
-    if(PRINT_ALL_STATE) {
-      printf("%08X\n", cpu_get_pc() - 0x3);
-      printState();
-    }
-
     // Backup CPU state
     //if(PRINT_STATE_DIFF)
     memcpy(&lastCPU, &cpu, sizeof(struct CPU));
@@ -173,13 +167,6 @@ int main(int argc, char *argv[])
     case 0x00000168:
     case 0x00000180:
     case 0x0000019c:
-#if MEM_COUNT_INST
-      cp_count++;
-#endif
-#if PRINT_CHECKPOINTS
-      fprintf(stderr, "%08X: CP: %lu, Caller: %08X\n", cp_addr, cycleCount,
-          (lastCPU.gpr[15] - 4 & (~0x1)));
-#endif
       break;
     default:
       break;

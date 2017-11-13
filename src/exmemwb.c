@@ -121,8 +121,8 @@ uint32_t entry7(DECODE_RESULT decoded)
   return executeJumpTable7[(insn >> 9) & 0x1](decoded);
 }
 
-uint32_t (*executeJumpTable16[16])(DECODE_RESULT) = {ands, eors, lsls_r, lsrs_r, asrs_r, adcs, sbcs, rors, tst,
-    rsbs, cmp_r, exmemwb_error, orrs, muls, bics, mvns};
+uint32_t (*executeJumpTable16[16])(DECODE_RESULT) = {ands, eors, lsls_r, lsrs_r, asrs_r, adcs, sbcs,
+    rors, tst, rsbs, cmp_r, exmemwb_error, orrs, muls, bics, mvns};
 
 uint32_t entry16(DECODE_RESULT decoded)
 {
@@ -183,7 +183,7 @@ uint32_t entry23(DECODE_RESULT decoded)
 }
 
 uint32_t (*executeJumpTable44[16])(DECODE_RESULT) = {add_sp, /* (2C0 - 2C1) */
-    add_sp, sub_sp,                            /* (2C2 - 2C3) */
+    add_sp, sub_sp,                                          /* (2C2 - 2C3) */
     sub_sp, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, sxth, sxtb, uxth, uxtb,
     exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error};
 
@@ -192,9 +192,9 @@ uint32_t entry44(DECODE_RESULT decoded)
   return executeJumpTable44[(insn >> 6) & 0xF](decoded);
 }
 
-uint32_t (*executeJumpTable46[16])(DECODE_RESULT) = {exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error,
-    exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, rev, rev16, exmemwb_error,
-    exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error};
+uint32_t (*executeJumpTable46[16])(DECODE_RESULT) = {exmemwb_error, exmemwb_error, exmemwb_error,
+    exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, rev, rev16,
+    exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error};
 
 uint32_t entry46(DECODE_RESULT decoded)
 {
@@ -218,23 +218,21 @@ uint32_t entry55(DECODE_RESULT decoded)
 
   if(insn == 0xDF01) {
     printf("Program exit after\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
-#if MEM_COUNT_INST
-    printf("Loads: %u\nStores: %u\nCheckpoints: %u\n", load_count, store_count, cp_count);
-#endif
     sim_exit(0);
   }
 
   return exmemwb_error(decoded);
 }
 
-uint32_t (*executeJumpTable[64])(DECODE_RESULT) = {lsls_i, lsls_i, lsrs_i, lsrs_i, asrs_i, asrs_i, entry6, /* 6 */
-    entry7,                                                                              /* 7 */
-    movs_i, movs_i, cmp_i, cmp_i, adds_i8, adds_i8, subs_i8, subs_i8, entry16,           /* 16 */
-    entry17,                                                                             /* 17 */
-    ldr_lit, ldr_lit, entry20,                                                           /* 20 */
-    entry21,                                                                             /* 21 */
-    entry22,                                                                             /* 22 */
-    entry23,                                                                             /* 23 */
+uint32_t (*executeJumpTable[64])(DECODE_RESULT) = {lsls_i, lsls_i, lsrs_i, lsrs_i, asrs_i, asrs_i,
+    entry6,                                                                    /* 6 */
+    entry7,                                                                    /* 7 */
+    movs_i, movs_i, cmp_i, cmp_i, adds_i8, adds_i8, subs_i8, subs_i8, entry16, /* 16 */
+    entry17,                                                                   /* 17 */
+    ldr_lit, ldr_lit, entry20,                                                 /* 20 */
+    entry21,                                                                   /* 21 */
+    entry22,                                                                   /* 22 */
+    entry23,                                                                   /* 23 */
     str_i, str_i, ldr_i, ldr_i, strb_i, strb_i, ldrb_i, ldrb_i, strh_i, strh_i, ldrh_i, ldrh_i,
     str_sp, str_sp, ldr_sp, ldr_sp, adr, adr, add_sp, add_sp, entry44, /* 44 */
     push, entry46,                                                     /* 46 */
