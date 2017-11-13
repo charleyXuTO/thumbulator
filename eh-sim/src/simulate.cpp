@@ -24,7 +24,7 @@ void load_program(char const *file_name)
   std::fclose(fd);
 }
 
-void simulate(char const *binary_file)
+stats_bundle simulate(char const *binary_file)
 {
   std::fprintf(stderr, "Simulating file %s\n", binary_file);
   std::fprintf(stderr, "Flash start:\t0x%8.8X\n", FLASH_START);
@@ -44,8 +44,7 @@ void simulate(char const *binary_file)
   cpu_set_pc(cpu_get_pc() + 0x4);
 
   // stats tracking
-  uint32_t insnCount = 0;
-  uint32_t cycleCount = 0;
+  stats_bundle stats{};
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
@@ -62,16 +61,16 @@ void simulate(char const *binary_file)
     }
 
     // fetch
-    uint16_t insn;
-    fetch_instruction(cpu_get_pc() - 0x4, &insn);
+    uint16_t instruction;
+    fetch_instruction(cpu_get_pc() - 0x4, &instruction);
     // decode
-    decode_result const decoded = decode(insn);
-    // execute
-    uint32_t const insnTicks = exmemwb(insn, &decoded);
+    decode_result const decoded = decode(instruction);
+    // execute, memory, and write-back
+    uint32_t const instruction_ticks = exmemwb(instruction, &decoded);
 
     // update statistics
-    ++insnCount;
-    cycleCount += insnTicks;
+    stats.cpu.instruction_count++;
+    stats.cpu.cycle_count += instruction_ticks;
 
     if(cpu_get_exception() != 0) {
       lastCPU.exceptmask = cpu.exceptmask;
@@ -91,6 +90,6 @@ void simulate(char const *binary_file)
     }
   }
 
-  printf("Simulation finished in\n\t%u ticks\n\t%u instructions\n", cycleCount, insnCount);
+  return stats;
 }
 }

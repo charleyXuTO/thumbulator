@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cstring>
 
+#include <iostream>
+
 #include "simulate.hpp"
 
 int main(int argc, char *argv[])
@@ -17,7 +19,10 @@ int main(int argc, char *argv[])
     file = argv[2];
   }
 
-  ehsim::simulate(file);
+  auto const stats = ehsim::simulate(file);
+
+  std::cout << "Cycle count: " << stats.cpu.cycle_count << "\n";
+  std::cout << "Instructions executed: " << stats.cpu.instruction_count << "\n";
 
   return 0;
 }
