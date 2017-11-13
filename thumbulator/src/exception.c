@@ -1,15 +1,20 @@
-#include "thumbulator/exmemwb.h"
+#include "thumbulator/exception.h"
+
+#include "thumbulator/cpu.h"
+#include "thumbulator/sim_support.h"
+
+#include "cpu_flags.h"
 
 // Clear pending exception after handled
 // Used for watchdog timer exception
 void check_except(void)
 {
-  int i;
+  uint32_t i;
 
   for(i = 0; i < 32; i++) {
-    if(((cpu_get_except() >> i) & 1) == 1) {
+    if(((cpu_get_exception() >> i) & 1) == 1) {
       except_enter(i);
-      cpu_clear_except(i);
+      cpu_clear_exception(i);
     }
   }
 }

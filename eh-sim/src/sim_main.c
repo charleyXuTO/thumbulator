@@ -1,8 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "thumbulator/cpu.h"
 #include "thumbulator/exception.h"
-#include "thumbulator/exmemwb.h"
+#include "thumbulator/sim_support.h"
 
 // Load a program into the simulator's RAM
 static void fillState(const char *pFileName)
@@ -62,8 +64,8 @@ int main(int argc, char *argv[])
     takenBranch = 0;
 
     // Backup CPU state
-    struct CPU lastCPU;
-    memcpy(&lastCPU, &cpu, sizeof(struct CPU));
+    cpu_state lastCPU;
+    memcpy(&lastCPU, &cpu, sizeof(cpu_state));
 
     if((cpu_get_pc() & 0x1) == 0) {
       fprintf(stderr, "ERROR: PC moved out of thumb mode: %08X\n", (cpu_get_pc() - 0x4));
@@ -76,15 +78,15 @@ int main(int argc, char *argv[])
     // decode
     decode_result const decoded = decode(insn);
     // execute
-    uint32_t const insnTicks = exwbmem(insn, decoded);
+    uint32_t const insnTicks = exmemwb(insn, decoded);
 
     // update statistics
     ++insnCount;
     cycleCount += insnTicks;
 
-    if(cpu_get_except() != 0) {
+    if(cpu_get_exception() != 0) {
       lastCPU.exceptmask = cpu.exceptmask;
-      memcpy(&cpu, &lastCPU, sizeof(struct CPU));
+      memcpy(&cpu, &lastCPU, sizeof(cpu_state));
       check_except();
     }
 

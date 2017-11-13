@@ -1,6 +1,9 @@
 #include "thumbulator/decode.h"
 
-#include "thumbulator/exmemwb.h"
+#include "thumbulator/cpu.h"
+#include "thumbulator/sim_support.h"
+
+#include "cpu_flags.h"
 
 // Various decodings
 decode_result decode_3lo(const uint16_t pInsn)

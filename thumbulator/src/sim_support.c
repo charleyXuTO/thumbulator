@@ -1,6 +1,7 @@
 #include "thumbulator/sim_support.h"
 
-#include "thumbulator/exmemwb.h"
+#include "cpu_flags.h"
+
 #include <string.h>
 #include <stdlib.h>
 

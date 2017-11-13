@@ -8,6 +8,16 @@
 // also clears the pending exception
 void check_except();
 
+/**
+ * Check the CPU exception flag.
+ */
+#define cpu_get_exception() (cpu.exceptmask)
+
+/**
+ * Clear the CPU's exception flag.
+ */
+#define cpu_clear_exception(x) cpu.exceptmask &= ~(1 << x)
+
 // Interface for starting a new exception
 void except_enter(uint32_t exceptID);
 

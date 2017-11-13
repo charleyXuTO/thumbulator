@@ -1,4 +1,6 @@
-#include "thumbulator/exmemwb.h"
+#include "thumbulator/sim_support.h"
+
+#include "cpu_flags.h"
 
 ///--- Load/store multiple operations --------------------------------------------///
 

@@ -1,5 +1,6 @@
-#include "thumbulator/exmemwb.h"
-#include "thumbulator/decode.h"
+#include "thumbulator/sim_support.h"
+
+#include "cpu_flags.h"
 
 ///--- Logical operations ----------------------------------------///
 

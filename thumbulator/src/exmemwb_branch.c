@@ -1,4 +1,7 @@
-#include "thumbulator/exmemwb.h"
+#include "thumbulator/exception.h"
+#include "thumbulator/sim_support.h"
+
+#include "cpu_flags.h"
 
 ///--- Compare operations --------------------------------------------///
 

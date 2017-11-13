@@ -1,18 +1,11 @@
-#include "thumbulator/exmemwb.h"
+#include "thumbulator/cpu.h"
+
+#include "thumbulator/sim_support.h"
 
 uint16_t insn;
 
-struct CPU cpu;
-struct SYSTICK systick;
-
-void do_cflag(uint32_t a, uint32_t b, uint32_t carry)
-{
-  uint32_t result;
-
-  result = (a & 0x7FFFFFFF) + (b & 0x7FFFFFFF) + carry; //carry in
-  result = (result >> 31) + (a >> 31) + (b >> 31);      //carry out
-  cpu_set_flag_c(result >> 1);
-}
+cpu_state cpu;
+system_tick systick;
 
 uint32_t adcs(decode_result);
 uint32_t adds_i3(decode_result);
@@ -238,7 +231,7 @@ uint32_t (*executeJumpTable[64])(decode_result) = {lsls_i, lsls_i, lsrs_i, lsrs_
     bl,                                                                /* 61 ignore udef */
     exmemwb_error, exmemwb_error};
 
-uint32_t exwbmem(uint16_t pInsn, decode_result decoded)
+uint32_t exmemwb(uint16_t pInsn, decode_result decoded)
 {
   insn = pInsn;
 
