@@ -56,11 +56,11 @@ char simStoreData(uint32_t address, uint32_t value);
 
 #define INCREMENT_CYCLES(x)     \
   {                             \
-    cycleCount += x;            \
-    cyclesSinceReset += x;      \
-    cyclesSinceCP += x;         \
+    cycleCount += (x);            \
+    cyclesSinceReset += (x);      \
+    cyclesSinceCP += (x);         \
     if(wdt_seed != 0) {         \
-      wdt_val += x;             \
+      wdt_val += (x);             \
       if(wdt_val >= wdt_seed) { \
         wdt_val = 0;            \
         cpu_set_except(16);     \
