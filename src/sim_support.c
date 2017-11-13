@@ -83,29 +83,6 @@ void cpu_reset(void)
   wdt_val = 0;
 }
 
-#if HOOK_GPR_ACCESSES
-void do_nothing(void)
-{
-  ;
-}
-
-void report_sp(void)
-{
-  if(cpu_get_sp() < 0X40010000) {
-    fprintf(stderr, "SP crosses heap: 0x%8.8X\n", cpu_get_sp());
-    fprintf(stderr, "PC: 0x%8.8X\n", cpu_get_pc());
-  }
-}
-
-void (*gprReadHooks[16])(void) = {do_nothing, do_nothing, do_nothing, do_nothing, do_nothing,
-    do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing,
-    do_nothing, do_nothing, do_nothing};
-
-void (*gprWriteHooks[16])(void) = {do_nothing, do_nothing, do_nothing, do_nothing, do_nothing,
-    do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing, do_nothing,
-    do_nothing, report_sp, do_nothing};
-#endif
-
 // Returns 1 if the passed list of addresses contains the passed
 // address, returns 0 otherwise
 char containsAddress(const ADDRESS_LIST *pList, const uint32_t pAddress)

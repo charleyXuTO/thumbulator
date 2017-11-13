@@ -41,14 +41,8 @@ extern struct SYSTICK systick;
 #define FLAG_C_MASK (1 << FLAG_C_INDEX)
 #define FLAG_V_MASK (1 << FLAG_V_INDEX)
 
-// GPR setters and getters
-#if HOOK_GPR_ACCESSES
-uint32_t cpu_get_gpr(uint32_t gpr);
-void cpu_set_gpr(uint32_t gpr, uint32_t value);
-#else
 #define cpu_get_gpr(x) cpu.gpr[x]
 #define cpu_set_gpr(x, y) cpu.gpr[x] = y
-#endif
 
 // GPRs with special functions
 #define GPR_SP 13

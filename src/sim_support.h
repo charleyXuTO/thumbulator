@@ -54,9 +54,6 @@ char simStoreData(uint32_t address, uint32_t value);
     }                                                 \
   } while(0)
 
-// Hooks to run code every time a GPR is accessed
-#define HOOK_GPR_ACCESSES 1 // Currently set to see if stack crosses heap
-
 #define INCREMENT_CYCLES(x)     \
   {                             \
     cycleCount += x;            \
@@ -89,11 +86,5 @@ extern uint32_t do_reset;
 extern uint32_t wdt_val;
 extern uint32_t wdt_seed;
 extern uint32_t PRINT_STATE_DIFF;
-#if HOOK_GPR_ACCESSES
-void do_nothing(void);
-void report_sp(void);
-void (*gprReadHooks[16])(void);
-void (*gprWriteHooks[16])(void);
-#endif
 
 #endif

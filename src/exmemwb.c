@@ -2,20 +2,6 @@
 
 uint16_t insn;
 
-#if HOOK_GPR_ACCESSES
-uint32_t cpu_get_gpr(uint32_t gpr)
-{
-  gprReadHooks[gpr]();
-  return cpu.gpr[gpr];
-}
-
-void cpu_set_gpr(uint32_t gpr, uint32_t value)
-{
-  gprWriteHooks[gpr]();
-  cpu.gpr[gpr] = value;
-}
-#endif
-
 void do_cflag(uint32_t a, uint32_t b, uint32_t carry)
 {
   uint32_t result;
