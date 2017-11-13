@@ -24,48 +24,6 @@ static void fillState(const char *pFileName)
 struct CPU cpu;
 struct SYSTICK systick;
 
-void printStateDiff(const struct CPU *pState1, const struct CPU *pState2)
-{
-  int reg;
-  for(reg = 0; reg < 13; ++reg) {
-    if(pState1->gpr[reg] != pState2->gpr[reg])
-      diff_printf("r%d:\t%8.8X to %8.8X\n", reg, pState1->gpr[reg], pState2->gpr[reg]);
-  }
-
-  if(pState1->gpr[13] != pState2->gpr[13])
-    diff_printf("SP:\t%8.8X to %8.8X\n", pState1->gpr[13], pState2->gpr[13]);
-
-  if(pState1->gpr[14] != pState2->gpr[14])
-    diff_printf("LR:\t%8.8X to %8.8X\n", pState1->gpr[14], pState2->gpr[14]);
-
-  if(pState1->gpr[15] != pState2->gpr[15])
-    diff_printf("PC:\t%8.8X to %8.8X\n", pState1->gpr[15], pState2->gpr[15]);
-
-  if((pState1->apsr & FLAG_Z_MASK) != (pState2->apsr & FLAG_Z_MASK))
-    diff_printf("Z:\t%d\n", cpu_get_flag_z());
-  if((pState1->apsr & FLAG_N_MASK) != (pState2->apsr & FLAG_N_MASK))
-    diff_printf("N:\t%d\n", cpu_get_flag_n());
-  if((pState1->apsr & FLAG_C_MASK) != (pState2->apsr & FLAG_C_MASK))
-    diff_printf("C:\t%d\n", cpu_get_flag_c());
-  if((pState1->apsr & FLAG_V_MASK) != (pState2->apsr & FLAG_V_MASK))
-    diff_printf("V:\t%d\n", cpu_get_flag_v());
-}
-
-void printState()
-{
-  int reg;
-
-  for(reg = 0; reg < 13; ++reg)
-    printf("R%d:\t%08X\n", reg, cpu.gpr[reg]);
-
-  printf("R%d:\t%08X\n", 13, cpu.gpr[13] & 0xFFFFFFFC);
-  printf("R%d:\t%08X\n", 14, cpu.gpr[14] & 0xFFFFFFFC);
-  printf("Z:\t%d\n", cpu_get_flag_z());
-  printf("N:\t%d\n", cpu_get_flag_n());
-  printf("C:\t%d\n", cpu_get_flag_c());
-  printf("V:\t%d\n", cpu_get_flag_v());
-}
-
 void sim_exit(int i)
 {
   printf("Simulation terminated after\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);
@@ -129,10 +87,6 @@ int main(int argc, char *argv[])
 
     DECODE_RESULT decoded = decode(insn);
     exwbmem(insn, decoded);
-
-    // Print any differences caused by the last instruction
-    if(PRINT_STATE_DIFF)
-      printStateDiff(&lastCPU, &cpu);
 
     if(cpu_get_except() != 0) {
       lastCPU.exceptmask = cpu.exceptmask;

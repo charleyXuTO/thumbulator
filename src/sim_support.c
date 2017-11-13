@@ -13,7 +13,6 @@ uint32_t addrOfCP = 0;
 uint32_t addrOfRestoreCP = 0;
 uint32_t wdt_seed = 0;
 uint32_t wdt_val = 0;
-uint32_t PRINT_STATE_DIFF = PRINT_STATE_DIFF_INIT;
 uint32_t ram[RAM_SIZE >> 2];
 uint32_t flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;

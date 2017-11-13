@@ -1,6 +1,4 @@
-#include <stdlib.h>
 #include "exmemwb.h"
-#include "decode.h"
 
 ///--- Load/store multiple operations --------------------------------------------///
 
@@ -388,10 +386,6 @@ uint32_t str_i(DECODE_RESULT decoded)
 
   simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
 
-#if PRINT_STORES_WITH_STATE
-  printf("write: %08X %08X\n", effectiveAddress, cpu_get_gpr(decoded.rD));
-#endif
-
   return TIMING_MEM;
 }
 
@@ -406,10 +400,6 @@ uint32_t str_sp(DECODE_RESULT decoded)
 
   simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
 
-#if PRINT_STORES_WITH_STATE
-  printf("write: %08X %08X\n", effectiveAddress, cpu_get_gpr(decoded.rD));
-#endif
-
   return TIMING_MEM;
 }
 
@@ -423,10 +413,6 @@ uint32_t str_r(DECODE_RESULT decoded)
   uint32_t effectiveAddress = base + offset;
 
   simStoreData(effectiveAddress, cpu_get_gpr(decoded.rD));
-
-#if PRINT_STORES_WITH_STATE
-  printf("write: %08X %08X\n", effectiveAddress, cpu_get_gpr(decoded.rD));
-#endif
 
   return TIMING_MEM;
 }
@@ -462,10 +448,6 @@ uint32_t strb_i(DECODE_RESULT decoded)
 
   simStoreData(effectiveAddressWordAligned, orig);
 
-#if PRINT_STORES_WITH_STATE
-  printf("write: %08X %08X\n", effectiveAddressWordAligned, orig);
-#endif
-
   return TIMING_MEM;
 }
 
@@ -500,10 +482,6 @@ uint32_t strb_r(DECODE_RESULT decoded)
 
   simStoreData(effectiveAddressWordAligned, orig);
 
-#if PRINT_STORES_WITH_STATE
-  printf("write: %08X %08X\n", effectiveAddressWordAligned, orig);
-#endif
-
   return TIMING_MEM;
 }
 
@@ -532,10 +510,6 @@ uint32_t strh_i(DECODE_RESULT decoded)
 
   simStoreData(effectiveAddressWordAligned, orig);
 
-#if PRINT_STORES_WITH_STATE
-  printf("write: %08X %08X\n", effectiveAddressWordAligned, orig);
-#endif
-
   return TIMING_MEM;
 }
 
@@ -563,10 +537,6 @@ uint32_t strh_r(DECODE_RESULT decoded)
   }
 
   simStoreData(effectiveAddressWordAligned, orig);
-
-#if PRINT_STORES_WITH_STATE
-  printf("write: %08X %08X\n", effectiveAddressWordAligned, orig);
-#endif
 
   return TIMING_MEM;
 }
