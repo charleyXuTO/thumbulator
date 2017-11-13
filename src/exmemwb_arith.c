@@ -223,7 +223,7 @@ uint32_t sbcs(DECODE_RESULT decoded)
 
 uint32_t rsbs(DECODE_RESULT decoded)
 {
-  TRACE_INSTRUCTION("rsbs r%u, r%u\n, #0", decoded.rD, decoded.rN);
+  TRACE_INSTRUCTION("rsbs r%u, r%u, #0\n", decoded.rD, decoded.rN);
 
   uint32_t opA = 0;
   uint32_t opB = ~(cpu_get_gpr(decoded.rN));
