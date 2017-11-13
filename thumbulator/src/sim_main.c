@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "except.h"
-#include "exmemwb.h"
+#include "thumbulator/except.h"
+#include "thumbulator/exmemwb.h"
 
 // Load a program into the simulator's RAM
 static void fillState(const char *pFileName)

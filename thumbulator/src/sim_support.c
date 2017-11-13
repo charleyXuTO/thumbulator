@@ -1,6 +1,6 @@
-#include "sim_support.h"
+#include "thumbulator/sim_support.h"
 
-#include "exmemwb.h"
+#include "thumbulator/exmemwb.h"
 #include <string.h>
 
 uint64_t cycleCount = 0;

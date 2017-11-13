@@ -1,6 +1,6 @@
-#include "decode.h"
+#include "thumbulator/decode.h"
 
-#include "exmemwb.h"
+#include "thumbulator/exmemwb.h"
 
 // Various decodings
 decode_result decode_3lo(const uint16_t pInsn)

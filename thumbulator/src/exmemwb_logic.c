@@ -1,5 +1,5 @@
-#include "exmemwb.h"
-#include "decode.h"
+#include "thumbulator/exmemwb.h"
+#include "thumbulator/decode.h"
 
 ///--- Logical operations ----------------------------------------///
 
