@@ -1,7 +1,8 @@
 #ifndef EH_SIM_SIMULATE_HPP
 #define EH_SIM_SIMULATE_HPP
 
-#include <stdint.h>
+#include <cstdint>
+
 namespace ehsim {
 
 struct cpu_stats {
