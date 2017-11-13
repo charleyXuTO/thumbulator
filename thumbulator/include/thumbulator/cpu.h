@@ -79,7 +79,7 @@ typedef struct {
   uint32_t calib;
 } system_tick;
 
-extern system_tick systick;
+extern system_tick SYSTICK;
 
 /**
  * Cycles taken for branch instructions.

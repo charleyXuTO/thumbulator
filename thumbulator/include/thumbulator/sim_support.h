@@ -14,8 +14,8 @@
 #define CPU_FREQ 24000000
 
 // Core CPU compenents
-extern uint32_t ram[RAM_SIZE >> 2];
-extern uint32_t flash[FLASH_SIZE >> 2];
+extern uint32_t RAM[RAM_SIZE >> 2];
+extern uint32_t FLASH_MEMORY[FLASH_SIZE >> 2];
 
 // Informs fetch that previous instruction caused a control flow change
 extern bool takenBranch;

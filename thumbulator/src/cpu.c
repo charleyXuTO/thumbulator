@@ -5,7 +5,7 @@
 uint16_t insn;
 
 cpu_state cpu;
-system_tick systick;
+system_tick SYSTICK;
 
 uint32_t adcs(decode_result const *);
 uint32_t adds_i3(decode_result const *);
@@ -239,16 +239,16 @@ uint32_t exmemwb(uint16_t instruction, decode_result const *decoded)
 
   uint32_t insnTicks = executeJumpTable[instruction >> 10](decoded);
 
-  // Update the systick unit and look for resets
-  if(systick.control & 0x1) {
-    if(insnTicks >= systick.value) {
+  // Update the SYSTICK unit and look for resets
+  if(SYSTICK.control & 0x1) {
+    if(insnTicks >= SYSTICK.value) {
       // Ignore resets due to reads
-      if(systick.value > 0)
-        systick.control |= 0x00010000;
+      if(SYSTICK.value > 0)
+        SYSTICK.control |= 0x00010000;
 
-      systick.value = systick.reload - insnTicks + systick.value;
+      SYSTICK.value = SYSTICK.reload - insnTicks + SYSTICK.value;
     } else
-      systick.value -= insnTicks;
+      SYSTICK.value -= insnTicks;
   }
 
   return insnTicks;

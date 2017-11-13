@@ -15,7 +15,7 @@ static void load_program(char const *file_name)
     terminate_simulation(1);
   }
 
-  fread(&flash, sizeof(uint32_t), sizeof(flash) / sizeof(uint32_t), fd);
+  fread(&FLASH_MEMORY, sizeof(uint32_t), sizeof(FLASH_MEMORY) / sizeof(uint32_t), fd);
 
   fclose(fd);
 }
@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
   fprintf(stderr, "Ram end:\t0x%8.8X\n", (RAM_START + RAM_SIZE));
 
   // Reset memory, then load program to memory
-  memset(ram, 0, sizeof(ram));
-  memset(flash, 0, sizeof(flash));
+  memset(RAM, 0, sizeof(RAM));
+  memset(FLASH_MEMORY, 0, sizeof(FLASH_MEMORY));
   load_program(file);
 
   // Initialize CPU state

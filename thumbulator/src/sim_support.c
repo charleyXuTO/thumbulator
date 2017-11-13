@@ -7,8 +7,8 @@
 
 #define ESPR_T (1 << 24)
 
-uint32_t ram[RAM_SIZE >> 2];
-uint32_t flash[FLASH_SIZE >> 2];
+uint32_t RAM[RAM_SIZE >> 2];
+uint32_t FLASH_MEMORY[FLASH_SIZE >> 2];
 bool takenBranch = 0;
 bool simulate = true;
 
@@ -58,11 +58,11 @@ void cpu_reset(void)
     terminate_simulation(1);
   }
 
-  // Reset the systick unit
-  systick.control = 0x4;
-  systick.reload = 0x0;
-  systick.value = 0x0;
-  systick.calib = CPU_FREQ / 100 | 0x80000000;
+  // Reset the SYSTICK unit
+  SYSTICK.control = 0x4;
+  SYSTICK.reload = 0x0;
+  SYSTICK.value = 0x0;
+  SYSTICK.calib = CPU_FREQ / 100 | 0x80000000;
 }
 
 // Memory access functions assume that RAM has a higher address than Flash
@@ -77,7 +77,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
       terminate_simulation(1);
     }
 
-    fromMem = ram[(address & RAM_ADDRESS_MASK) >> 2];
+    fromMem = RAM[(address & RAM_ADDRESS_MASK) >> 2];
   } else {
     if(address >= (FLASH_START + FLASH_SIZE)) {
       fprintf(
@@ -85,7 +85,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
       terminate_simulation(1);
     }
 
-    fromMem = flash[(address & FLASH_ADDRESS_MASK) >> 2];
+    fromMem = FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 2];
   }
 
   // Data 32-bits, but instruction 16-bits
@@ -102,11 +102,11 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead)
         return;
       }
 
-      // Check for systick
+      // Check for SYSTICK
       if((address >> 4) == 0xE000E01) {
-        *value = ((uint32_t *)&systick)[(address >> 2) & 0x3];
+        *value = ((uint32_t *)&SYSTICK)[(address >> 2) & 0x3];
         if(address == 0xE000E010)
-          systick.control &= 0x00010000;
+          SYSTICK.control &= 0x00010000;
 
         return;
       }
@@ -116,7 +116,7 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead)
       terminate_simulation(1);
     }
 
-    *value = ram[(address & RAM_ADDRESS_MASK) >> 2];
+    *value = RAM[(address & RAM_ADDRESS_MASK) >> 2];
   } else {
     if(address >= (FLASH_START + FLASH_SIZE)) {
       fprintf(
@@ -124,7 +124,7 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead)
       terminate_simulation(1);
     }
 
-    *value = flash[(address & FLASH_ADDRESS_MASK) >> 2];
+    *value = FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 2];
   }
 }
 
@@ -137,19 +137,19 @@ void store(uint32_t address, uint32_t value)
         return;
       }
 
-      // Check for systick
+      // Check for SYSTICK
       if((address >> 4) == 0xE000E01 && address != 0xE000E01C) {
         if(address == 0xE000E010) {
-          systick.control = (value & 0x1FFFD) | 0x4; // No external tick source, no interrupt
+          SYSTICK.control = (value & 0x1FFFD) | 0x4; // No external tick source, no interrupt
 
           if(value & 0x2) {
             fprintf(stderr, "Warning: SYSTICK interrupts not implemented, ignoring\n");
           }
         } else if(address == 0xE000E014) {
-          systick.reload = value & 0xFFFFFF;
+          SYSTICK.reload = value & 0xFFFFFF;
         } else if(address == 0xE000E018) {
           // Reads clears current value
-          systick.value = 0;
+          SYSTICK.value = 0;
         }
 
         return;
@@ -160,7 +160,7 @@ void store(uint32_t address, uint32_t value)
       terminate_simulation(1);
     }
 
-    ram[(address & RAM_ADDRESS_MASK) >> 2] = value;
+    RAM[(address & RAM_ADDRESS_MASK) >> 2] = value;
   } else {
     if(address >= (FLASH_START + FLASH_SIZE)) {
       fprintf(
@@ -168,6 +168,6 @@ void store(uint32_t address, uint32_t value)
       terminate_simulation(1);
     }
 
-    flash[(address & FLASH_ADDRESS_MASK) >> 2] = value;
+    FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 2] = value;
   }
 }
