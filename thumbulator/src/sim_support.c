@@ -9,8 +9,8 @@
 
 uint32_t RAM[RAM_SIZE >> 2];
 uint32_t FLASH_MEMORY[FLASH_SIZE >> 2];
-bool takenBranch = 0;
-bool simulate = true;
+bool BRANCH_WAS_TAKEN = 0;
+bool EXIT_INSTRUCTION_ENCOUNTERED = false;
 
 void terminate_simulation(int exit_code)
 {

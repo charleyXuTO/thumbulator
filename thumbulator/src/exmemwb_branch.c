@@ -79,7 +79,7 @@ uint32_t b(decode_result const *decoded)
 
   uint32_t result = offset + cpu_get_pc();
   cpu_set_pc(result);
-  takenBranch = 1;
+  BRANCH_WAS_TAKEN = 1;
 
   return TIMING_BRANCH;
 }
@@ -174,7 +174,7 @@ uint32_t b_c(decode_result const *decoded)
   uint32_t pc = cpu_get_pc();
   uint32_t result = offset + pc;
   cpu_set_pc(result);
-  takenBranch = 1;
+  BRANCH_WAS_TAKEN = 1;
 
   return TIMING_BRANCH;
 }
@@ -193,7 +193,7 @@ uint32_t blx(decode_result const *decoded)
 
   cpu_set_lr(cpu_get_pc() - 0x2);
   cpu_set_pc(address);
-  takenBranch = 1;
+  BRANCH_WAS_TAKEN = 1;
 
   return TIMING_BRANCH;
 }
@@ -217,7 +217,7 @@ uint32_t bx(decode_result const *decoded)
   else
     cpu_set_pc(address);
 
-  takenBranch = 1;
+  BRANCH_WAS_TAKEN = 1;
 
   return TIMING_BRANCH;
 }
@@ -234,7 +234,7 @@ uint32_t bl(decode_result const *decoded)
 
   cpu_set_lr(cpu_get_pc());
   cpu_set_pc(result);
-  takenBranch = 1;
+  BRANCH_WAS_TAKEN = 1;
 
   return TIMING_BRANCH_LINK;
 }

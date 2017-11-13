@@ -85,7 +85,7 @@ uint32_t exmemwb_error(decode_result const *decoded)
 uint32_t exmemwb_exit_simulation(decode_result const *decoded)
 {
   printf("Exit instruction encountered.");
-  simulate = false;
+  EXIT_INSTRUCTION_ENCOUNTERED = true;
 
   return 0;
 }

@@ -74,7 +74,7 @@ static void do_cflag(uint32_t a, uint32_t b, uint32_t carry)
 // Special write to PC
 #define alu_write_pc(x)    \
   do {                     \
-    takenBranch = 1;       \
+    BRANCH_WAS_TAKEN = 1;       \
     cpu_set_pc((x) | 0x1); \
   } while(0)
 

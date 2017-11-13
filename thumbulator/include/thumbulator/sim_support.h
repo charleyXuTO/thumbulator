@@ -18,12 +18,12 @@ extern uint32_t RAM[RAM_SIZE >> 2];
 extern uint32_t FLASH_MEMORY[FLASH_SIZE >> 2];
 
 // Informs fetch that previous instruction caused a control flow change
-extern bool takenBranch;
+extern bool BRANCH_WAS_TAKEN;
 
 /**
  * Whether or not the simulation should continue.
  */
-extern bool simulate;
+extern bool EXIT_INSTRUCTION_ENCOUNTERED;
 
 /**
  * Terminate the simulation prematurely.

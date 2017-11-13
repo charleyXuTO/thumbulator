@@ -59,7 +59,7 @@ void except_enter(const uint32_t exceptID)
   cpu_set_pc(handlerAddress);
 
   // This counts as a branch
-  takenBranch = 1;
+  BRANCH_WAS_TAKEN = 1;
 }
 
 void except_exit(const uint32_t pType)
@@ -115,5 +115,5 @@ void except_exit(const uint32_t pType)
   cpu_set_apsr(cpu_get_apsr() & 0xF0000000);
   cpu_set_ipsr(0);
   // Ignore epsr
-  takenBranch = 1;
+  BRANCH_WAS_TAKEN = 1;
 }

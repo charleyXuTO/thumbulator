@@ -76,7 +76,7 @@ uint32_t pop(decode_result const *decoded)
       cpu_set_gpr(i, data);
       ++numLoaded;
       if(i == 15)
-        takenBranch = 1;
+        BRANCH_WAS_TAKEN = 1;
       address += 4;
     }
 
@@ -87,7 +87,7 @@ uint32_t pop(decode_result const *decoded)
 
   cpu_set_sp(address);
 
-  return 1 + numLoaded + takenBranch ? TIMING_PC_UPDATE : 0;
+  return 1 + numLoaded + BRANCH_WAS_TAKEN ? TIMING_PC_UPDATE : 0;
 }
 
 // Push multiple reg values to the stack and update SP
