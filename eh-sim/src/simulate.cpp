@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <stdexcept>
 
 extern "C" {
 #include <thumbulator/cpu.h>
@@ -15,12 +16,10 @@ void load_program(char const *file_name)
 {
   std::FILE *fd = std::fopen(file_name, "r");
   if(fd == nullptr) {
-    std::fprintf(stderr, "Error: Could not open file %s\n", file_name);
-    terminate_simulation(1);
+    throw std::runtime_error("Could not open binary file.\n");
   }
 
   std::fread(&FLASH_MEMORY, sizeof(uint32_t), sizeof(FLASH_MEMORY) / sizeof(uint32_t), fd);
-
   std::fclose(fd);
 }
 
@@ -56,8 +55,7 @@ stats_bundle simulate(char const *binary_file)
     std::memcpy(&lastCPU, &cpu, sizeof(cpu_state));
 
     if((cpu_get_pc() & 0x1) == 0) {
-      std::fprintf(stderr, "ERROR: PC moved out of thumb mode: %08X\n", (cpu_get_pc() - 0x4));
-      terminate_simulation(1);
+      throw std::runtime_error("PC moved out of thumb mode.");
     }
 
     // fetch
@@ -80,8 +78,7 @@ stats_bundle simulate(char const *binary_file)
 
     if(!BRANCH_WAS_TAKEN) {
       if(cpu_get_pc() != lastCPU.gpr[15]) {
-        std::fprintf(stderr, "Error: Break in control flow not accounted for\n");
-        terminate_simulation(1);
+        throw std::runtime_error("Unexpected control flow change.");
       }
 
       cpu_set_pc(cpu_get_pc() + 0x2);
