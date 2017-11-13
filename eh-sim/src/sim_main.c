@@ -21,9 +21,6 @@ static void fillState(const char *pFileName)
   fclose(fd);
 }
 
-struct CPU cpu;
-struct SYSTICK systick;
-
 void terminate_simulation(int exit_code)
 {
   printf("Simulation terminated after\n\t%llu ticks\n\t%llu instructions\n", cycleCount, insnCount);

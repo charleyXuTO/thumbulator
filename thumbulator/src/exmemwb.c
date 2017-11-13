@@ -2,6 +2,9 @@
 
 uint16_t insn;
 
+struct CPU cpu;
+struct SYSTICK systick;
+
 void do_cflag(uint32_t a, uint32_t b, uint32_t carry)
 {
   uint32_t result;
