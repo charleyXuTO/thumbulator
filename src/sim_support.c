@@ -65,56 +65,6 @@ void cpu_reset(void)
   wdt_val = 0;
 }
 
-// Returns 1 if the passed list of addresses contains the passed
-// address, returns 0 otherwise
-char containsAddress(const ADDRESS_LIST *pList, const uint32_t pAddress)
-{
-  if(pList->address == pAddress)
-    return 1;
-
-  if(pList->next == NULL)
-    return 0;
-
-  // Tail recursion FTW
-  return containsAddress(pList->next, pAddress);
-}
-
-// Adds the passed address to the end of the list
-// Returns 0 if already present, 1 if added to end
-char addAddress(const ADDRESS_LIST *pList, const uint32_t pAddress)
-{
-  ADDRESS_LIST *temp = pList;
-  ADDRESS_LIST *temp_prev;
-
-  // Go to the end of the list
-  do {
-    if(temp->address == pAddress)
-      return 0;
-    temp_prev = temp;
-    temp = temp->next;
-  } while(temp != NULL);
-
-  // Create a new entry and link to it
-  temp_prev->next = malloc(sizeof(ADDRESS_LIST));
-  temp_prev->next->address = pAddress;
-  temp_prev->next->next = NULL;
-
-  return 1;
-}
-
-// Clears the list
-void clearList(ADDRESS_LIST *pList)
-{
-  if(pList->next == NULL)
-    return;
-
-  clearList(pList->next);
-
-  free(pList->next);
-
-  pList->next = NULL;
-}
-
 // Memory access functions assume that RAM has a higher address than Flash
 char simLoadInsn(uint32_t address, uint16_t *value)
 {

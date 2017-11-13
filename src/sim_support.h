@@ -61,12 +61,6 @@ char simStoreData(uint32_t address, uint32_t value);
     }                           \
   }
 
-struct ADDRESS_LIST {
-  uint32_t address;
-  struct ADDRESS_LIST *next;
-};
-typedef struct ADDRESS_LIST ADDRESS_LIST;
-
 extern uint64_t cycleCount;
 extern uint64_t insnCount;
 extern uint32_t cyclesSinceReset;
