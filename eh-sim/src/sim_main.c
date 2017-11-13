@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "thumbulator/except.h"
+#include "thumbulator/exception.h"
 #include "thumbulator/exmemwb.h"
 
 // Load a program into the simulator's RAM

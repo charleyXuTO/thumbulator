@@ -2,7 +2,7 @@
 #define THUMBULATOR_EXWBMEM_H
 
 #include "sim_support.h"
-#include "except.h"
+#include "exception.h"
 #include "decode.h"
 
 struct CPU {
