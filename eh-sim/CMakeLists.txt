@@ -9,6 +9,8 @@ project(
 add_executable(
   ${PROJECT_NAME}
   src/main.cpp
+  src/simulate.cpp
+  src/simulate.hpp
 )
 
 target_link_libraries(

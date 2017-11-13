@@ -49,7 +49,7 @@ void simulate(char const *binary_file)
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
-  while(simulate) {
+  while(!EXIT_INSTRUCTION_ENCOUNTERED) {
     BRANCH_WAS_TAKEN = false;
 
     // Backup CPU state
@@ -79,7 +79,6 @@ void simulate(char const *binary_file)
       check_except();
     }
 
-    // Hacky way to advance PC if no jumps
     if(!BRANCH_WAS_TAKEN) {
       if(cpu_get_pc() != lastCPU.gpr[15]) {
         std::fprintf(stderr, "Error: Break in control flow not accounted for\n");
@@ -92,6 +91,6 @@ void simulate(char const *binary_file)
     }
   }
 
-  std::printf("Simulation finished in\n\t%u ticks\n\t%u instructions\n", cycleCount, insnCount);
+  printf("Simulation finished in\n\t%u ticks\n\t%u instructions\n", cycleCount, insnCount);
 }
 }
