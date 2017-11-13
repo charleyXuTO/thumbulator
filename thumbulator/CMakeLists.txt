@@ -6,7 +6,7 @@ project(
   LANGUAGES C
 )
 
-add_executable(
+add_library(
   ${PROJECT_NAME}
   include/thumbulator/decode.h
   include/thumbulator/except.h
@@ -20,7 +20,6 @@ add_executable(
   src/exmemwb_logic.c
   src/exmemwb_mem.c
   src/exmemwb_misc.c
-  src/sim_main.c
   src/sim_support.c
 )
 

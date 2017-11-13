@@ -6,3 +6,4 @@ project(
 )
 
 add_subdirectory(thumbulator)
+add_subdirectory(eh-sim)
