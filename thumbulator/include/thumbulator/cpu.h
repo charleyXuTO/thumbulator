@@ -104,11 +104,11 @@ extern system_tick systick;
 /**
  * Perform the execute, mem, and write-back stages.
  *
- * @param pInsn The instruction to execute.
+ * @param instruction The instruction to execute.
  * @param decoded The result from the decode stage.
  *
  * @return The number of cycles taken.
  */
-uint32_t exmemwb(uint16_t pInsn, decode_result decoded);
+uint32_t exmemwb(uint16_t instruction, decode_result const *decoded);
 
 #endif //THUMBULATOR_CPU_H

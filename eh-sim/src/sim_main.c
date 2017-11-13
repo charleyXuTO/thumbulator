@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     // decode
     decode_result const decoded = decode(insn);
     // execute
-    uint32_t const insnTicks = exmemwb(insn, decoded);
+    uint32_t const insnTicks = exmemwb(insn, &decoded);
 
     // update statistics
     ++insnCount;
