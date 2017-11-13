@@ -9,27 +9,15 @@ uint64_t insnCount = 0;
 uint64_t wastedCycles = 0;
 uint32_t cyclesSinceReset = 0;
 uint32_t cyclesSinceCP = 0;
-uint32_t resetAfterCycles = 0;
 uint32_t addrOfCP = 0;
 uint32_t addrOfRestoreCP = 0;
-uint32_t do_reset = 0;
 uint32_t wdt_seed = 0;
 uint32_t wdt_val = 0;
-uint32_t md5[4] = {0, 0, 0, 0, 0};
 uint32_t PRINT_STATE_DIFF = PRINT_STATE_DIFF_INIT;
 uint32_t ram[RAM_SIZE >> 2];
 uint32_t flash[FLASH_SIZE >> 2];
 bool takenBranch = 0;
 bool simulate = true;
-
-// Reserve a space inside the simulator for variables that GDB and python can use to control the simulator
-// Essentially creates a new block of addresses on the bus of the processor that only the debug read and write commands can access
-//MEMMAPIO mmio = {.cycleCountLSB = &cycleCount, .cycleCountMSB = &cycleCount+4,
-//                 .cyclesSince = &cyclesSinceReset, .resetAfter = &resetAfterCycles};
-uint32_t *mmio[] = {&cycleCount, ((uint32_t *)&cycleCount) + 1, &wastedCycles,
-    ((uint32_t *)&wastedCycles) + 1, &cyclesSinceReset, &cyclesSinceCP, &addrOfCP, &addrOfRestoreCP,
-    &resetAfterCycles, &do_reset, &PRINT_STATE_DIFF, &wdt_seed, &wdt_val, &(md5[0]), &(md5[1]),
-    &(md5[2]), &(md5[3]), &(md5[4])};
 
 // Reset CPU state in accordance with B1.5.5 and B3.2.2
 void cpu_reset(void)
@@ -229,23 +217,6 @@ char simStoreData(uint32_t address, uint32_t value)
           systick.reload = value & 0xFFFFFF;
         else if(address == 0xE000E018)
           systick.value = 0; // Reads clears current value
-
-        return 0;
-      }
-
-      // Check for cycle count
-      if(address >= MEMMAPIO_START && address <= (MEMMAPIO_START + MEMMAPIO_SIZE)) {
-        word = *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]);
-        word &= ~(0xff << (8 * (address % 4)));
-        word |= (value << (8 * (address % 4)));
-        *(mmio[((address & 0xfffffffc) - MEMMAPIO_START >> 2)]) = word;
-
-        // If the variable updated is a request to reset, then do it
-        if(do_reset != 0) {
-          cpu_reset();
-          cpu_set_pc(cpu_get_pc() + 0x4);
-          do_reset = 0;
-        }
 
         return 0;
       }
