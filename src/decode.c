@@ -1,9 +1,6 @@
-#include "exmemwb.h"
 #include "decode.h"
 
-// Holds the result of decoding
-// Passed to exmemwb stage
-decode_result decoded;
+#include "exmemwb.h"
 
 // Various decodings
 decode_result decode_3lo(const uint16_t pInsn)

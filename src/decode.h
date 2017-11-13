@@ -9,9 +9,9 @@
  * Passed to exectue, memory access, and write-back stage in decoded variable.
  */
 typedef struct {
-  unsigned char rD;
-  unsigned char rM;
-  unsigned char rN;
+  uint8_t rD;
+  uint8_t rM;
+  uint8_t rN;
   uint32_t imm;
   uint32_t cond;
   uint32_t reg_list;
