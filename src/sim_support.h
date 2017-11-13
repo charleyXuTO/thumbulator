@@ -61,23 +61,14 @@ void store(uint32_t address, uint32_t value);
     }                                                 \
   } while(0)
 
-#define INCREMENT_CYCLES(x)     \
-  {                             \
-    cycleCount += (x);          \
-    cyclesSinceReset += (x);    \
-    if(wdt_seed != 0) {         \
-      wdt_val += (x);           \
-      if(wdt_val >= wdt_seed) { \
-        wdt_val = 0;            \
-        cpu_set_except(16);     \
-      }                         \
-    }                           \
+#define INCREMENT_CYCLES(x)  \
+  {                          \
+    cycleCount += (x);       \
+    cyclesSinceReset += (x); \
   }
 
 extern uint64_t cycleCount;
 extern uint64_t insnCount;
 extern uint32_t cyclesSinceReset;
-extern uint32_t wdt_val;
-extern uint32_t wdt_seed;
 
 #endif
