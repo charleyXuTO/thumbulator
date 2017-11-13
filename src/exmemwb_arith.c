@@ -5,7 +5,7 @@
 // ADCS - add with carry and update flags
 uint32_t adcs(DECODE_RESULT decoded)
 {
-  diss_printf("adcs r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("adcs r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM);
@@ -24,7 +24,7 @@ uint32_t adcs(DECODE_RESULT decoded)
 // ADD - add small immediate to a register and update flags
 uint32_t adds_i3(DECODE_RESULT decoded)
 {
-  diss_printf("adds r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
+  TRACE_INSTRUCTION("adds r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
 
   uint32_t opA = cpu_get_gpr(decoded.rN);
   uint32_t opB = zeroExtend32(decoded.imm);
@@ -43,7 +43,7 @@ uint32_t adds_i3(DECODE_RESULT decoded)
 // ADD - add large immediate to a register and update flags
 uint32_t adds_i8(DECODE_RESULT decoded)
 {
-  diss_printf("adds r%u, #0x%X\n", decoded.rD, decoded.imm);
+  TRACE_INSTRUCTION("adds r%u, #0x%X\n", decoded.rD, decoded.imm);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = zeroExtend32(decoded.imm);
@@ -62,7 +62,7 @@ uint32_t adds_i8(DECODE_RESULT decoded)
 // ADD - add two registers and update flags
 uint32_t adds_r(DECODE_RESULT decoded)
 {
-  diss_printf("adds r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("adds r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rN);
   uint32_t opB = cpu_get_gpr(decoded.rM);
@@ -81,7 +81,7 @@ uint32_t adds_r(DECODE_RESULT decoded)
 // ADD - add two registers, one or both high no flags
 uint32_t add_r(DECODE_RESULT decoded)
 {
-  diss_printf("add r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("add r%u, r%u\n", decoded.rD, decoded.rM);
 
   // Check for malformed instruction
   if(decoded.rD == 15 && decoded.rM == 15) {
@@ -107,7 +107,7 @@ uint32_t add_r(DECODE_RESULT decoded)
 // ADD - add an immpediate to SP
 uint32_t add_sp(DECODE_RESULT decoded)
 {
-  diss_printf("add r%u, SP, #0x%02X\n", decoded.rD, decoded.imm);
+  TRACE_INSTRUCTION("add r%u, SP, #0x%02X\n", decoded.rD, decoded.imm);
 
   uint32_t opA = cpu_get_sp();
   uint32_t opB = zeroExtend32(decoded.imm << 2);
@@ -121,7 +121,7 @@ uint32_t add_sp(DECODE_RESULT decoded)
 // ADR - add an immpediate to PC
 uint32_t adr(DECODE_RESULT decoded)
 {
-  diss_printf("adr r%u, PC, #0x%02X\n", decoded.rD, decoded.imm);
+  TRACE_INSTRUCTION("adr r%u, PC, #0x%02X\n", decoded.rD, decoded.imm);
 
   uint32_t opA = cpu_get_pc();
   // Align PC to 4 bytes
@@ -138,7 +138,7 @@ uint32_t adr(DECODE_RESULT decoded)
 
 uint32_t subs_i3(DECODE_RESULT decoded)
 {
-  diss_printf("subs r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
+  TRACE_INSTRUCTION("subs r%u, r%u, #0x%X\n", decoded.rD, decoded.rN, decoded.imm);
 
   uint32_t opA = cpu_get_gpr(decoded.rN);
   uint32_t opB = ~zeroExtend32(decoded.imm);
@@ -156,7 +156,7 @@ uint32_t subs_i3(DECODE_RESULT decoded)
 
 uint32_t subs_i8(DECODE_RESULT decoded)
 {
-  diss_printf("subs r%u, #0x%02X\n", decoded.rD, decoded.imm);
+  TRACE_INSTRUCTION("subs r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = ~zeroExtend32(decoded.imm);
@@ -174,7 +174,7 @@ uint32_t subs_i8(DECODE_RESULT decoded)
 
 uint32_t subs(DECODE_RESULT decoded)
 {
-  diss_printf("subs r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("subs r%u, r%u, r%u\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rN);
   uint32_t opB = ~cpu_get_gpr(decoded.rM);
@@ -192,7 +192,7 @@ uint32_t subs(DECODE_RESULT decoded)
 
 uint32_t sub_sp(DECODE_RESULT decoded)
 {
-  diss_printf("sub SP, #0x%02X\n", decoded.imm);
+  TRACE_INSTRUCTION("sub SP, #0x%02X\n", decoded.imm);
 
   uint32_t opA = cpu_get_sp();
   uint32_t opB = ~zeroExtend32(decoded.imm << 2);
@@ -205,7 +205,7 @@ uint32_t sub_sp(DECODE_RESULT decoded)
 
 uint32_t sbcs(DECODE_RESULT decoded)
 {
-  diss_printf("sbcs r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("sbcs r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = ~cpu_get_gpr(decoded.rM);
@@ -223,7 +223,7 @@ uint32_t sbcs(DECODE_RESULT decoded)
 
 uint32_t rsbs(DECODE_RESULT decoded)
 {
-  diss_printf("rsbs r%u, r%u\n, #0", decoded.rD, decoded.rN);
+  TRACE_INSTRUCTION("rsbs r%u, r%u\n, #0", decoded.rD, decoded.rN);
 
   uint32_t opA = 0;
   uint32_t opB = ~(cpu_get_gpr(decoded.rN));
@@ -245,7 +245,7 @@ uint32_t rsbs(DECODE_RESULT decoded)
 // Does not update carry or overflow: simple mult
 uint32_t muls(DECODE_RESULT decoded)
 {
-  diss_printf("muls r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("muls r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM);

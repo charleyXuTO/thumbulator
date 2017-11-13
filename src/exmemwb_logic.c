@@ -6,7 +6,7 @@
 // AND - logical AND two registers and update flags
 uint32_t ands(DECODE_RESULT decoded)
 {
-  diss_printf("ands r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("ands r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM);
@@ -24,7 +24,7 @@ uint32_t ands(DECODE_RESULT decoded)
 // the source register
 uint32_t bics(DECODE_RESULT decoded)
 {
-  diss_printf("bics r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("bics r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM);
@@ -41,7 +41,7 @@ uint32_t bics(DECODE_RESULT decoded)
 // EOR - exclusive OR two registers and update the flags
 uint32_t eors(DECODE_RESULT decoded)
 {
-  diss_printf("eors r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("eors r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM);
@@ -58,7 +58,7 @@ uint32_t eors(DECODE_RESULT decoded)
 // ORR - logical OR two registers and update the flags
 uint32_t orrs(DECODE_RESULT decoded)
 {
-  diss_printf("orrs r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("orrs r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM);
@@ -75,7 +75,7 @@ uint32_t orrs(DECODE_RESULT decoded)
 // MVN - Move while negating
 uint32_t mvns(DECODE_RESULT decoded)
 {
-  diss_printf("mvns r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("mvns r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
   uint32_t result = ~opA;
@@ -92,7 +92,7 @@ uint32_t mvns(DECODE_RESULT decoded)
 
 uint32_t asrs_i(DECODE_RESULT decoded)
 {
-  diss_printf("asrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
+  TRACE_INSTRUCTION("asrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
   uint32_t opB = decoded.imm;
@@ -124,7 +124,7 @@ uint32_t asrs_i(DECODE_RESULT decoded)
 
 uint32_t asrs_r(DECODE_RESULT decoded)
 {
-  diss_printf("asrs r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("asrs r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM) & 0xFF;
@@ -157,9 +157,9 @@ uint32_t asrs_r(DECODE_RESULT decoded)
 uint32_t lsls_i(DECODE_RESULT decoded)
 {
   if(decoded.imm == 0)
-    diss_printf("mov r%u, r%u\n", decoded.rD, decoded.rM);
+    TRACE_INSTRUCTION("mov r%u, r%u\n", decoded.rD, decoded.rM);
   else
-    diss_printf("lsls r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
+    TRACE_INSTRUCTION("lsls r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
   uint32_t opB = decoded.imm;
@@ -176,7 +176,7 @@ uint32_t lsls_i(DECODE_RESULT decoded)
 
 uint32_t lsrs_i(DECODE_RESULT decoded)
 {
-  diss_printf("lsrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
+  TRACE_INSTRUCTION("lsrs r%u, r%u, #%d\n", decoded.rD, decoded.rM, decoded.imm);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
   uint32_t opB = decoded.imm;
@@ -194,7 +194,7 @@ uint32_t lsrs_i(DECODE_RESULT decoded)
 
 uint32_t lsls_r(DECODE_RESULT decoded)
 {
-  diss_printf("lsls r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("lsls r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM) & 0xFF;
@@ -211,7 +211,7 @@ uint32_t lsls_r(DECODE_RESULT decoded)
 
 uint32_t lsrs_r(DECODE_RESULT decoded)
 {
-  diss_printf("lsrs r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("lsrs r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM) & 0xFF;
@@ -228,7 +228,7 @@ uint32_t lsrs_r(DECODE_RESULT decoded)
 
 uint32_t rors(DECODE_RESULT decoded)
 {
-  diss_printf("rors r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("rors r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rD);
   uint32_t opB = cpu_get_gpr(decoded.rM) & 0xFF;

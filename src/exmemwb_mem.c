@@ -5,7 +5,7 @@
 // LDM - Load multiple registers from the stack
 uint32_t ldm(DECODE_RESULT decoded)
 {
-  diss_printf("ldm r%u!, {0x%X}\n", decoded.rN, decoded.reg_list);
+  TRACE_INSTRUCTION("ldm r%u!, {0x%X}\n", decoded.rN, decoded.reg_list);
 
   uint32_t numLoaded = 0;
   uint32_t rNWritten = (1 << decoded.rN) & decoded.reg_list;
@@ -31,7 +31,7 @@ uint32_t ldm(DECODE_RESULT decoded)
 // STM - Store multiple registers to the stack
 uint32_t stm(DECODE_RESULT decoded)
 {
-  diss_printf("stm r%u!, {0x%X}\n", decoded.rN, decoded.reg_list);
+  TRACE_INSTRUCTION("stm r%u!, {0x%X}\n", decoded.rN, decoded.reg_list);
 
   uint32_t numStored = 0;
   uint32_t address = cpu_get_gpr(decoded.rN);
@@ -61,7 +61,7 @@ uint32_t stm(DECODE_RESULT decoded)
 // Pop multiple reg values from the stack and update SP
 uint32_t pop(DECODE_RESULT decoded)
 {
-  diss_printf("pop {0x%X}\n", decoded.reg_list);
+  TRACE_INSTRUCTION("pop {0x%X}\n", decoded.reg_list);
 
   uint32_t numLoaded = 0;
   uint32_t address = cpu_get_sp();
@@ -91,7 +91,7 @@ uint32_t pop(DECODE_RESULT decoded)
 // Push multiple reg values to the stack and update SP
 uint32_t push(DECODE_RESULT decoded)
 {
-  diss_printf("push {0x%4.4X}\n", decoded.reg_list);
+  TRACE_INSTRUCTION("push {0x%4.4X}\n", decoded.reg_list);
 
   uint32_t numStored = 0;
   uint32_t address = cpu_get_sp();
@@ -120,7 +120,7 @@ uint32_t push(DECODE_RESULT decoded)
 // LDR - Load from offset from register
 uint32_t ldr_i(DECODE_RESULT decoded)
 {
-  diss_printf("ldr r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm << 2);
+  TRACE_INSTRUCTION("ldr r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm << 2);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = zeroExtend32(decoded.imm << 2);
@@ -137,7 +137,7 @@ uint32_t ldr_i(DECODE_RESULT decoded)
 // LDR - Load from offset from SP
 uint32_t ldr_sp(DECODE_RESULT decoded)
 {
-  diss_printf("ldr r%u, [SP, #0x%X]\n", decoded.rD, decoded.imm << 2);
+  TRACE_INSTRUCTION("ldr r%u, [SP, #0x%X]\n", decoded.rD, decoded.imm << 2);
 
   uint32_t base = cpu_get_sp();
   uint32_t offset = zeroExtend32(decoded.imm << 2);
@@ -154,7 +154,7 @@ uint32_t ldr_sp(DECODE_RESULT decoded)
 // LDR - Load from offset from PC
 uint32_t ldr_lit(DECODE_RESULT decoded)
 {
-  diss_printf("ldr r%u, [PC, #%d]\n", decoded.rD, decoded.imm << 2);
+  TRACE_INSTRUCTION("ldr r%u, [PC, #%d]\n", decoded.rD, decoded.imm << 2);
 
   uint32_t base = cpu_get_pc() & 0xFFFFFFFC;
   uint32_t offset = zeroExtend32(decoded.imm << 2);
@@ -171,7 +171,7 @@ uint32_t ldr_lit(DECODE_RESULT decoded)
 // LDR - Load from an offset from a reg based on another reg value
 uint32_t ldr_r(DECODE_RESULT decoded)
 {
-  diss_printf("ldr r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("ldr r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = cpu_get_gpr(decoded.rM);
@@ -188,7 +188,7 @@ uint32_t ldr_r(DECODE_RESULT decoded)
 // LDRB - Load byte from offset from register
 uint32_t ldrb_i(DECODE_RESULT decoded)
 {
-  diss_printf("ldrb r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
+  TRACE_INSTRUCTION("ldrb r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = zeroExtend32(decoded.imm);
@@ -222,7 +222,7 @@ uint32_t ldrb_i(DECODE_RESULT decoded)
 // LDRB - Load byte from an offset from a reg based on another reg value
 uint32_t ldrb_r(DECODE_RESULT decoded)
 {
-  diss_printf("ldrb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("ldrb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = cpu_get_gpr(decoded.rM);
@@ -256,7 +256,7 @@ uint32_t ldrb_r(DECODE_RESULT decoded)
 // LDRH - Load halfword from offset from register
 uint32_t ldrh_i(DECODE_RESULT decoded)
 {
-  diss_printf("ldrh r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
+  TRACE_INSTRUCTION("ldrh r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = zeroExtend32(decoded.imm << 1);
@@ -285,7 +285,7 @@ uint32_t ldrh_i(DECODE_RESULT decoded)
 // LDRH - Load halfword from an offset from a reg based on another reg value
 uint32_t ldrh_r(DECODE_RESULT decoded)
 {
-  diss_printf("ldrh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("ldrh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = cpu_get_gpr(decoded.rM);
@@ -314,7 +314,7 @@ uint32_t ldrh_r(DECODE_RESULT decoded)
 // LDRSB - Load signed byte from an offset from a reg based on another reg value
 uint32_t ldrsb_r(DECODE_RESULT decoded)
 {
-  diss_printf("ldrsb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("ldrsb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = cpu_get_gpr(decoded.rM);
@@ -348,7 +348,7 @@ uint32_t ldrsb_r(DECODE_RESULT decoded)
 // LDRSH - Load signed halfword from an offset from a reg based on another reg value
 uint32_t ldrsh_r(DECODE_RESULT decoded)
 {
-  diss_printf("ldrsh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("ldrsh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = cpu_get_gpr(decoded.rM);
@@ -378,7 +378,7 @@ uint32_t ldrsh_r(DECODE_RESULT decoded)
 // STR - Store to offset from register
 uint32_t str_i(DECODE_RESULT decoded)
 {
-  diss_printf("str r%u, [r%u, #%d]\n", decoded.rD, decoded.rN, decoded.imm << 2);
+  TRACE_INSTRUCTION("str r%u, [r%u, #%d]\n", decoded.rD, decoded.rN, decoded.imm << 2);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = zeroExtend32(decoded.imm << 2);
@@ -392,7 +392,7 @@ uint32_t str_i(DECODE_RESULT decoded)
 // STR - Store to offset from SP
 uint32_t str_sp(DECODE_RESULT decoded)
 {
-  diss_printf("str r%u, [SP, #%d]\n", decoded.rD, decoded.imm << 2);
+  TRACE_INSTRUCTION("str r%u, [SP, #%d]\n", decoded.rD, decoded.imm << 2);
 
   uint32_t base = cpu_get_sp();
   uint32_t offset = zeroExtend32(decoded.imm << 2);
@@ -406,7 +406,7 @@ uint32_t str_sp(DECODE_RESULT decoded)
 // STR - Store to an offset from a reg based on another reg value
 uint32_t str_r(DECODE_RESULT decoded)
 {
-  diss_printf("str r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("str r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = cpu_get_gpr(decoded.rM);
@@ -420,7 +420,7 @@ uint32_t str_r(DECODE_RESULT decoded)
 // STRB - Store byte to offset from register
 uint32_t strb_i(DECODE_RESULT decoded)
 {
-  diss_printf("strb r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
+  TRACE_INSTRUCTION("strb r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = zeroExtend32(decoded.imm);
@@ -454,7 +454,7 @@ uint32_t strb_i(DECODE_RESULT decoded)
 // STRB - Store byte to an offset from a reg based on another reg value
 uint32_t strb_r(DECODE_RESULT decoded)
 {
-  diss_printf("strb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("strb r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = cpu_get_gpr(decoded.rM);
@@ -488,7 +488,7 @@ uint32_t strb_r(DECODE_RESULT decoded)
 // STRH - Store halfword to offset from register
 uint32_t strh_i(DECODE_RESULT decoded)
 {
-  diss_printf("strh r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
+  TRACE_INSTRUCTION("strh r%u, [r%u, #0x%X]\n", decoded.rD, decoded.rN, decoded.imm);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = zeroExtend32(decoded.imm << 1);
@@ -516,7 +516,7 @@ uint32_t strh_i(DECODE_RESULT decoded)
 // STRH - Store halfword to an offset from a reg based on another reg value
 uint32_t strh_r(DECODE_RESULT decoded)
 {
-  diss_printf("strh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
+  TRACE_INSTRUCTION("strh r%u, [r%u, r%u]\n", decoded.rD, decoded.rN, decoded.rM);
 
   uint32_t base = cpu_get_gpr(decoded.rN);
   uint32_t offset = cpu_get_gpr(decoded.rM);

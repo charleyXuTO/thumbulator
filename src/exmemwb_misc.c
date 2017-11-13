@@ -10,7 +10,7 @@ uint32_t breakpoint(DECODE_RESULT decoded)
 // MOVS - write an immediate to the destination register
 uint32_t movs_i(DECODE_RESULT decoded)
 {
-  diss_printf("movs r%u, #0x%02X\n", decoded.rD, decoded.imm);
+  TRACE_INSTRUCTION("movs r%u, #0x%02X\n", decoded.rD, decoded.imm);
 
   uint32_t opA = zeroExtend32(decoded.imm);
   cpu_set_gpr(decoded.rD, opA);
@@ -24,7 +24,7 @@ uint32_t movs_i(DECODE_RESULT decoded)
 // MOV - copy the source register value to the destination register
 uint32_t mov_r(DECODE_RESULT decoded)
 {
-  diss_printf("mov r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("mov r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
 
@@ -39,7 +39,7 @@ uint32_t mov_r(DECODE_RESULT decoded)
 // MOVS - copy the low source register value to the destination low register
 uint32_t movs_r(DECODE_RESULT decoded)
 {
-  diss_printf("movs r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("movs r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
   cpu_set_gpr(decoded.rD, opA);
@@ -55,7 +55,7 @@ uint32_t movs_r(DECODE_RESULT decoded)
 // SXTB - Sign extend a byte to a word
 uint32_t sxtb(DECODE_RESULT decoded)
 {
-  diss_printf("sxtb r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("sxtb r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t result = 0xFF & cpu_get_gpr(decoded.rM);
   result = (result & 0x80) != 0 ? (result | 0xFFFFFF00) : result;
@@ -68,7 +68,7 @@ uint32_t sxtb(DECODE_RESULT decoded)
 // SXTH - Sign extend a halfword to a word
 uint32_t sxth(DECODE_RESULT decoded)
 {
-  diss_printf("sxth r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("sxth r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t result = 0xFFFF & cpu_get_gpr(decoded.rM);
   result = (result & 0x8000) != 0 ? (result | 0xFFFF0000) : result;
@@ -81,7 +81,7 @@ uint32_t sxth(DECODE_RESULT decoded)
 // UXTB - Extend a byte to a word
 uint32_t uxtb(DECODE_RESULT decoded)
 {
-  diss_printf("uxtb r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("uxtb r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t result = 0xFF & cpu_get_gpr(decoded.rM);
   cpu_set_gpr(decoded.rD, result);
@@ -92,7 +92,7 @@ uint32_t uxtb(DECODE_RESULT decoded)
 // UXTH - Extend a halfword to a word
 uint32_t uxth(DECODE_RESULT decoded)
 {
-  diss_printf("uxth r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("uxth r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t result = 0xFFFF & cpu_get_gpr(decoded.rM);
   cpu_set_gpr(decoded.rD, result);
@@ -103,7 +103,7 @@ uint32_t uxth(DECODE_RESULT decoded)
 // REV - Reverse ordering of bytes in a word
 uint32_t rev(DECODE_RESULT decoded)
 {
-  diss_printf("rev r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("rev r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
   uint32_t result = opA << 24;
@@ -119,7 +119,7 @@ uint32_t rev(DECODE_RESULT decoded)
 // REV16 - Reverse ordering of bytes in a packed halfword
 uint32_t rev16(DECODE_RESULT decoded)
 {
-  diss_printf("rev16 r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("rev16 r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
   uint32_t result = (opA << 8) & 0xFF000000;
@@ -135,7 +135,7 @@ uint32_t rev16(DECODE_RESULT decoded)
 // REVSH - Reverse ordering of bytes in a signed halfword
 uint32_t revsh(DECODE_RESULT decoded)
 {
-  diss_printf("revsh r%u, r%u\n", decoded.rD, decoded.rM);
+  TRACE_INSTRUCTION("revsh r%u, r%u\n", decoded.rD, decoded.rM);
 
   uint32_t opA = cpu_get_gpr(decoded.rM);
   uint32_t result = (opA & 0x8) != 0 ? (0xFFFFFF00 | opA) : (0xFF & opA);

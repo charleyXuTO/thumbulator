@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
 #endif
 
     simLoadInsn(cpu_get_pc() - 0x4, &insn);
-    diss_printf("%04X\n", insn);
 
     DECODE_RESULT decoded = decode(insn);
     exwbmem(insn, decoded);
