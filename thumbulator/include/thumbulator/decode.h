@@ -9,12 +9,35 @@
  * Passed to exectue, memory access, and write-back stage in decoded variable.
  */
 typedef struct {
-  uint8_t rD;
-  uint8_t rM;
-  uint8_t rN;
+  /**
+   * Destination register-index.
+   */
+  uint8_t Rd;
+
+  /**
+   * Operand register-index.
+   */
+  uint8_t Rm;
+
+  /**
+   * Operand register-index.
+   */
+  uint8_t Rn;
+
+  /**
+   * Immediate value.
+   */
   uint32_t imm;
+
+  /**
+   * Condition.
+   */
   uint32_t cond;
-  uint32_t reg_list;
+
+  /**
+   * Register list for push/pop instructions.
+   */
+  uint32_t register_list;
 } decode_result;
 
 /**

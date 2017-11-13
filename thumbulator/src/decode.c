@@ -7,9 +7,9 @@ decode_result decode_3lo(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rD = pInsn & 0x7;
-  decoded.rN = (pInsn >> 3) & 0x7;
-  decoded.rM = (pInsn >> 6) & 0x7;
+  decoded.Rd = pInsn & 0x7;
+  decoded.Rn = (pInsn >> 3) & 0x7;
+  decoded.Rm = (pInsn >> 6) & 0x7;
 
   return decoded;
 }
@@ -18,9 +18,9 @@ decode_result decode_2loimm5(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rD = pInsn & 0x7;
-  decoded.rM = (pInsn >> 3) & 0x7;
-  decoded.rN = (pInsn >> 3) & 0x7;
+  decoded.Rd = pInsn & 0x7;
+  decoded.Rm = (pInsn >> 3) & 0x7;
+  decoded.Rn = (pInsn >> 3) & 0x7;
   decoded.imm = (pInsn >> 6) & 0x1F;
 
   return decoded;
@@ -30,9 +30,9 @@ decode_result decode_2loimm3(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rD = pInsn & 0x7;
-  decoded.rM = (pInsn >> 3) & 0x7; // Just to be safe
-  decoded.rN = (pInsn >> 3) & 0x7;
+  decoded.Rd = pInsn & 0x7;
+  decoded.Rm = (pInsn >> 3) & 0x7; // Just to be safe
+  decoded.Rn = (pInsn >> 3) & 0x7;
   decoded.imm = (pInsn >> 6) & 0x7;
 
   return decoded;
@@ -42,9 +42,9 @@ decode_result decode_2lo(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rD = pInsn & 0x7;
-  decoded.rM = (pInsn >> 3) & 0x7;
-  decoded.rN = (pInsn >> 3) & 0x7;
+  decoded.Rd = pInsn & 0x7;
+  decoded.Rm = (pInsn >> 3) & 0x7;
+  decoded.Rn = (pInsn >> 3) & 0x7;
 
   return decoded;
 }
@@ -53,9 +53,9 @@ decode_result decode_imm8lo(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rD = (pInsn >> 8) & 0x7;
-  decoded.rM = decoded.rD; // Just to be safe
-  decoded.rN = decoded.rD; // Just to be safe
+  decoded.Rd = (pInsn >> 8) & 0x7;
+  decoded.Rm = decoded.Rd; // Just to be safe
+  decoded.Rn = decoded.Rd; // Just to be safe
   decoded.imm = pInsn & 0xFF;
 
   return decoded;
@@ -84,7 +84,7 @@ decode_result decode_imm7(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rD = GPR_SP;
+  decoded.Rd = GPR_SP;
   decoded.imm = pInsn & 0x7F;
 
   return decoded;
@@ -103,8 +103,8 @@ decode_result decode_reglistlo(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rN = (pInsn >> 8) & 0x7;
-  decoded.reg_list = pInsn & 0xFF;
+  decoded.Rn = (pInsn >> 8) & 0x7;
+  decoded.register_list = pInsn & 0xFF;
 
   return decoded;
 }
@@ -113,7 +113,7 @@ decode_result decode_pop(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.reg_list = ((pInsn & 0x100) << 7) | (pInsn & 0xFF);
+  decoded.register_list = ((pInsn & 0x100) << 7) | (pInsn & 0xFF);
 
   return decoded;
 }
@@ -122,7 +122,7 @@ decode_result decode_push(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.reg_list = (pInsn & 0xFF) | ((pInsn & 0x100) << 6);
+  decoded.register_list = (pInsn & 0xFF) | ((pInsn & 0x100) << 6);
 
   return decoded;
 }
@@ -151,7 +151,7 @@ decode_result decode_1all(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rM = (pInsn >> 3) & 0xF;
+  decoded.Rm = (pInsn >> 3) & 0xF;
 
   return decoded;
 }
@@ -160,9 +160,9 @@ decode_result decode_mov_r(const uint16_t pInsn)
 {
   decode_result decoded;
 
-  decoded.rD = (pInsn & 0x7) | ((pInsn & 0x80) >> 4);
-  decoded.rN = decoded.rD;
-  decoded.rM = (pInsn >> 3) & 0xF;
+  decoded.Rd = (pInsn & 0x7) | ((pInsn & 0x80) >> 4);
+  decoded.Rn = decoded.Rd;
+  decoded.Rm = (pInsn >> 3) & 0xF;
 
   return decoded;
 }

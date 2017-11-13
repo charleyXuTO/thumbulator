@@ -4,10 +4,10 @@
 
 uint32_t cmn(decode_result decoded)
 {
-  TRACE_INSTRUCTION("cmns r%u, r%u\n", decoded.rM, decoded.rN);
+  TRACE_INSTRUCTION("cmns r%u, r%u\n", decoded.Rm, decoded.Rn);
 
-  uint32_t opA = cpu_get_gpr(decoded.rM);
-  uint32_t opB = cpu_get_gpr(decoded.rN);
+  uint32_t opA = cpu_get_gpr(decoded.Rm);
+  uint32_t opB = cpu_get_gpr(decoded.Rn);
   uint32_t result = opA + opB;
 
   do_nflag(result);
@@ -20,9 +20,9 @@ uint32_t cmn(decode_result decoded)
 
 uint32_t cmp_i(decode_result decoded)
 {
-  TRACE_INSTRUCTION("cmp r%u, #0x%02X\n", decoded.rD, decoded.imm);
+  TRACE_INSTRUCTION("cmp r%u, #0x%02X\n", decoded.Rd, decoded.imm);
 
-  uint32_t opA = cpu_get_gpr(decoded.rD);
+  uint32_t opA = cpu_get_gpr(decoded.Rd);
   uint32_t opB = ~zeroExtend32(decoded.imm);
   uint32_t result = opA + opB + 1;
 
@@ -36,10 +36,10 @@ uint32_t cmp_i(decode_result decoded)
 
 uint32_t cmp_r(decode_result decoded)
 {
-  TRACE_INSTRUCTION("cmp r%u, r%u\n", decoded.rD, decoded.rM); // rN to rD due to decoding
+  TRACE_INSTRUCTION("cmp r%u, r%u\n", decoded.Rd, decoded.Rm); // Rn to Rd due to decoding
 
-  uint32_t opA = cpu_get_gpr(decoded.rD);
-  uint32_t opB = ~zeroExtend32(cpu_get_gpr(decoded.rM));
+  uint32_t opA = cpu_get_gpr(decoded.Rd);
+  uint32_t opB = ~zeroExtend32(cpu_get_gpr(decoded.Rm));
   uint32_t result = opA + opB + 1;
 
   do_nflag(result);
@@ -53,10 +53,10 @@ uint32_t cmp_r(decode_result decoded)
 // TST - Test for matches
 uint32_t tst(decode_result decoded)
 {
-  TRACE_INSTRUCTION("tst r%u, r%u\n", decoded.rN, decoded.rD); // Switch operands to ease decoding
+  TRACE_INSTRUCTION("tst r%u, r%u\n", decoded.Rn, decoded.Rd); // Switch operands to ease decoding
 
-  uint32_t opA = cpu_get_gpr(decoded.rD);
-  uint32_t opB = cpu_get_gpr(decoded.rM);
+  uint32_t opA = cpu_get_gpr(decoded.Rd);
+  uint32_t opB = cpu_get_gpr(decoded.Rm);
   uint32_t result = opA & opB;
 
   do_nflag(result);
@@ -179,9 +179,9 @@ uint32_t b_c(decode_result decoded)
 // BLX - Unconditional branch and link with switch to ARM mode
 uint32_t blx(decode_result decoded)
 {
-  TRACE_INSTRUCTION("blx r%u\n", decoded.rM);
+  TRACE_INSTRUCTION("blx r%u\n", decoded.Rm);
 
-  uint32_t address = cpu_get_gpr(decoded.rM);
+  uint32_t address = cpu_get_gpr(decoded.Rm);
 
   if((address & 0x1) == 0) {
     fprintf(stderr, "Error: Interworking not supported: 0x%8.8X\n", address);
@@ -199,9 +199,9 @@ uint32_t blx(decode_result decoded)
 // Also may be used as exception return
 uint32_t bx(decode_result decoded)
 {
-  TRACE_INSTRUCTION("bx r%u\n", decoded.rM);
+  TRACE_INSTRUCTION("bx r%u\n", decoded.Rm);
 
-  uint32_t address = cpu_get_gpr(decoded.rM);
+  uint32_t address = cpu_get_gpr(decoded.Rm);
 
   if((address & 0x1) == 0) {
     fprintf(stderr, "Error: Interworking not supported: 0x%8.8X\n", address);
