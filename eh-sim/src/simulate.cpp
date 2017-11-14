@@ -8,7 +8,6 @@
 
 extern "C" {
 #include <thumbulator/cpu.h>
-#include <thumbulator/exception.h>
 #include <thumbulator/sim_support.h>
 }
 
@@ -86,12 +85,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
     stats.cpu.instruction_count++;
     stats.cpu.cycle_count += instruction_ticks;
 
-    if(cpu_get_exception() != 0) {
-      lastCPU.exceptmask = cpu.exceptmask;
-      std::memcpy(&cpu, &lastCPU, sizeof(cpu_state));
-      check_except();
-    }
-
+    // advance to next PC
     if(!BRANCH_WAS_TAKEN) {
       if(cpu_get_pc() != lastCPU.gpr[15]) {
         throw std::runtime_error("Unexpected control flow change.");

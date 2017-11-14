@@ -1,4 +1,3 @@
-#include "thumbulator/exception.h"
 #include "thumbulator/sim_support.h"
 
 #include "cpu_flags.h"
@@ -211,11 +210,11 @@ uint32_t bx(decode_result const *decoded)
     terminate_simulation(1);
   }
 
-  // Check for exception return
-  if((address >> 28) == 0xF)
-    except_exit(address);
-  else
+  if((address >> 28) == 0xF) {
+    fprintf(stderr, "Error: CPU exceptions not supported: 0x%8.8X\n", address);
+  } else {
     cpu_set_pc(address);
+  }
 
   BRANCH_WAS_TAKEN = 1;
 

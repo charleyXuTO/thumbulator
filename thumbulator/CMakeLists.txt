@@ -10,11 +10,9 @@ add_library(
   ${PROJECT_NAME}
   include/thumbulator/cpu.h
   include/thumbulator/decode.h
-  include/thumbulator/exception.h
   include/thumbulator/sim_support.h
   src/cpu_flags.h
   src/decode.c
-  src/exception.c
   src/cpu.c
   src/exmemwb_arith.c
   src/exmemwb_branch.c
