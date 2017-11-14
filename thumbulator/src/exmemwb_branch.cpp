@@ -1,6 +1,6 @@
-#include "thumbulator/sim_support.h"
+#include "thumbulator/sim_support.hpp"
 
-#include "cpu_flags.h"
+#include "cpu_flags.hpp"
 
 ///--- Compare operations --------------------------------------------///
 

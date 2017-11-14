@@ -1,9 +1,9 @@
-#include "thumbulator/sim_support.h"
+#include "thumbulator/sim_support.hpp"
 
-#include "cpu_flags.h"
+#include "cpu_flags.hpp"
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 #define ESPR_T (1 << 24)
 
@@ -19,7 +19,7 @@ void terminate_simulation(int exit_code)
 }
 
 // Reset CPU state in accordance with B1.5.5 and B3.2.2
-void cpu_reset(void)
+void cpu_reset()
 {
   // Initialize the special-purpose registers
   cpu.apsr = 0;       // No flags set

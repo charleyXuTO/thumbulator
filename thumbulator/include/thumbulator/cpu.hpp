@@ -1,9 +1,9 @@
 #ifndef THUMBULATOR_CPU_H
 #define THUMBULATOR_CPU_H
 
-#include <stdint.h>
+#include <cstdint>
 
-#include "thumbulator/decode.h"
+#include "thumbulator/decode.hpp"
 
 /**
  * The state of an armv6m CPU.

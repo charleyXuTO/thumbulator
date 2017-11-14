@@ -1,9 +1,8 @@
 #ifndef THUMBULATOR_SIM_SUPPORT_H
 #define THUMBULATOR_SIM_SUPPORT_H
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstdint>
 
 #define RAM_START 0x40000000
 #define RAM_SIZE (1 << 23) // 8 MB

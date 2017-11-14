@@ -1,7 +1,7 @@
 #ifndef THUMBULATOR_DECODE_H
 #define THUMBULATOR_DECODE_H
 
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * Registers that hold the results of instruction decoding.

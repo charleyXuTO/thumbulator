@@ -3,23 +3,23 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(
   thumbulator
   VERSION 0.0.1
-  LANGUAGES C
+  LANGUAGES CXX
 )
 
 add_library(
   ${PROJECT_NAME}
-  include/thumbulator/cpu.h
-  include/thumbulator/decode.h
-  include/thumbulator/sim_support.h
-  src/cpu_flags.h
-  src/decode.c
-  src/cpu.c
-  src/exmemwb_arith.c
-  src/exmemwb_branch.c
-  src/exmemwb_logic.c
-  src/exmemwb_mem.c
-  src/exmemwb_misc.c
-  src/sim_support.c
+  include/thumbulator/cpu.hpp
+  include/thumbulator/decode.hpp
+  include/thumbulator/sim_support.hpp
+  src/cpu_flags.hpp
+  src/decode.cpp
+  src/cpu.cpp
+  src/exmemwb_arith.cpp
+  src/exmemwb_branch.cpp
+  src/exmemwb_logic.cpp
+  src/exmemwb_mem.cpp
+  src/exmemwb_misc.cpp
+  src/sim_support.cpp
 )
 
 target_include_directories(
@@ -29,6 +29,6 @@ target_include_directories(
 
 set_target_properties(
   ${PROJECT_NAME} PROPERTIES
-  C_STANDARD 99
-  C_STANDARD_REQUIRED ON
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED ON
 )

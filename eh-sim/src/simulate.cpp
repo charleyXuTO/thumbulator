@@ -6,10 +6,8 @@
 #include <stdexcept>
 #include <cstring>
 
-extern "C" {
-#include <thumbulator/cpu.h>
-#include <thumbulator/sim_support.h>
-}
+#include <thumbulator/cpu.hpp>
+#include <thumbulator/sim_support.hpp>
 
 namespace ehsim {
 

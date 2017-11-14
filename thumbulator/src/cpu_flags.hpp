@@ -1,7 +1,7 @@
 #ifndef THUMBULATOR_CPU_FLAGS_H
 #define THUMBULATOR_CPU_FLAGS_H
 
-#include"thumbulator/cpu.h"
+#include"thumbulator/cpu.hpp"
 
 // Define bit fields of APSR
 #define FLAG_N_INDEX 31
