@@ -12,55 +12,52 @@ public:
   /**
    * Create a capacitor.
    *
-   * @param initial_voltage The initial voltage across the capacitor.
    * @param capacitance The capacitance.
    */
-  capacitor(double const initial_voltage, double const capacitance)
-      : V(initial_voltage), C(capacitance)
+  explicit capacitor(double const capacitance) : C(capacitance), energy(0)
   {
   }
 
-  double voltage() const
+  double capacitance() const
   {
-    return V;
+    return C;
   }
 
   double energy_stored() const
   {
-    // E = 1/2 * C * V^2
-    return 0.5 * C * V * V;
+    return energy;
   }
 
   /**
    * Consume energy from the capacitor.
    *
-   * Doing so will decrease the voltage seen across the capacitor.
-   *
-   * @param energy_to_consume
+   * @param energy_to_consume The amount of energy to consume.
    */
   void consume_energy(double const energy_to_consume)
   {
-    double const new_energy = energy_stored() - energy_to_consume;
-    assert(new_energy > 0);
+    assert(energy_to_consume > 0);
+    assert(energy - energy_to_consume > 0);
 
-    V = std::sqrt(2.0 * new_energy / C);
+    energy -= energy_to_consume;
   }
 
   /**
-   * Change the voltage across the capacitor.
+   * Add energy to the capacitor.
    *
-   * @param new_voltage The new voltage across the capacitor.
+   * @param energy_harvested The amount of energy harvested.
    */
-  void change_voltage(double const new_voltage)
+  void harvest_energy(double const energy_harvested)
   {
-    V = new_voltage;
+    assert(energy_harvested > 0);
+
+    energy += energy_harvested;
   }
 
 private:
-  // voltage
-  double V;
   // capacitance
   double const C;
+  // stored energy
+  double energy;
 };
 }
 

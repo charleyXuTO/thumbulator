@@ -22,7 +22,7 @@ voltage_trace::voltage_trace(std::string const &path_to_trace) : maximum_time(0)
   }
 }
 
-double voltage_trace::get_voltage(int time) const
+double voltage_trace::get_voltage(uint64_t time) const
 {
   time = time % maximum_time;
 

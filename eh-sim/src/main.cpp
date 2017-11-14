@@ -58,8 +58,9 @@ int main(int argc, char *argv[])
     auto const path_to_voltage_trace = options["voltages"];
     auto const stats = ehsim::simulate(path_to_binary, path_to_voltage_trace);
 
-    std::cout << "Cycle count: " << stats.cpu.cycle_count << "\n";
-    std::cout << "Instructions executed: " << stats.cpu.instruction_count << "\n";
+    std::cout << "CPU instructions executed: " << stats.cpu.instruction_count << "\n";
+    std::cout << "CPU cycle count: " << stats.cpu.cycle_count << "\n";
+    std::cout << "System cycle count: " << stats.system.cycle_count << "\n";
 
   } catch(std::exception const &e) {
     std::cerr << "Error: " << e.what() << "\n";

@@ -21,9 +21,9 @@ public:
    *
    * @return The voltage reading at the specified time.
    */
-  double get_voltage(int time) const;
+  double get_voltage(uint64_t time) const;
 private:
-  int maximum_time;
+  uint64_t maximum_time;
 
   std::vector<double> voltages;
 };
