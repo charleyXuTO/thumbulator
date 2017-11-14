@@ -7,8 +7,8 @@ voltage_trace::voltage_trace(std::string const &path_to_trace) : maximum_time(0)
 {
   std::ifstream trace(path_to_trace);
 
-  int time;
-  int initial_time_offset;
+  uint64_t time;
+  uint64_t initial_time_offset;
   double voltage;
   if(trace >> time >> voltage) {
     initial_time_offset = time;
