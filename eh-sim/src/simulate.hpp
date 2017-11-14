@@ -21,7 +21,7 @@ struct stats_bundle {
   cpu_stats cpu;
 };
 
-stats_bundle simulate(char const *binary_file);
+stats_bundle simulate(char const *binary_file, char const *voltage_trace_file);
 
 }
 

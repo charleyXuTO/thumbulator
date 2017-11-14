@@ -12,6 +12,8 @@ add_executable(
   src/main.cpp
   src/simulate.cpp
   src/simulate.hpp
+  src/voltage_trace.cpp
+  src/voltage_trace.hpp
 )
 
 target_link_libraries(

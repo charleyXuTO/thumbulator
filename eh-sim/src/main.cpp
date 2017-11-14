@@ -14,6 +14,14 @@ void print_usage(std::ostream &stream, argagg::parser const &arguments)
   help << arguments;
 }
 
+void ensure_file_exists(std::string const &path_to_file)
+{
+  std::ifstream binary_file(path_to_file);
+  if(!binary_file.good()) {
+    throw std::runtime_error("File does not exist: " + path_to_file);
+  }
+}
+
 void validate(argagg::parser_results const &options)
 {
   if(options["binary"].count() == 0) {
@@ -21,15 +29,20 @@ void validate(argagg::parser_results const &options)
   }
 
   auto const path_to_binary = options["binary"].as<std::string>();
-  std::ifstream binary_file(path_to_binary, std::ios::binary);
-  if(!binary_file.good()) {
-    throw std::runtime_error("File does not exist: " + path_to_binary);
+  ensure_file_exists(path_to_binary);
+
+  if(options["voltages"].count() == 0) {
+    throw std::runtime_error("Missing path to voltage trace.");
   }
+
+  auto const path_to_voltage_trace = options["voltages"].as<std::string>();
+  ensure_file_exists(path_to_voltage_trace);
 }
 
 int main(int argc, char *argv[])
 {
   argagg::parser arguments{{{"help", {"-h", "--help"}, "display help information", 0},
+      {"voltages", {"--voltage-trace"}, "path to voltage trace", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1}}};
 
   try {
@@ -42,7 +55,8 @@ int main(int argc, char *argv[])
     validate(options);
 
     auto const path_to_binary = options["binary"];
-    auto const stats = ehsim::simulate(path_to_binary);
+    auto const path_to_voltage_trace = options["voltages"];
+    auto const stats = ehsim::simulate(path_to_binary, path_to_voltage_trace);
 
     std::cout << "Cycle count: " << stats.cpu.cycle_count << "\n";
     std::cout << "Instructions executed: " << stats.cpu.instruction_count << "\n";

@@ -1,5 +1,7 @@
 #include "simulate.hpp"
 
+#include "voltage_trace.hpp"
+
 #include <cstdio>
 #include <cstring>
 #include <stdexcept>
@@ -23,7 +25,7 @@ void load_program(char const *file_name)
   std::fclose(fd);
 }
 
-stats_bundle simulate(char const *binary_file)
+stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 {
   std::fprintf(stderr, "Simulating file %s\n", binary_file);
   std::fprintf(stderr, "Flash start:\t0x%8.8X\n", FLASH_START);
@@ -44,6 +46,8 @@ stats_bundle simulate(char const *binary_file)
 
   // stats tracking
   stats_bundle stats{};
+
+  voltage_trace voltages(voltage_trace_file);
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
