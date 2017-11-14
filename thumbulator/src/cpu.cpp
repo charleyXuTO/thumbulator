@@ -2,6 +2,8 @@
 
 #include "thumbulator/sim_support.hpp"
 
+#include <cstdio>
+
 uint16_t insn;
 
 cpu_state cpu;

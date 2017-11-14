@@ -1,6 +1,7 @@
 #include "thumbulator/sim_support.hpp"
 
 #include "cpu_flags.hpp"
+#include "trace.hpp"
 
 ///--- Add operations --------------------------------------------///
 

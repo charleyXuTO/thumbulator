@@ -2,8 +2,9 @@
 
 #include "cpu_flags.hpp"
 
-#include <cstring>
+#include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #define ESPR_T (1 << 24)
 

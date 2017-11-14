@@ -20,6 +20,7 @@ add_library(
   src/exmemwb_mem.cpp
   src/exmemwb_misc.cpp
   src/sim_support.cpp
+  src/trace.hpp
 )
 
 target_include_directories(

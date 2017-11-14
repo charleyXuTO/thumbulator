@@ -1,7 +1,6 @@
 #ifndef THUMBULATOR_SIM_SUPPORT_H
 #define THUMBULATOR_SIM_SUPPORT_H
 
-#include <cstdio>
 #include <cstdint>
 
 #define RAM_START 0x40000000
@@ -58,14 +57,5 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead);
  * @param value The data to store at that address.
  */
 void store(uint32_t address, uint32_t value);
-
-#define ENABLE_INSTRUCTION_TRACE 0
-#define TRACE_INSTRUCTION(format, ...)                \
-  do {                                                \
-    if(ENABLE_INSTRUCTION_TRACE) {                    \
-      fprintf(stderr, "%08X:\t", cpu_get_pc() - 0x5); \
-      fprintf(stderr, format, __VA_ARGS__);           \
-    }                                                 \
-  } while(0)
 
 #endif

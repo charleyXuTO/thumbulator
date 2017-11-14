@@ -5,6 +5,8 @@
 
 #include "cpu_flags.hpp"
 
+#include <cstdio>
+
 // Various decodings
 decode_result decode_3lo(const uint16_t pInsn)
 {
