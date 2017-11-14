@@ -8,6 +8,7 @@ project(
 
 add_executable(
   ${PROJECT_NAME}
+  src/capacitor.hpp
   src/main.cpp
   src/simulate.cpp
   src/simulate.hpp
