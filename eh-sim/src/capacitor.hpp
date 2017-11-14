@@ -2,6 +2,8 @@
 #define EH_SIM_CAPACITOR_HPP
 
 #include <cmath>
+#include <cassert>
+#include <stdexcept>
 
 namespace ehsim {
 
@@ -18,6 +20,17 @@ public:
   {
   }
 
+  double voltage() const
+  {
+    return V;
+  }
+
+  double energy_stored() const
+  {
+    // E = 1/2 * C * V^2
+    return 0.5 * C * V * V;
+  }
+
   /**
    * Consume energy from the capacitor.
    *
@@ -27,9 +40,8 @@ public:
    */
   void consume_energy(double const energy_to_consume)
   {
-    // E = 1/2 * C * V^2
-    double const current_energy = 0.5 * C * V * V;
-    double const new_energy = current_energy - energy_to_consume;
+    double const new_energy = energy_stored() - energy_to_consume;
+    assert(new_energy > 0);
 
     V = std::sqrt(2.0 * new_energy / C);
   }

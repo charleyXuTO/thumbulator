@@ -1,8 +1,8 @@
 #include "simulate.hpp"
 
+#include "capacitor.hpp"
 #include "voltage_trace.hpp"
 
-#include <cstdio>
 #include <cstring>
 #include <stdexcept>
 
@@ -23,6 +23,14 @@ void load_program(char const *file_name)
 
   std::fread(&FLASH_MEMORY, sizeof(uint32_t), sizeof(FLASH_MEMORY) / sizeof(uint32_t), fd);
   std::fclose(fd);
+}
+
+int time_in_ms(uint64_t const cycle_count)
+{
+  constexpr double CPU_PERIOD = 1.0 / CPU_FREQ;
+  auto const time = CPU_PERIOD * cycle_count * 1000;
+
+  return static_cast<int>(time);
 }
 
 stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
@@ -47,7 +55,11 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
   // stats tracking
   stats_bundle stats{};
 
-  voltage_trace voltages(voltage_trace_file);
+  // energy harvesting
+  constexpr double EPSILON = 1.18e-3;
+  constexpr double CURRENT = EPSILON / 1.8;
+  voltage_trace power(voltage_trace_file);
+  capacitor battery(power.get_voltage(0), 10-6);
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
