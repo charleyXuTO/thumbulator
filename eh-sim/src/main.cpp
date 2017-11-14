@@ -30,7 +30,6 @@ void validate(argagg::parser_results const &options)
 int main(int argc, char *argv[])
 {
   argagg::parser arguments{{{"help", {"-h", "--help"}, "display help information", 0},
-      {"verbosity", {"-v"}, "verbosity of log messages", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1}}};
 
   try {
