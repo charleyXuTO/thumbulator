@@ -8,7 +8,7 @@
  *
  * Passed to exectue, memory access, and write-back stage in decoded variable.
  */
-typedef struct {
+struct decode_result {
   /**
    * Destination register-index.
    */
@@ -38,7 +38,7 @@ typedef struct {
    * Register list for push/pop instructions.
    */
   uint32_t register_list;
-} decode_result;
+};
 
 /**
  * Interface to the decode stage.

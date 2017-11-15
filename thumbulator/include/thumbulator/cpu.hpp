@@ -8,7 +8,7 @@
 /**
  * The state of an armv6m CPU.
  */
-typedef struct {
+struct cpu_state {
   /**
    * General-purpose register including FP, SP, LR, and PC.
    */
@@ -43,7 +43,7 @@ typedef struct {
    * Bit mask of pending exceptions.
    */
   uint32_t exceptmask;
-} cpu_state;
+};
 
 extern cpu_state cpu;
 
@@ -72,12 +72,12 @@ extern cpu_state cpu;
  */
 #define cpu_set_pc(x) cpu_set_gpr(GPR_PC, (x))
 
-typedef struct {
+struct system_tick {
   uint32_t control;
   uint32_t reload;
   uint32_t value;
   uint32_t calib;
-} system_tick;
+};
 
 extern system_tick SYSTICK;
 
