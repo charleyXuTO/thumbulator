@@ -37,13 +37,13 @@ public:
 
   bool is_active() const override
   {
-    return battery.energy_stored() > (normal_running_energy + backup_energy_penalty);
+    return battery.energy_stored() >
+           (normal_running_energy + backup_energy_penalty + recovery_energy_penalty);
   }
 
   bool will_backup(stats_bundle *stats) const override
   {
-    // if we are in an active period, we backup
-    return is_active();
+    return battery.energy_stored() > backup_energy_penalty;
   }
 
   void backup(stats_bundle *stats) override
