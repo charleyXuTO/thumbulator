@@ -6,6 +6,7 @@
 #include "capacitor.hpp"
 #include "checkpoint_scheme.hpp"
 #include "msp430_energy.hpp"
+#include "stats.hpp"
 #include "voltage_trace.hpp"
 
 #include <cstring>

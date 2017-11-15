@@ -14,6 +14,7 @@ add_executable(
   src/msp430_energy.hpp
   src/simulate.cpp
   src/simulate.hpp
+  src/stats.hpp
   src/voltage_trace.cpp
   src/voltage_trace.hpp
 )

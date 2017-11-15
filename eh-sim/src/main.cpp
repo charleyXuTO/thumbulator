@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "simulate.hpp"
+#include "stats.hpp"
 
 void print_usage(std::ostream &stream, argagg::parser const &arguments)
 {
