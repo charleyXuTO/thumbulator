@@ -52,7 +52,8 @@ public:
 
     battery.consume_energy(backup_energy_penalty);
 
-    stats->models.back().backup_times.push_back(stats->cpu.cycle_count);
+    stats->models.back().backup_times.push_back(stats->cpu.cycle_count - last_cycle_count);
+    last_cycle_count = stats->cpu.cycle_count;
   }
 
   void restore(stats_bundle *stats) override
@@ -67,6 +68,9 @@ public:
 
 private:
   capacitor battery;
+
+  uint64_t last_cycle_count = 0u;
+
   // see Section 3 from paper - 8 KHz clock frequency
   static constexpr uint32_t cpu_frequency = 8000;
   // see Figure 11 from paper - instruction energy is 31.25 pJ

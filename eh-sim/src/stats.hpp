@@ -41,7 +41,7 @@ struct eh_model {
   /**
    * The cycle count of each backup.
    */
-  std::deque<uint32_t> backup_times;
+  std::deque<uint64_t> backup_times;
 
   /**
    * The total amount of energy spent on executing instructions.

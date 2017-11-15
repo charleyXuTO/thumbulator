@@ -66,10 +66,21 @@ int main(int argc, char *argv[])
     auto const stats = ehsim::simulate(path_to_binary, path_to_voltage_trace, scheme.get());
 
     std::cout << "CPU instructions executed: " << stats.cpu.instruction_count << "\n";
-    std::cout << "CPU cycle count: " << stats.cpu.cycle_count << "\n";
+    std::cout << "CPU time (cycles): " << stats.cpu.cycle_count << "\n";
     std::cout << "Total time (ns): " << stats.system.time.count() << "\n";
     std::cout << "Energy harvested (J): " << stats.system.energy_harvested * 1e-9 << "\n";
     std::cout << "Energy remaining (J): " << stats.system.energy_remaining * 1e-9 << "\n";
+
+    int id = 0;
+    std::cout << "\nThe EH Model\n\n";
+    for(auto const &model : stats.models) {
+      std::cout << "Active Period: " << id++ << "\n";
+      std::cout << "Total instruction energy (J): " << model.instruction_energy * 1e-9 << "\n";
+
+      auto const tau_sum = std::accumulate(model.backup_times.begin(), model.backup_times.end(), 0ul);
+      auto const tau_b = static_cast<double>(tau_sum) / model.backup_times.size();
+      std::cout << "Tau_b (cycles): " << tau_b << "\n";
+    }
 
   } catch(std::exception const &e) {
     std::cerr << "Error: " << e.what() << "\n";
