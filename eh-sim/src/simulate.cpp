@@ -1,6 +1,7 @@
 #include "simulate.hpp"
 
 #include "capacitor.hpp"
+#include "msp430_energy.hpp"
 #include "voltage_trace.hpp"
 
 #include <stdexcept>
@@ -94,9 +95,17 @@ uint32_t step_cpu()
   return instruction_ticks;
 }
 
+/**
+ * Calculate the energy stored in a capacitor.
+ *
+ * @param voltage The voltage across the capacitor.
+ * @param capacitance The capacitance.
+ *
+ * @return Energy in nJ.
+ */
 double calculate_energy(double const voltage, double const capacitance)
 {
-  return 0.5 * capacitance * voltage * voltage;
+  return 0.5 * capacitance * voltage * voltage * 1e9;
 }
 
 stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
@@ -107,9 +116,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
   stats_bundle stats{};
 
   // energy harvesting
-  //constexpr double EPSILON = 1.18e-3;
-  constexpr double EPSILON = 1.18e-6;
-  constexpr double CURRENT = EPSILON / 1.8;
+  constexpr double EPSILON = MSP430_INSTRUCTION_ENERGY;
 
   uint64_t current_ms = cycles_to_ms(stats.system.cycle_count);
   uint64_t last_ms = current_ms;

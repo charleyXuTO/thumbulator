@@ -10,6 +10,7 @@ add_executable(
   ${PROJECT_NAME}
   src/capacitor.hpp
   src/main.cpp
+  src/msp430_energy.hpp
   src/simulate.cpp
   src/simulate.hpp
   src/voltage_trace.cpp
