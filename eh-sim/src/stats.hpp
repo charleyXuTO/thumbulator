@@ -18,7 +18,7 @@ struct system_stats {
   /**
    * Total execution time, including active and charging periods.
    */
-  std::chrono::nanoseconds time;
+  std::chrono::nanoseconds time{0};
 
   /**
    * Amount of energy harvested (nJ).
