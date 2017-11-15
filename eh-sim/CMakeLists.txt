@@ -9,6 +9,7 @@ project(
 add_executable(
   ${PROJECT_NAME}
   src/capacitor.hpp
+  src/checkpoint_scheme.hpp
   src/main.cpp
   src/msp430_energy.hpp
   src/simulate.cpp

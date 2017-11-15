@@ -1,15 +1,14 @@
 #include "simulate.hpp"
 
+#include <thumbulator/cpu.hpp>
+#include <thumbulator/memory.hpp>
+
 #include "capacitor.hpp"
+#include "checkpoint_scheme.hpp"
 #include "msp430_energy.hpp"
 #include "voltage_trace.hpp"
 
 #include <cstring>
-#include <stdexcept>
-
-#include <thumbulator/cpu.hpp>
-#include <thumbulator/memory.hpp>
-#include <iostream>
 
 namespace ehsim {
 
@@ -118,12 +117,16 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 
   initialize_system(binary_file);
 
-  // epsilon is the energy to execute an instruction as well as the energy to fetch that instruction.
-  constexpr double EPSILON = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
-
   // energy harvesting
+  checkpoint_scheme scheme{};
   voltage_trace power(voltage_trace_file);
   capacitor battery(4.7e-5);
+
+  // epsilon is the energy to execute an instruction as well as the energy to fetch that instruction.
+  constexpr double EPSILON = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
+  auto const backup_threshold = EPSILON + scheme.backup_energy() + scheme.restore_energy();
+  auto backup_needed = false;
+  auto restore_needed = false;
 
   auto const cycles_per_sample =
       thumbulator::CPU_FREQ * std::chrono::duration<double>(power.sample_rate()).count();
@@ -136,15 +139,27 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
     uint64_t elapsed_cycles = 1;
 
-    if(battery.energy_stored() > EPSILON) {
+    if(battery.energy_stored() > backup_threshold) {
       // active period
+      if(restore_needed) {
+        scheme.restore();
+
+        restore_needed = false;
+      }
+
       elapsed_cycles = step_cpu();
+      backup_needed = true;
 
       stats.cpu.instruction_count++;
       stats.cpu.cycle_count += elapsed_cycles;
 
       // consume energy for execution
       battery.consume_energy(EPSILON);
+    } else if(backup_needed) {
+      scheme.backup();
+
+      backup_needed = false;
+      restore_needed = true;
     }
 
     // harvest energy
