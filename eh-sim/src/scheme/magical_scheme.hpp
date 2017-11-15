@@ -1,6 +1,8 @@
 #ifndef EH_SIM_MAGIC_HPP
 #define EH_SIM_MAGIC_HPP
 
+#include <thumbulator/cpu.hpp>
+
 #include "scheme/eh_scheme.hpp"
 #include "capacitor.hpp"
 #include "msp430_energy.hpp"
@@ -22,6 +24,11 @@ public:
   capacitor &get_battery() override
   {
     return battery;
+  }
+
+  uint32_t clock_frequency() const override
+  {
+    return thumbulator::CPU_FREQ;
   }
 
   double energy_threshold() const override

@@ -88,9 +88,9 @@ double calculate_energy(double const voltage, double const capacitance)
   return 0.5 * capacitance * voltage * voltage * 1e9;
 }
 
-std::chrono::nanoseconds get_time(uint64_t const cycle_count)
+std::chrono::nanoseconds get_time(uint64_t const cycle_count, uint32_t const frequency)
 {
-  constexpr double CPU_PERIOD = 1.0 / thumbulator::CPU_FREQ;
+  double const CPU_PERIOD = 1.0 / frequency;
   auto const time = static_cast<uint64_t>(CPU_PERIOD * cycle_count * 1e9);
 
   return std::chrono::nanoseconds(time);
@@ -125,7 +125,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, e
   auto restore_needed = false;
 
   auto const cycles_per_sample =
-      thumbulator::CPU_FREQ * std::chrono::duration<double>(power.sample_rate()).count();
+      scheme->clock_frequency() * std::chrono::duration<double>(power.sample_rate()).count();
   auto voltage = power.get_voltage(to_ms(stats.system.time));
   auto charging_rate = calculate_charging_rate(voltage, battery.capacitance(), cycles_per_sample);
   auto next_charge_time = power.sample_rate();
@@ -165,7 +165,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, e
     battery.harvest_energy(harvested_energy);
 
     // track stats
-    stats.system.time += get_time(elapsed_cycles);
+    stats.system.time += get_time(elapsed_cycles, scheme->clock_frequency());
     stats.system.energy_harvested += harvested_energy;
 
     if(stats.system.time >= next_charge_time) {
