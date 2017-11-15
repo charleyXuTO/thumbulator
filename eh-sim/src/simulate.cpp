@@ -65,10 +65,6 @@ uint32_t step_cpu()
 {
   BRANCH_WAS_TAKEN = false;
 
-  // Backup CPU state
-  cpu_state lastCPU{};
-  std::memcpy(&lastCPU, &cpu, sizeof(cpu_state));
-
   if((cpu_get_pc() & 0x1) == 0) {
     throw std::runtime_error("PC moved out of thumb mode.");
   }
@@ -83,10 +79,6 @@ uint32_t step_cpu()
 
   // advance to next PC
   if(!BRANCH_WAS_TAKEN) {
-    if(cpu_get_pc() != lastCPU.gpr[15]) {
-      throw std::runtime_error("Unexpected control flow change.");
-    }
-
     cpu_set_pc(cpu_get_pc() + 0x2);
   } else {
     cpu_set_pc(cpu_get_pc() + 0x4);
