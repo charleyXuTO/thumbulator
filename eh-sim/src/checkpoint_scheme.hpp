@@ -3,6 +3,8 @@
 
 #include <thumbulator/cpu.hpp>
 
+namespace ehsim {
+
 class checkpoint_scheme {
 public:
   double backup_energy() const
@@ -29,8 +31,10 @@ public:
   {
     thumbulator::cpu = architectural_state;
   }
+
 private:
   thumbulator::cpu_state architectural_state;
 };
+}
 
 #endif //EH_SIM_CHECKPOINT_SCHEME_HPP
