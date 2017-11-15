@@ -23,7 +23,7 @@ voltage_trace::voltage_trace(std::string const &path_to_trace, std::chrono::micr
 
 double voltage_trace::get_voltage(std::chrono::microseconds const &time) const
 {
-  auto const index = time.count() % maximum_time.count();
+  auto const index = (time.count() / rate.count()) % maximum_time.count();
   return voltages[index];
 }
 }
