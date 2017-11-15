@@ -108,9 +108,10 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
   // stats tracking
   stats_bundle stats{};
 
-  // energy harvesting
-  constexpr double EPSILON = MSP430_INSTRUCTION_ENERGY;
+  // epsilon is the energy to execute an instruction as well as the energy to fetch that instruction.
+  constexpr double EPSILON = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
 
+  // energy harvesting
   uint64_t current_ms = cycles_to_ms(stats.system.cycle_count);
   uint64_t last_ms = current_ms;
   voltage_trace power(voltage_trace_file);
