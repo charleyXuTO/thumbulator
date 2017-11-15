@@ -3,8 +3,8 @@
 #include <thumbulator/cpu.hpp>
 #include <thumbulator/memory.hpp>
 
+#include "checkpoint/checkpoint_scheme.hpp"
 #include "capacitor.hpp"
-#include "checkpoint_scheme.hpp"
 #include "msp430_energy.hpp"
 #include "stats.hpp"
 #include "voltage_trace.hpp"
@@ -108,7 +108,8 @@ double calculate_charging_rate(double voltage, double capacitance, double cycles
   return energy / cycles_per_sample;
 }
 
-stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
+stats_bundle
+simulate(char const *binary_file, char const *voltage_trace_file, checkpoint_scheme *scheme)
 {
   using namespace std::chrono_literals;
 
@@ -119,13 +120,12 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
   initialize_system(binary_file);
 
   // energy harvesting
-  checkpoint_scheme scheme{};
   voltage_trace power(voltage_trace_file);
   capacitor battery(4.7e-5);
 
   // epsilon is the energy to execute an instruction as well as the energy to fetch that instruction.
   constexpr double EPSILON = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
-  auto const backup_threshold = EPSILON + scheme.backup_energy() + scheme.restore_energy();
+  auto const backup_threshold = EPSILON + scheme->backup_energy() + scheme->restore_energy();
   auto backup_needed = false;
   auto restore_needed = false;
 
@@ -143,7 +143,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
     if(battery.energy_stored() > backup_threshold) {
       // active period
       if(restore_needed) {
-        scheme.restore();
+        scheme->restore();
         restore_needed = false;
       }
 
@@ -155,8 +155,8 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 
       // consume energy for execution
       battery.consume_energy(EPSILON);
-    } else if(backup_needed && scheme.will_backup()) {
-      scheme.backup();
+    } else if(backup_needed && scheme->will_backup()) {
+      scheme->backup();
 
       backup_needed = false;
       restore_needed = true;

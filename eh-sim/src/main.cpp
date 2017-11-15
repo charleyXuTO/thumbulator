@@ -2,7 +2,9 @@
 
 #include <fstream>
 #include <iostream>
+#include <memory>
 
+#include "checkpoint/magic_checkpointing.hpp"
 #include "simulate.hpp"
 #include "stats.hpp"
 
@@ -57,7 +59,8 @@ int main(int argc, char *argv[])
 
     auto const path_to_binary = options["binary"];
     auto const path_to_voltage_trace = options["voltages"];
-    auto const stats = ehsim::simulate(path_to_binary, path_to_voltage_trace);
+    auto checkpointing = std::make_unique<ehsim::magic_checkpointing>();
+    auto const stats = ehsim::simulate(path_to_binary, path_to_voltage_trace, checkpointing.get());
 
     std::cout << "CPU instructions executed: " << stats.cpu.instruction_count << "\n";
     std::cout << "CPU cycle count: " << stats.cpu.cycle_count << "\n";

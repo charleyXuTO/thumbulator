@@ -8,8 +8,9 @@ project(
 
 add_executable(
   ${PROJECT_NAME}
+  src/checkpoint/checkpoint_scheme.hpp
+  src/checkpoint/magic_checkpointing.hpp
   src/capacitor.hpp
-  src/checkpoint_scheme.hpp
   src/main.cpp
   src/msp430_energy.hpp
   src/simulate.cpp
