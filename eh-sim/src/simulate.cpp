@@ -5,7 +5,6 @@
 
 #include "checkpoint/checkpoint_scheme.hpp"
 #include "capacitor.hpp"
-#include "msp430_energy.hpp"
 #include "stats.hpp"
 #include "voltage_trace.hpp"
 
@@ -123,9 +122,6 @@ simulate(char const *binary_file, char const *voltage_trace_file, checkpoint_sch
   voltage_trace power(voltage_trace_file);
   capacitor battery(4.7e-5);
 
-  // epsilon is the energy to execute an instruction as well as the energy to fetch that instruction.
-  constexpr double EPSILON = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
-  auto const backup_threshold = EPSILON + scheme->backup_energy() + scheme->restore_energy();
   auto backup_needed = false;
   auto restore_needed = false;
 
@@ -140,7 +136,7 @@ simulate(char const *binary_file, char const *voltage_trace_file, checkpoint_sch
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
     uint64_t elapsed_cycles = 1;
 
-    if(battery.energy_stored() > backup_threshold) {
+    if(battery.energy_stored() > scheme->energy_threshold()) {
       // active period
       if(restore_needed) {
         scheme->restore();
@@ -154,7 +150,7 @@ simulate(char const *binary_file, char const *voltage_trace_file, checkpoint_sch
       stats.cpu.cycle_count += elapsed_cycles;
 
       // consume energy for execution
-      battery.consume_energy(EPSILON);
+      battery.consume_energy(scheme->energy_instruction());
     } else if(backup_needed && scheme->will_backup()) {
       scheme->backup();
 

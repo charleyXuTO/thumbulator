@@ -8,13 +8,13 @@ namespace ehsim {
  */
 class checkpoint_scheme {
 public:
+  virtual double energy_threshold() const = 0;
+
+  virtual double energy_instruction() const = 0;
+
   virtual bool will_backup() const = 0;
 
-  virtual double backup_energy() const = 0;
-
   virtual void backup() = 0;
-
-  virtual double restore_energy() const = 0;
 
   virtual void restore() = 0;
 };
