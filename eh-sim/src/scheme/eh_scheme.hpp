@@ -3,10 +3,12 @@
 
 namespace ehsim {
 
+class capacitor;
+
 /**
  * An abstract checkpointing scheme.
  */
-class checkpoint_scheme {
+class eh_scheme {
 public:
   virtual double energy_threshold() const = 0;
 

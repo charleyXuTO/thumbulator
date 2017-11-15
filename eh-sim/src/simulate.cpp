@@ -3,7 +3,7 @@
 #include <thumbulator/cpu.hpp>
 #include <thumbulator/memory.hpp>
 
-#include "checkpoint/checkpoint_scheme.hpp"
+#include "scheme/eh_scheme.hpp"
 #include "capacitor.hpp"
 #include "stats.hpp"
 #include "voltage_trace.hpp"
@@ -108,7 +108,7 @@ double calculate_charging_rate(double voltage, double capacitance, double cycles
 }
 
 stats_bundle
-simulate(char const *binary_file, char const *voltage_trace_file, checkpoint_scheme *scheme)
+simulate(char const *binary_file, char const *voltage_trace_file, eh_scheme *scheme)
 {
   using namespace std::chrono_literals;
 

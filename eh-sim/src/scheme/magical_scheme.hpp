@@ -1,7 +1,7 @@
 #ifndef EH_SIM_MAGIC_HPP
 #define EH_SIM_MAGIC_HPP
 
-#include "checkpoint/checkpoint_scheme.hpp"
+#include "eh_scheme.hpp"
 #include "msp430_energy.hpp"
 
 namespace ehsim {
@@ -11,7 +11,7 @@ namespace ehsim {
  *
  * Does not waste any energy, because it is magic.
  */
-class magic_checkpointing : public checkpoint_scheme {
+class magical_scheme : public eh_scheme {
 public:
   double energy_threshold() const override
   {
