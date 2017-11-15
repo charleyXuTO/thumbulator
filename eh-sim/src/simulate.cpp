@@ -138,8 +138,11 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, e
     if(battery.energy_stored() > scheme->energy_threshold()) {
       // active period
       if(restore_needed) {
-        scheme->restore();
+        scheme->restore(&stats);
         restore_needed = false;
+      } else if(stats.cpu.instruction_count == 0) {
+        // allocate space for very first active period model
+        stats.models.emplace_back();
       }
 
       elapsed_cycles = step_cpu();
@@ -150,8 +153,8 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, e
 
       // consume energy for execution
       battery.consume_energy(scheme->energy_instruction());
-    } else if(backup_needed && scheme->will_backup()) {
-      scheme->backup();
+    } else if(backup_needed && scheme->will_backup(stats)) {
+      scheme->backup(&stats);
 
       backup_needed = false;
       restore_needed = true;

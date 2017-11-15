@@ -4,6 +4,7 @@
 namespace ehsim {
 
 class capacitor;
+struct stats_bundle;
 
 /**
  * An abstract checkpointing scheme.
@@ -16,11 +17,11 @@ public:
 
   virtual double energy_instruction() const = 0;
 
-  virtual bool will_backup() const = 0;
+  virtual bool will_backup(stats_bundle const &stats) const = 0;
 
-  virtual void backup() = 0;
+  virtual void backup(stats_bundle *stats) = 0;
 
-  virtual void restore() = 0;
+  virtual void restore(stats_bundle *stats) = 0;
 };
 }
 

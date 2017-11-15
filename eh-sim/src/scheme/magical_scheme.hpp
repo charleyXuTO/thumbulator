@@ -4,6 +4,7 @@
 #include "scheme/eh_scheme.hpp"
 #include "capacitor.hpp"
 #include "msp430_energy.hpp"
+#include "stats.hpp"
 
 namespace ehsim {
 
@@ -34,20 +35,24 @@ public:
     return MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
   }
 
-  bool will_backup() const override
+  bool will_backup(stats_bundle const &stats) const override
   {
     // always backup when it is an option
     return true;
   }
 
-  void backup() override
+  void backup(stats_bundle *stats) override
   {
     // do not touch arch/app state
+    stats->models.back().backup_times.push_back(stats->cpu.cycle_count);
   }
 
-  void restore() override
+  void restore(stats_bundle *stats) override
   {
     // do not touch arch/app state
+
+    // allocate space for a new active period model
+    stats->models.emplace_back();
   }
 
 private:

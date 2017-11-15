@@ -1,6 +1,9 @@
 #ifndef EH_SIM_STATS_HPP
 #define EH_SIM_STATS_HPP
 
+#include <chrono>
+#include <deque>
+
 namespace ehsim {
 struct cpu_stats {
   /**
@@ -31,9 +34,24 @@ struct system_stats {
   double energy_remaining = 0.0;
 };
 
+/**
+ * A model of one active period.
+ */
+struct eh_model {
+  /**
+   * The cycle count of each backup.
+   */
+  std::deque<uint32_t> backup_times;
+};
+
 struct stats_bundle {
   system_stats system;
   cpu_stats cpu;
+
+  /**
+   * Model of multiple active periods.
+   */
+  std::deque<eh_model> models;
 };
 }
 
