@@ -145,6 +145,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
       auto const next_voltage = power.get_voltage(current_ms);
       auto const harvested_energy = calculate_energy(next_voltage, battery.capacitance());
       battery.harvest_energy(harvested_energy);
+      stats.system.energy_harvested += harvested_energy;
     }
   }
 

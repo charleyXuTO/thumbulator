@@ -22,6 +22,11 @@ struct system_stats {
    * Number of cycles ticked.
    */
   uint64_t cycle_count = 0u;
+
+  /**
+   * Amount of energy harvested (nJ).
+   */
+  double energy_harvested = 0.0;
 };
 
 struct stats_bundle {
