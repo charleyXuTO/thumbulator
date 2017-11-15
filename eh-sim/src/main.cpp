@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     std::cout << "CPU cycle count: " << stats.cpu.cycle_count << "\n";
     std::cout << "Total time (ns): " << stats.system.time.count() << "\n";
     std::cout << "Energy harvested (J): " << stats.system.energy_harvested * 1e-9 << "\n";
+    std::cout << "Energy remaining (J): " << stats.system.energy_remaining * 1e-9 << "\n";
 
   } catch(std::exception const &e) {
     std::cerr << "Error: " << e.what() << "\n";

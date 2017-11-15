@@ -9,6 +9,7 @@
 
 #include <thumbulator/cpu.hpp>
 #include <thumbulator/memory.hpp>
+#include <iostream>
 
 namespace ehsim {
 
@@ -101,6 +102,12 @@ std::chrono::milliseconds to_ms(std::chrono::nanoseconds const &time)
   return std::chrono::duration_cast<std::chrono::milliseconds>(time);
 }
 
+double calculate_charging_rate(double voltage, double capacitance, double cycles_per_sample)
+{
+  auto const energy = calculate_energy(voltage, capacitance);
+  return energy / cycles_per_sample;
+}
+
 stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 {
   using namespace std::chrono_literals;
@@ -118,15 +125,17 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
   voltage_trace power(voltage_trace_file);
   capacitor battery(4.7e-5);
 
-  auto const initial_voltage = power.get_voltage(to_ms(stats.system.time));
-  auto const initial_energy = calculate_energy(initial_voltage, battery.capacitance());
-  battery.harvest_energy(initial_energy);
-
+  auto const cycles_per_sample =
+      thumbulator::CPU_FREQ * std::chrono::duration<double>(power.sample_rate()).count();
+  auto voltage = power.get_voltage(to_ms(stats.system.time));
+  auto charging_rate = calculate_charging_rate(voltage, battery.capacitance(), cycles_per_sample);
   auto next_charge_time = power.sample_rate();
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
+    double harvested_energy;
+
     if(battery.energy_stored() > EPSILON) {
       // active period
       auto const instruction_ticks = step_cpu();
@@ -136,20 +145,24 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
       stats.system.time += get_time(instruction_ticks);
 
       battery.consume_energy(EPSILON);
+      harvested_energy = charging_rate * instruction_ticks;
     } else {
-      // charging period
-      stats.system.time = next_charge_time;
+      stats.system.time += get_time(1);
+      harvested_energy = charging_rate;
     }
 
-    if(stats.system.time == next_charge_time) {
+    battery.harvest_energy(harvested_energy);
+    stats.system.energy_harvested += harvested_energy;
+
+    if(stats.system.time >= next_charge_time) {
       next_charge_time += power.sample_rate();
 
-      auto const next_voltage = power.get_voltage(to_ms(stats.system.time));
-      auto const harvested_energy = calculate_energy(next_voltage, battery.capacitance());
-      battery.harvest_energy(harvested_energy);
-      stats.system.energy_harvested += harvested_energy;
+      voltage = power.get_voltage(to_ms(stats.system.time));
+      charging_rate = calculate_charging_rate(voltage, battery.capacitance(), cycles_per_sample);
     }
   }
+
+  stats.system.energy_remaining = battery.energy_stored();
 
   return stats;
 }

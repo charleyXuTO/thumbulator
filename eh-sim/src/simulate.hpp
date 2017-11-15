@@ -28,6 +28,11 @@ struct system_stats {
    * Amount of energy harvested (nJ).
    */
   double energy_harvested = 0.0;
+
+  /**
+   * Remaining energy in battery.
+   */
+  double energy_remaining = 0.0;
 };
 
 struct stats_bundle {
