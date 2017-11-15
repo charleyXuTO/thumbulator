@@ -5,6 +5,8 @@
 
 #include "thumbulator/decode.hpp"
 
+#define CPU_FREQ 24000000
+
 /**
  * The state of an armv6m CPU.
  */
@@ -44,6 +46,21 @@ struct cpu_state {
    */
   uint32_t exceptmask;
 };
+
+/**
+ * Informs fetch that previous instruction caused a control flow change
+ */
+extern bool BRANCH_WAS_TAKEN;
+
+/**
+ * Whether or not the exit instruction has been executed.
+ */
+extern bool EXIT_INSTRUCTION_ENCOUNTERED;
+
+/**
+ * Resets the CPU according to the specification.
+ */
+void cpu_reset();
 
 extern cpu_state cpu;
 

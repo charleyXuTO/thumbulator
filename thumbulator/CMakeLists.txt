@@ -10,16 +10,17 @@ add_library(
   ${PROJECT_NAME}
   include/thumbulator/cpu.hpp
   include/thumbulator/decode.hpp
-  include/thumbulator/sim_support.hpp
+  include/thumbulator/memory.hpp
   src/cpu_flags.hpp
   src/decode.cpp
+  src/exit.hpp
   src/cpu.cpp
   src/exmemwb_arith.cpp
   src/exmemwb_branch.cpp
   src/exmemwb_logic.cpp
   src/exmemwb_mem.cpp
   src/exmemwb_misc.cpp
-  src/sim_support.cpp
+  src/memory.cpp
   src/trace.hpp
 )
 

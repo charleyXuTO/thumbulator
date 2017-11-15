@@ -1,6 +1,7 @@
-#include "thumbulator/sim_support.hpp"
+#include "thumbulator/memory.hpp"
 
 #include "cpu_flags.hpp"
+#include "exit.hpp"
 #include "trace.hpp"
 
 ///--- Load/store multiple operations --------------------------------------------///

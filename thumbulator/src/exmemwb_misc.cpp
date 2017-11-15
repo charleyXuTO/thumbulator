@@ -1,4 +1,4 @@
-#include "thumbulator/sim_support.hpp"
+#include "thumbulator/memory.hpp"
 
 #include "cpu_flags.hpp"
 #include "trace.hpp"

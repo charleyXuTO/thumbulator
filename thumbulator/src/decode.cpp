@@ -1,11 +1,10 @@
 #include "thumbulator/decode.hpp"
 
 #include "thumbulator/cpu.hpp"
-#include "thumbulator/sim_support.hpp"
+#include "thumbulator/memory.hpp"
 
 #include "cpu_flags.hpp"
-
-#include <cstdio>
+#include "exit.hpp"
 
 // Various decodings
 decode_result decode_3lo(const uint16_t pInsn)

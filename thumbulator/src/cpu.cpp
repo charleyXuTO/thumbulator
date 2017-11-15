@@ -1,10 +1,65 @@
 #include "thumbulator/cpu.hpp"
 
-#include "thumbulator/sim_support.hpp"
+#include "thumbulator/memory.hpp"
+#include "cpu_flags.hpp"
+#include "exit.hpp"
 
 #include <cstdio>
+#include <cstring>
 
 uint16_t insn;
+
+bool BRANCH_WAS_TAKEN = false;
+bool EXIT_INSTRUCTION_ENCOUNTERED = false;
+
+// Reset CPU state in accordance with B1.5.5 and B3.2.2
+void cpu_reset()
+{
+  constexpr auto ESPR_T = (1 << 24);
+
+  // Initialize the special-purpose registers
+  cpu.apsr = 0;       // No flags set
+  cpu.ipsr = 0;       // No exception number
+  cpu.espr = ESPR_T;  // Thumb mode
+  cpu.primask = 0;    // No except priority boosting
+  cpu.control = 0;    // Priv mode and main stack
+  cpu.sp_main = 0;    // Stack pointer for exception handling
+  cpu.sp_process = 0; // Stack pointer for process
+
+  // Clear the general purpose registers
+  memset(cpu.gpr, 0, sizeof(cpu.gpr));
+
+  // Set the reserved GPRs
+  cpu.gpr[GPR_LR] = 0;
+
+  // May need to add logic to send writes and reads to the
+  // correct stack pointer
+  // Set the stack pointers
+  load(0, &cpu.sp_main, 0);
+  cpu.sp_main &= 0xFFFFFFFC;
+  cpu.sp_process = 0;
+  cpu_set_sp(cpu.sp_main);
+
+  // Set the program counter to the address of the reset exception vector
+  uint32_t startAddr;
+  load(0x4, &startAddr, 0);
+  cpu_set_pc(startAddr);
+
+  // No pending exceptions
+  cpu.exceptmask = 0;
+
+  // Check for attempts to go to ARM mode
+  if((cpu_get_pc() & 0x1) == 0) {
+    printf("Error: Reset PC to an ARM address 0x%08X\n", cpu_get_pc());
+    terminate_simulation(1);
+  }
+
+  // Reset the SYSTICK unit
+  SYSTICK.control = 0x4;
+  SYSTICK.reload = 0x0;
+  SYSTICK.value = 0x0;
+  SYSTICK.calib = CPU_FREQ / 100 | 0x80000000;
+}
 
 cpu_state cpu;
 system_tick SYSTICK;

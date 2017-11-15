@@ -8,7 +8,7 @@
 #include <cstring>
 
 #include <thumbulator/cpu.hpp>
-#include <thumbulator/sim_support.hpp>
+#include <thumbulator/memory.hpp>
 
 namespace ehsim {
 
