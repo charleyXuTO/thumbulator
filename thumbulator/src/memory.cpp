@@ -5,6 +5,8 @@
 #include "cpu_flags.hpp"
 #include "exit.hpp"
 
+namespace thumbulator {
+
 uint32_t RAM[RAM_SIZE >> 2];
 uint32_t FLASH_MEMORY[FLASH_SIZE >> 2];
 
@@ -113,4 +115,5 @@ void store(uint32_t address, uint32_t value)
 
     FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 2] = value;
   }
+}
 }

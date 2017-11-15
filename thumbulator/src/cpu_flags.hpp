@@ -1,7 +1,9 @@
 #ifndef THUMBULATOR_CPU_FLAGS_H
 #define THUMBULATOR_CPU_FLAGS_H
 
-#include"thumbulator/cpu.hpp"
+#include "thumbulator/cpu.hpp"
+
+namespace thumbulator {
 
 // Define bit fields of APSR
 #define FLAG_N_INDEX 31
@@ -12,7 +14,6 @@
 #define FLAG_Z_MASK (1 << FLAG_Z_INDEX)
 #define FLAG_C_MASK (1 << FLAG_C_INDEX)
 #define FLAG_V_MASK (1 << FLAG_V_INDEX)
-
 
 // GPRs with special functions
 #define GPR_SP 13
@@ -74,8 +75,8 @@ static void do_cflag(uint32_t a, uint32_t b, uint32_t carry)
 // Special write to PC
 #define alu_write_pc(x)    \
   do {                     \
-    BRANCH_WAS_TAKEN = 1;       \
+    BRANCH_WAS_TAKEN = 1;  \
     cpu_set_pc((x) | 0x1); \
   } while(0)
-
+}
 #endif //THUMBULATOR_CPU_FLAGS_H

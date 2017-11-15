@@ -5,7 +5,9 @@
 
 #include "thumbulator/decode.hpp"
 
-#define CPU_FREQ 24000000
+namespace thumbulator {
+
+constexpr auto CPU_FREQ = 24000000;
 
 /**
  * The state of an armv6m CPU.
@@ -127,5 +129,6 @@ extern system_tick SYSTICK;
  * @return The number of cycles taken.
  */
 uint32_t exmemwb(uint16_t instruction, decode_result const *decoded);
+}
 
 #endif //THUMBULATOR_CPU_H

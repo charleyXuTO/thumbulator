@@ -4,6 +4,8 @@
 #include "exit.hpp"
 #include "trace.hpp"
 
+namespace thumbulator {
+
 ///--- Load/store multiple operations --------------------------------------------///
 
 // LDM - Load multiple registers from the stack
@@ -543,4 +545,5 @@ uint32_t strh_r(decode_result const *decoded)
   store(effectiveAddressWordAligned, orig);
 
   return TIMING_MEM;
+}
 }

@@ -6,6 +6,8 @@
 #include "cpu_flags.hpp"
 #include "exit.hpp"
 
+namespace thumbulator {
+
 // Various decodings
 decode_result decode_3lo(const uint16_t pInsn)
 {
@@ -180,21 +182,20 @@ decode_result decode_error(const uint16_t pInsn)
 }
 
 // Decode functions that require more opcode bits than the first 6
-decode_result(*decodeJumpTable17[4])
-(const uint16_t pInsn) = {
+decode_result (*decodeJumpTable17[4])(const uint16_t pInsn) = {
     decode_mov_r,               /* 01_0001_0XXX (110 - 117) */
     decode_mov_r, decode_mov_r, /* 01_0001_10XX (118 - 11B) */
     decode_1all                 /* 01_0001_11XX (11C - 11F) */
 };
 
-decode_result(*decodeJumpTable44[4])
-(const uint16_t pInsn) = {decode_imm7, /* 10_1100_00XX (2C0 - 2C3) */
-    decode_error, decode_2lo,          /* 10_1100_10XX (2C8 - 2CB) */
+decode_result (*decodeJumpTable44[4])(const uint16_t pInsn) = {
+    decode_imm7,              /* 10_1100_00XX (2C0 - 2C3) */
+    decode_error, decode_2lo, /* 10_1100_10XX (2C8 - 2CB) */
     decode_error};
 
-decode_result(*decodeJumpTable47[4])
-(const uint16_t pInsn) = {decode_pop, /* 10_1111_0XXX (2F0 - 2F7) */
-    decode_pop, decode_imm8,          /* 10_1111_10XX (2F8 - 2FB) */
+decode_result (*decodeJumpTable47[4])(const uint16_t pInsn) = {
+    decode_pop,              /* 10_1111_0XXX (2F0 - 2F7) */
+    decode_pop, decode_imm8, /* 10_1111_10XX (2F8 - 2FB) */
     decode_error};
 
 decode_result decode_17(const uint16_t pInsn)
@@ -214,12 +215,11 @@ decode_result decode_47(const uint16_t pInsn)
 // to make decoding fast
 // Indices 16, 17, 44, 47, 60, and 62 have multiple conflicting
 // decodings that need to be resolved outside the jump table
-decode_result(*decodeJumpTable[64])
-(const uint16_t pInsn) = {decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_2loimm5,
-    decode_2loimm5, decode_2loimm5, decode_3lo, decode_2loimm3, decode_imm8lo, decode_imm8lo,
+decode_result (*decodeJumpTable[64])(const uint16_t pInsn) = {decode_2loimm5, decode_2loimm5,
+    decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_3lo, decode_2loimm3,
     decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo, decode_imm8lo,
-    decode_2lo, /* A5.2.2 - these are all decoded the same */
-    decode_17,  /* 17 */
+    decode_imm8lo, decode_imm8lo, decode_2lo, /* A5.2.2 - these are all decoded the same */
+    decode_17,                                /* 17 */
     decode_imm8lo, decode_imm8lo, decode_3lo, decode_3lo, decode_3lo, decode_3lo, decode_2loimm5,
     decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_2loimm5,
     decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_2loimm5, decode_imm8lo,
@@ -240,4 +240,5 @@ decode_result(*decodeJumpTable[64])
 decode_result decode(const uint16_t instruction)
 {
   return decodeJumpTable[instruction >> 10](instruction);
+}
 }

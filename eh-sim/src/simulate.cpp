@@ -19,21 +19,22 @@ void load_program(char const *file_name)
     throw std::runtime_error("Could not open binary file.\n");
   }
 
-  std::fread(&FLASH_MEMORY, sizeof(uint32_t), sizeof(FLASH_MEMORY) / sizeof(uint32_t), fd);
+  std::fread(&thumbulator::FLASH_MEMORY, sizeof(uint32_t),
+      sizeof(thumbulator::FLASH_MEMORY) / sizeof(uint32_t), fd);
   std::fclose(fd);
 }
 
 uint64_t cycles_to_ms(uint64_t const cycle_count)
 {
-  constexpr double CPU_PERIOD = 1.0 / CPU_FREQ;
+  constexpr double CPU_PERIOD = 1.0 / thumbulator::CPU_FREQ;
   auto const time = CPU_PERIOD * cycle_count * 1000;
 
-  return static_cast<uint64_t >(time);
+  return static_cast<uint64_t>(time);
 }
 
 uint64_t ms_to_cycles(uint64_t const ms)
 {
-  return ms * static_cast<uint64_t>(CPU_FREQ * 0.001);
+  return ms * static_cast<uint64_t>(thumbulator::CPU_FREQ * 0.001);
 }
 
 void initialize_system(char const *binary_file)
@@ -45,15 +46,15 @@ void initialize_system(char const *binary_file)
   std::fprintf(stderr, "Ram end:\t0x%8.8X\n", (RAM_START + RAM_SIZE));
 
   // Reset memory, then load program to memory
-  std::memset(RAM, 0, sizeof(RAM));
-  std::memset(FLASH_MEMORY, 0, sizeof(FLASH_MEMORY));
+  std::memset(thumbulator::RAM, 0, sizeof(thumbulator::RAM));
+  std::memset(thumbulator::FLASH_MEMORY, 0, sizeof(thumbulator::FLASH_MEMORY));
   load_program(binary_file);
 
   // Initialize CPU state
-  cpu_reset();
+  thumbulator::cpu_reset();
 
   // PC seen is PC + 4
-  cpu_set_pc(cpu_get_pc() + 0x4);
+  thumbulator::cpu_set_pc(thumbulator::cpu_get_pc() + 0x4);
 }
 
 /**
@@ -63,25 +64,25 @@ void initialize_system(char const *binary_file)
  */
 uint32_t step_cpu()
 {
-  BRANCH_WAS_TAKEN = false;
+  thumbulator::BRANCH_WAS_TAKEN = false;
 
-  if((cpu_get_pc() & 0x1) == 0) {
+  if((thumbulator::cpu_get_pc() & 0x1) == 0) {
     throw std::runtime_error("PC moved out of thumb mode.");
   }
 
   // fetch
   uint16_t instruction;
-  fetch_instruction(cpu_get_pc() - 0x4, &instruction);
+  thumbulator::fetch_instruction(thumbulator::cpu_get_pc() - 0x4, &instruction);
   // decode
-  decode_result const decoded = decode(instruction);
+  auto const decoded = thumbulator::decode(instruction);
   // execute, memory, and write-back
-  uint32_t const instruction_ticks = exmemwb(instruction, &decoded);
+  uint32_t const instruction_ticks = thumbulator::exmemwb(instruction, &decoded);
 
   // advance to next PC
-  if(!BRANCH_WAS_TAKEN) {
-    cpu_set_pc(cpu_get_pc() + 0x2);
+  if(!thumbulator::BRANCH_WAS_TAKEN) {
+    thumbulator::cpu_set_pc(thumbulator::cpu_get_pc() + 0x2);
   } else {
-    cpu_set_pc(cpu_get_pc() + 0x4);
+    thumbulator::cpu_set_pc(thumbulator::cpu_get_pc() + 0x4);
   }
 
   return instruction_ticks;
@@ -121,7 +122,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
-  while(!EXIT_INSTRUCTION_ENCOUNTERED) {
+  while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
     if(battery.energy_stored() > EPSILON) {
       // active period
       auto const instruction_ticks = step_cpu();

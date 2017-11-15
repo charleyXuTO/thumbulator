@@ -3,6 +3,8 @@
 
 #include <cstdio>
 
+namespace thumbulator {
+
 #define ENABLE_INSTRUCTION_TRACE 0
 #define TRACE_INSTRUCTION(format, ...)                \
   do {                                                \
@@ -11,5 +13,5 @@
       fprintf(stderr, format, __VA_ARGS__);           \
     }                                                 \
   } while(0)
-
+}
 #endif //THUMBULATOR_TRACE_HPP

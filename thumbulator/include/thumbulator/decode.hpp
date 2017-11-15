@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+namespace thumbulator {
+
 /**
  * Registers that hold the results of instruction decoding.
  *
@@ -47,5 +49,6 @@ struct decode_result {
  * @return The decode stage registers based upon the passed instruction.
  */
 decode_result decode(uint16_t instruction);
+}
 
 #endif

@@ -4,6 +4,8 @@
 #include "exit.hpp"
 #include "trace.hpp"
 
+namespace thumbulator {
+
 ///--- Compare operations --------------------------------------------///
 
 uint32_t cmn(decode_result const *decoded)
@@ -238,4 +240,5 @@ uint32_t bl(decode_result const *decoded)
   BRANCH_WAS_TAKEN = 1;
 
   return TIMING_BRANCH_LINK;
+}
 }

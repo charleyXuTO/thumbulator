@@ -4,8 +4,9 @@
 #include "cpu_flags.hpp"
 #include "exit.hpp"
 
-#include <cstdio>
 #include <cstring>
+
+namespace thumbulator {
 
 uint16_t insn;
 
@@ -308,4 +309,5 @@ uint32_t exmemwb(uint16_t instruction, decode_result const *decoded)
   }
 
   return insnTicks;
+}
 }

@@ -4,6 +4,8 @@
 #include "exit.hpp"
 #include "trace.hpp"
 
+namespace thumbulator {
+
 ///--- Add operations --------------------------------------------///
 
 // ADCS - add with carry and update flags
@@ -261,4 +263,5 @@ uint32_t muls(decode_result const *decoded)
   do_zflag(result);
 
   return 32;
+}
 }

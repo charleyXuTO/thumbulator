@@ -3,6 +3,8 @@
 #include "cpu_flags.hpp"
 #include "trace.hpp"
 
+namespace thumbulator {
+
 ///--- Logical operations ----------------------------------------///
 
 // AND - logical AND two registers and update flags
@@ -246,4 +248,5 @@ uint32_t rors(decode_result const *decoded)
   do_zflag(result);
 
   return 1;
+}
 }

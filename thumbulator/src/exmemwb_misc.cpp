@@ -3,6 +3,8 @@
 #include "cpu_flags.hpp"
 #include "trace.hpp"
 
+namespace thumbulator {
+
 uint32_t breakpoint(decode_result const *decoded)
 {
   return 0;
@@ -148,4 +150,5 @@ uint32_t revsh(decode_result const *decoded)
   cpu_set_gpr(decoded->Rd, result);
 
   return 1;
+}
 }

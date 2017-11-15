@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+namespace thumbulator {
+
 #define RAM_START 0x40000000
 #define RAM_SIZE (1 << 23) // 8 MB
 #define RAM_ADDRESS_MASK (((~0) << 23) ^ (~0))
@@ -47,5 +49,6 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead);
  * @param value The data to store at that address.
  */
 void store(uint32_t address, uint32_t value);
+}
 
 #endif
