@@ -3,13 +3,20 @@
 
 #include <thumbulator/cpu.hpp>
 
+#include "msp430_energy.hpp"
+
 namespace ehsim {
 
 class checkpoint_scheme {
 public:
   double backup_energy() const
   {
-    return 0.0;
+    // 16 general purpose registers
+    auto const gpr_energy = 16 * MSP430_FLASH_REG;
+    // 3 special registers
+    auto const special_energy = 3 * MSP430_FLASH_REG;
+
+    return gpr_energy + special_energy;
   }
 
   bool will_backup() const
@@ -24,7 +31,12 @@ public:
 
   double restore_energy() const
   {
-    return 0.0;
+    // 16 general purpose registers
+    auto const gpr_energy = 16 * MSP430_REG_FLASH;
+    // 3 special registers
+    auto const special_energy = 3 * MSP430_REG_FLASH;
+
+    return gpr_energy + special_energy;
   }
 
   void restore()
