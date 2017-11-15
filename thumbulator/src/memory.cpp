@@ -7,8 +7,8 @@
 
 namespace thumbulator {
 
-uint32_t RAM[RAM_SIZE >> 2];
-uint32_t FLASH_MEMORY[FLASH_SIZE >> 2];
+uint32_t RAM[RAM_SIZE_BYTES >> 2];
+uint32_t FLASH_MEMORY[FLASH_SIZE_BYTES >> 2];
 
 // Memory access functions assume that RAM has a higher address than Flash
 void fetch_instruction(uint32_t address, uint16_t *value)
@@ -16,7 +16,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
   uint32_t fromMem;
 
   if(address >= RAM_START) {
-    if(address >= (RAM_START + RAM_SIZE)) {
+    if(address >= (RAM_START + RAM_SIZE_BYTES)) {
       fprintf(
           stderr, "Error: ILR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       terminate_simulation(1);
@@ -24,7 +24,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
 
     fromMem = RAM[(address & RAM_ADDRESS_MASK) >> 2];
   } else {
-    if(address >= (FLASH_START + FLASH_SIZE)) {
+    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
       fprintf(
           stderr, "Error: ILF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       terminate_simulation(1);
@@ -40,7 +40,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
 void load(uint32_t address, uint32_t *value, uint32_t falseRead)
 {
   if(address >= RAM_START) {
-    if(address >= (RAM_START + RAM_SIZE)) {
+    if(address >= (RAM_START + RAM_SIZE_BYTES)) {
       // Check for UART
       if(address == 0xE0000000) {
         *value = 0;
@@ -63,7 +63,7 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead)
 
     *value = RAM[(address & RAM_ADDRESS_MASK) >> 2];
   } else {
-    if(address >= (FLASH_START + FLASH_SIZE)) {
+    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
       fprintf(
           stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       terminate_simulation(1);
@@ -76,7 +76,7 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead)
 void store(uint32_t address, uint32_t value)
 {
   if(address >= RAM_START) {
-    if(address >= (RAM_START + RAM_SIZE)) {
+    if(address >= (RAM_START + RAM_SIZE_BYTES)) {
       // Check for UART
       if(address == 0xE0000000) {
         return;
@@ -107,7 +107,7 @@ void store(uint32_t address, uint32_t value)
 
     RAM[(address & RAM_ADDRESS_MASK) >> 2] = value;
   } else {
-    if(address >= (FLASH_START + FLASH_SIZE)) {
+    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
       fprintf(
           stderr, "Error: DSF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       terminate_simulation(1);

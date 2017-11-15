@@ -6,16 +6,18 @@
 namespace thumbulator {
 
 #define RAM_START 0x40000000
-#define RAM_SIZE (1 << 23) // 8 MB
+#define RAM_SIZE_BYTES (1 << 23) // 8 MB
+#define RAM_SIZE_ELEMENTS (RAM_SIZE_BYTES >> 2)
 #define RAM_ADDRESS_MASK (((~0) << 23) ^ (~0))
 
 /**
  * Random-Access Memory, like SRAM.
  */
-extern uint32_t RAM[RAM_SIZE >> 2];
+extern uint32_t RAM[RAM_SIZE_ELEMENTS];
 
 #define FLASH_START 0x0
-#define FLASH_SIZE (1 << 23) // 8 MB
+#define FLASH_SIZE_BYTES (1 << 23) // 8 MB
+#define FLASH_SIZE_ELEMENTS (FLASH_SIZE_BYTES >> 2)
 #define FLASH_ADDRESS_MASK (((~0) << 23) ^ (~0))
 
 /**
@@ -23,7 +25,7 @@ extern uint32_t RAM[RAM_SIZE >> 2];
  *
  * Typically used to store the application code.
  */
-extern uint32_t FLASH_MEMORY[FLASH_SIZE >> 2];
+extern uint32_t FLASH_MEMORY[FLASH_SIZE_ELEMENTS];
 
 /**
  * Fetch an instruction from memory.
