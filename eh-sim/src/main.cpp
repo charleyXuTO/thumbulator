@@ -41,12 +41,17 @@ void validate(argagg::parser_results const &options)
 
   auto const path_to_voltage_trace = options["voltages"].as<std::string>();
   ensure_file_exists(path_to_voltage_trace);
+
+  if(options["rate"].count() == 0) {
+    throw std::runtime_error("No sampling rate provided for the voltage trace.");
+  }
 }
 
 int main(int argc, char *argv[])
 {
   argagg::parser arguments{{{"help", {"-h", "--help"}, "display help information", 0},
       {"voltages", {"--voltage-trace"}, "path to voltage trace", 1},
+      {"rate", {"--voltage-rate"}, "sampling rate of voltage trace (microseconds)", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1}}};
 
   try {
@@ -59,12 +64,12 @@ int main(int argc, char *argv[])
     validate(options);
 
     auto const path_to_binary = options["binary"];
+
     auto const path_to_voltage_trace = options["voltages"];
+    std::chrono::microseconds sampling_rate(options["rate"]);
 
-    ehsim::voltage_trace power(path_to_voltage_trace, std::chrono::microseconds(1000));
-
-    //auto scheme = std::make_unique<ehsim::magical_scheme>();
     auto scheme = std::make_unique<ehsim::backup_every_cycle>();
+    ehsim::voltage_trace power(path_to_voltage_trace, sampling_rate);
 
     auto const stats = ehsim::simulate(path_to_binary, power, scheme.get());
 
@@ -78,9 +83,10 @@ int main(int argc, char *argv[])
     std::cout << "\nThe EH Model\n\n";
     for(auto const &model : stats.models) {
       std::cout << "Active Period: " << id++ << "\n";
-      std::cout << "Total instruction energy (J): " << model.instruction_energy * 1e-9 << "\n";
+      std::cout << "Total instruction energy (nJ): " << model.instruction_energy << "\n";
 
-      auto const tau_sum = std::accumulate(model.backup_times.begin(), model.backup_times.end(), 0ul);
+      auto const tau_sum =
+          std::accumulate(model.backup_times.begin(), model.backup_times.end(), 0ul);
       auto const tau_b = static_cast<double>(tau_sum) / model.backup_times.size();
       std::cout << "Tau_b (cycles): " << tau_b << "\n";
     }
