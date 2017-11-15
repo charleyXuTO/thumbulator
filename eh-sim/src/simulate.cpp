@@ -150,12 +150,12 @@ stats_bundle simulate(char const *binary_file, voltage_trace const &power, eh_sc
 
       // consume energy for execution
       scheme->execute_instruction(&stats);
+
+      if(scheme->will_backup(&stats)) {
+        scheme->backup(&stats);
+      }
     } else {
       was_active = false;
-    }
-
-    if(scheme->will_backup(&stats)) {
-      scheme->backup(&stats);
     }
 
     // harvest energy
