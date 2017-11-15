@@ -143,7 +143,6 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
       // active period
       if(restore_needed) {
         scheme.restore();
-
         restore_needed = false;
       }
 
@@ -155,7 +154,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 
       // consume energy for execution
       battery.consume_energy(EPSILON);
-    } else if(backup_needed) {
+    } else if(backup_needed && scheme.will_backup()) {
       scheme.backup();
 
       backup_needed = false;

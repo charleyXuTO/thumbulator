@@ -10,6 +10,11 @@ public:
     return 0.0;
   }
 
+  bool will_backup() const
+  {
+    return true;
+  }
+
   void backup()
   {
     architectural_state = thumbulator::cpu;
