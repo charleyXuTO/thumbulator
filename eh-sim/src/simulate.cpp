@@ -121,8 +121,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, e
   voltage_trace power(voltage_trace_file);
   auto &battery = scheme->get_battery();
 
-  auto backup_needed = false;
-  auto restore_needed = false;
+  auto was_active = false;
 
   auto const cycles_per_sample =
       scheme->clock_frequency() * std::chrono::duration<double>(power.sample_rate()).count();
@@ -135,29 +134,29 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, e
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
     uint64_t elapsed_cycles = 1;
 
-    if(battery.energy_stored() > scheme->energy_threshold()) {
-      // active period
-      if(restore_needed) {
+    if(scheme->is_active()) {
+      if(!was_active && stats.cpu.instruction_count != 0) {
+        // we have just transitioned to an active mode
         scheme->restore(&stats);
-        restore_needed = false;
       } else if(stats.cpu.instruction_count == 0) {
-        // allocate space for very first active period model
         stats.models.emplace_back();
       }
 
+      was_active = true;
+
       elapsed_cycles = step_cpu();
-      backup_needed = true;
 
       stats.cpu.instruction_count++;
       stats.cpu.cycle_count += elapsed_cycles;
 
       // consume energy for execution
-      battery.consume_energy(scheme->energy_instruction());
-    } else if(backup_needed && scheme->will_backup(stats)) {
-      scheme->backup(&stats);
+      scheme->execute_instruction(&stats);
+    } else {
+      was_active = false;
+    }
 
-      backup_needed = false;
-      restore_needed = true;
+    if(scheme->will_backup(&stats)) {
+      scheme->backup(&stats);
     }
 
     // harvest energy

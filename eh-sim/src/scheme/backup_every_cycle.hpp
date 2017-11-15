@@ -7,6 +7,11 @@
 
 namespace ehsim {
 
+/**
+ * Based on Architecture Exploration for Ambient Energy Harvesting Nonvolatile Processors.
+ *
+ * See the data relating to the BEC scheme.
+ */
 class backup_every_cycle : public eh_scheme {
 public:
   backup_every_cycle() : battery(4.7e-5)
@@ -20,35 +25,41 @@ public:
 
   uint32_t clock_frequency() const override
   {
-    return 8000;
+    return cpu_frequency;
   }
 
-  double energy_threshold() const override
+  void execute_instruction(stats_bundle *stats) override
   {
-    return energy_instruction();
+    battery.consume_energy(normal_running_energy);
+
+    stats->models.back().instruction_energy += normal_running_energy;
   }
 
-  double energy_instruction() const override
+  bool is_active() const override
   {
-    // based on Architecture Exploration for Ambient Energy Harvesting Nonvolatile Processors, Figure 11
-    return 0.03125;
+    return battery.energy_stored() > (normal_running_energy + backup_energy_penalty);
   }
 
-  bool will_backup(stats_bundle const &stats) const override
+  bool will_backup(stats_bundle *stats) const override
   {
-    // always backup when it is an option
-    return true;
+    // if we are in an active period, we backup
+    return is_active();
   }
 
   void backup(stats_bundle *stats) override
   {
-    // do not touch arch/app state
+    // do not touch arch/app state, assume it is all non-volatile
+
+    battery.consume_energy(backup_energy_penalty);
+
     stats->models.back().backup_times.push_back(stats->cpu.cycle_count);
   }
 
   void restore(stats_bundle *stats) override
   {
-    // do not touch arch/app state
+    // do not touch arch/app state, assume it is all non-volatile
+
+    battery.consume_energy(recovery_energy_penalty);
 
     // allocate space for a new active period model
     stats->models.emplace_back();
@@ -56,6 +67,14 @@ public:
 
 private:
   capacitor battery;
+  // see Section 3 from paper - 8 KHz clock frequency
+  static constexpr uint32_t cpu_frequency = 8000;
+  // see Figure 11 from paper - instruction energy is 31.25 pJ
+  static constexpr auto normal_running_energy = 0.03125;
+  // see Figure 11 from paper - backup energy penalty is 125 pj
+  static constexpr auto backup_energy_penalty = 0.125;
+  // see Figure 11 from paper - restore cost is 250 pj
+  static constexpr auto recovery_energy_penalty = 0.25;
 };
 }
 

@@ -31,18 +31,18 @@ public:
     return thumbulator::CPU_FREQ;
   }
 
-  double energy_threshold() const override
-  {
-    return energy_instruction();
-  }
-
-  double energy_instruction() const override
+  void execute_instruction(stats_bundle *stats) override
   {
     // energy to fetch and execute
-    return MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
+    battery.consume_energy(energy_per_instruction);
   }
 
-  bool will_backup(stats_bundle const &stats) const override
+  bool is_active() const override
+  {
+    return battery.energy_stored() > energy_per_instruction;
+  }
+
+  bool will_backup(stats_bundle *stats) const override
   {
     // always backup when it is an option
     return true;
@@ -64,6 +64,8 @@ public:
 
 private:
   capacitor battery;
+  // based on Mementos numbers for an MSP430
+  static constexpr auto energy_per_instruction = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
 };
 }
 

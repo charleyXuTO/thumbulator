@@ -15,11 +15,11 @@ public:
 
   virtual uint32_t clock_frequency() const = 0;
 
-  virtual double energy_threshold() const = 0;
+  virtual void execute_instruction(stats_bundle *stats) = 0;
 
-  virtual double energy_instruction() const = 0;
+  virtual bool is_active() const = 0;
 
-  virtual bool will_backup(stats_bundle const &stats) const = 0;
+  virtual bool will_backup(stats_bundle *stats) const = 0;
 
   virtual void backup(stats_bundle *stats) = 0;
 
