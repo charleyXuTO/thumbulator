@@ -1,7 +1,8 @@
 #ifndef EH_SIM_MAGIC_HPP
 #define EH_SIM_MAGIC_HPP
 
-#include "eh_scheme.hpp"
+#include "scheme/eh_scheme.hpp"
+#include "capacitor.hpp"
 #include "msp430_energy.hpp"
 
 namespace ehsim {
@@ -13,6 +14,15 @@ namespace ehsim {
  */
 class magical_scheme : public eh_scheme {
 public:
+  magical_scheme() : battery(4.7e-5)
+  {
+  }
+
+  capacitor &get_battery() override
+  {
+    return battery;
+  }
+
   double energy_threshold() const override
   {
     return energy_instruction();
@@ -39,6 +49,9 @@ public:
   {
     // do not touch arch/app state
   }
+
+private:
+  capacitor battery;
 };
 }
 

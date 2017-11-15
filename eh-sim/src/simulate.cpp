@@ -107,8 +107,7 @@ double calculate_charging_rate(double voltage, double capacitance, double cycles
   return energy / cycles_per_sample;
 }
 
-stats_bundle
-simulate(char const *binary_file, char const *voltage_trace_file, eh_scheme *scheme)
+stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, eh_scheme *scheme)
 {
   using namespace std::chrono_literals;
 
@@ -120,7 +119,7 @@ simulate(char const *binary_file, char const *voltage_trace_file, eh_scheme *sch
 
   // energy harvesting
   voltage_trace power(voltage_trace_file);
-  capacitor battery(4.7e-5);
+  auto &battery = scheme->get_battery();
 
   auto backup_needed = false;
   auto restore_needed = false;

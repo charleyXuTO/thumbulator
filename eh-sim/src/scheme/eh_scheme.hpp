@@ -10,6 +10,8 @@ class capacitor;
  */
 class eh_scheme {
 public:
+  virtual capacitor &get_battery() = 0;
+
   virtual double energy_threshold() const = 0;
 
   virtual double energy_instruction() const = 0;
