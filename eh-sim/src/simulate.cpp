@@ -96,9 +96,9 @@ std::chrono::nanoseconds get_time(uint64_t const cycle_count, uint32_t const fre
   return std::chrono::nanoseconds(time);
 }
 
-std::chrono::milliseconds to_ms(std::chrono::nanoseconds const &time)
+std::chrono::microseconds to_microseconds(std::chrono::nanoseconds const &time)
 {
-  return std::chrono::duration_cast<std::chrono::milliseconds>(time);
+  return std::chrono::duration_cast<std::chrono::microseconds>(time);
 }
 
 double calculate_charging_rate(double voltage, double capacitance, double cycles_per_sample)
@@ -107,7 +107,7 @@ double calculate_charging_rate(double voltage, double capacitance, double cycles
   return energy / cycles_per_sample;
 }
 
-stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, eh_scheme *scheme)
+stats_bundle simulate(char const *binary_file, voltage_trace const &power, eh_scheme *scheme)
 {
   using namespace std::chrono_literals;
 
@@ -118,14 +118,13 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, e
   initialize_system(binary_file);
 
   // energy harvesting
-  voltage_trace power(voltage_trace_file);
   auto &battery = scheme->get_battery();
 
   auto was_active = false;
 
   auto const cycles_per_sample =
       scheme->clock_frequency() * std::chrono::duration<double>(power.sample_rate()).count();
-  auto voltage = power.get_voltage(to_ms(stats.system.time));
+  auto voltage = power.get_voltage(to_microseconds(stats.system.time));
   auto charging_rate = calculate_charging_rate(voltage, battery.capacitance(), cycles_per_sample);
   auto next_charge_time = power.sample_rate();
 
@@ -170,7 +169,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file, e
     if(stats.system.time >= next_charge_time) {
       next_charge_time += power.sample_rate();
 
-      voltage = power.get_voltage(to_ms(stats.system.time));
+      voltage = power.get_voltage(to_microseconds(stats.system.time));
       charging_rate = calculate_charging_rate(voltage, battery.capacitance(), cycles_per_sample);
     }
   }

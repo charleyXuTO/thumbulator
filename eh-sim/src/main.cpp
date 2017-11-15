@@ -7,6 +7,7 @@
 #include "scheme/backup_every_cycle.hpp"
 #include "scheme/magical_scheme.hpp"
 #include "simulate.hpp"
+#include "voltage_trace.hpp"
 
 void print_usage(std::ostream &stream, argagg::parser const &arguments)
 {
@@ -60,10 +61,12 @@ int main(int argc, char *argv[])
     auto const path_to_binary = options["binary"];
     auto const path_to_voltage_trace = options["voltages"];
 
+    ehsim::voltage_trace power(path_to_voltage_trace, std::chrono::microseconds(1000));
+
     //auto scheme = std::make_unique<ehsim::magical_scheme>();
     auto scheme = std::make_unique<ehsim::backup_every_cycle>();
 
-    auto const stats = ehsim::simulate(path_to_binary, path_to_voltage_trace, scheme.get());
+    auto const stats = ehsim::simulate(path_to_binary, power, scheme.get());
 
     std::cout << "CPU instructions executed: " << stats.cpu.instruction_count << "\n";
     std::cout << "CPU time (cycles): " << stats.cpu.cycle_count << "\n";
