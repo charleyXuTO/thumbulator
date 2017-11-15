@@ -35,8 +35,8 @@ public:
    */
   void consume_energy(double const energy_to_consume)
   {
-    assert(energy_to_consume > 0);
-    assert(energy - energy_to_consume > 0);
+    assert(energy_to_consume >= 0);
+    assert(energy - energy_to_consume >= 0);
 
     energy -= energy_to_consume;
   }
@@ -48,7 +48,7 @@ public:
    */
   void harvest_energy(double const energy_harvested)
   {
-    assert(energy_harvested > 0);
+    assert(energy_harvested >= 0);
 
     energy += energy_harvested;
   }
