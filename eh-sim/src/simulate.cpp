@@ -107,7 +107,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 
   // stats tracking
   stats_bundle stats{};
-  stats.system.execution_time = 0ns;
+  stats.system.time = 0ns;
 
   initialize_system(binary_file);
 
@@ -118,7 +118,7 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
   voltage_trace power(voltage_trace_file);
   capacitor battery(4.7e-5);
 
-  auto const initial_voltage = power.get_voltage(to_ms(stats.system.execution_time));
+  auto const initial_voltage = power.get_voltage(to_ms(stats.system.time));
   auto const initial_energy = calculate_energy(initial_voltage, battery.capacitance());
   battery.harvest_energy(initial_energy);
 
@@ -133,18 +133,18 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 
       stats.cpu.instruction_count++;
       stats.cpu.cycle_count += instruction_ticks;
-      stats.system.execution_time += get_time(instruction_ticks);
+      stats.system.time += get_time(instruction_ticks);
 
       battery.consume_energy(EPSILON);
     } else {
       // charging period
-      stats.system.execution_time = next_charge_time;
+      stats.system.time = next_charge_time;
     }
 
-    if(stats.system.execution_time == next_charge_time) {
+    if(stats.system.time == next_charge_time) {
       next_charge_time += power.sample_rate();
 
-      auto const next_voltage = power.get_voltage(to_ms(stats.system.execution_time));
+      auto const next_voltage = power.get_voltage(to_ms(stats.system.time));
       auto const harvested_energy = calculate_energy(next_voltage, battery.capacitance());
       battery.harvest_energy(harvested_energy);
       stats.system.energy_harvested += harvested_energy;
