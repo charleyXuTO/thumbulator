@@ -4,8 +4,8 @@
 #include "msp430_energy.hpp"
 #include "voltage_trace.hpp"
 
-#include <stdexcept>
 #include <cstring>
+#include <stdexcept>
 
 #include <thumbulator/cpu.hpp>
 #include <thumbulator/memory.hpp>
@@ -22,19 +22,6 @@ void load_program(char const *file_name)
   std::fread(&thumbulator::FLASH_MEMORY, sizeof(uint32_t),
       sizeof(thumbulator::FLASH_MEMORY) / sizeof(uint32_t), fd);
   std::fclose(fd);
-}
-
-uint64_t cycles_to_ms(uint64_t const cycle_count)
-{
-  constexpr double CPU_PERIOD = 1.0 / thumbulator::CPU_FREQ;
-  auto const time = CPU_PERIOD * cycle_count * 1000;
-
-  return static_cast<uint64_t>(time);
-}
-
-uint64_t ms_to_cycles(uint64_t const ms)
-{
-  return ms * static_cast<uint64_t>(thumbulator::CPU_FREQ * 0.001);
 }
 
 void initialize_system(char const *binary_file)
@@ -101,25 +88,41 @@ double calculate_energy(double const voltage, double const capacitance)
   return 0.5 * capacitance * voltage * voltage * 1e9;
 }
 
+std::chrono::nanoseconds get_time(uint64_t const cycle_count)
+{
+  constexpr double CPU_PERIOD = 1.0 / thumbulator::CPU_FREQ;
+  auto const time = static_cast<uint64_t>(CPU_PERIOD * cycle_count * 1e9);
+
+  return std::chrono::nanoseconds(time);
+}
+
+std::chrono::milliseconds to_ms(std::chrono::nanoseconds const &time)
+{
+  return std::chrono::duration_cast<std::chrono::milliseconds>(time);
+}
+
 stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 {
-  initialize_system(binary_file);
+  using namespace std::chrono_literals;
 
   // stats tracking
   stats_bundle stats{};
+  stats.system.execution_time = 0ns;
+
+  initialize_system(binary_file);
 
   // epsilon is the energy to execute an instruction as well as the energy to fetch that instruction.
   constexpr double EPSILON = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
 
   // energy harvesting
-  uint64_t current_ms = cycles_to_ms(stats.system.cycle_count);
-  uint64_t last_ms = current_ms;
   voltage_trace power(voltage_trace_file);
   capacitor battery(4.7e-5);
 
-  auto const initial_voltage = power.get_voltage(current_ms);
+  auto const initial_voltage = power.get_voltage(to_ms(stats.system.execution_time));
   auto const initial_energy = calculate_energy(initial_voltage, battery.capacitance());
   battery.harvest_energy(initial_energy);
+
+  auto next_charge_time = power.sample_rate();
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
@@ -130,19 +133,18 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
 
       stats.cpu.instruction_count++;
       stats.cpu.cycle_count += instruction_ticks;
-      stats.system.cycle_count += instruction_ticks;
+      stats.system.execution_time += get_time(instruction_ticks);
 
       battery.consume_energy(EPSILON);
     } else {
       // charging period
-      stats.system.cycle_count += ms_to_cycles(1);
+      stats.system.execution_time = next_charge_time;
     }
 
-    current_ms = cycles_to_ms(stats.system.cycle_count);
-    if(current_ms != last_ms) {
-      last_ms = current_ms;
+    if(stats.system.execution_time == next_charge_time) {
+      next_charge_time += power.sample_rate();
 
-      auto const next_voltage = power.get_voltage(current_ms);
+      auto const next_voltage = power.get_voltage(to_ms(stats.system.execution_time));
       auto const harvested_energy = calculate_energy(next_voltage, battery.capacitance());
       battery.harvest_energy(harvested_energy);
       stats.system.energy_harvested += harvested_energy;

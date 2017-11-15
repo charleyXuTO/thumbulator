@@ -1,6 +1,7 @@
 #ifndef EH_SIM_VOLTAGE_TRACE_HPP
 #define EH_SIM_VOLTAGE_TRACE_HPP
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -21,9 +22,15 @@ public:
    *
    * @return The voltage reading at the specified time.
    */
-  double get_voltage(uint64_t time) const;
+  double get_voltage(std::chrono::milliseconds const &time) const;
+
+  std::chrono::milliseconds sample_rate() const
+  {
+    return std::chrono::milliseconds(1);
+  }
+
 private:
-  uint64_t maximum_time;
+  std::chrono::milliseconds maximum_time;
 
   std::vector<double> voltages;
 };

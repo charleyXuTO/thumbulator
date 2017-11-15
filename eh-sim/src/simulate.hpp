@@ -1,6 +1,7 @@
 #ifndef EH_SIM_SIMULATE_HPP
 #define EH_SIM_SIMULATE_HPP
 
+#include <chrono>
 #include <cstdint>
 
 namespace ehsim {
@@ -19,9 +20,9 @@ struct cpu_stats {
 
 struct system_stats {
   /**
-   * Number of cycles ticked.
+   * Total execution time, including active and charging periods.
    */
-  uint64_t cycle_count = 0u;
+  std::chrono::nanoseconds execution_time;
 
   /**
    * Amount of energy harvested (nJ).
