@@ -134,24 +134,25 @@ stats_bundle simulate(char const *binary_file, char const *voltage_trace_file)
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
-    double harvested_energy;
+    uint64_t elapsed_cycles = 1;
 
     if(battery.energy_stored() > EPSILON) {
       // active period
-      auto const instruction_ticks = step_cpu();
+      elapsed_cycles = step_cpu();
 
       stats.cpu.instruction_count++;
-      stats.cpu.cycle_count += instruction_ticks;
-      stats.system.time += get_time(instruction_ticks);
+      stats.cpu.cycle_count += elapsed_cycles;
 
+      // consume energy for execution
       battery.consume_energy(EPSILON);
-      harvested_energy = charging_rate * instruction_ticks;
-    } else {
-      stats.system.time += get_time(1);
-      harvested_energy = charging_rate;
     }
 
+    // harvest energy
+    auto const harvested_energy = charging_rate * elapsed_cycles;
     battery.harvest_energy(harvested_energy);
+
+    // track stats
+    stats.system.time += get_time(elapsed_cycles);
     stats.system.energy_harvested += harvested_energy;
 
     if(stats.system.time >= next_charge_time) {
