@@ -123,7 +123,7 @@ stats_bundle simulate(char const *binary_file,
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
     uint64_t elapsed_cycles = 0;
 
-    if(scheme->is_active()) {
+    if(scheme->is_active(&stats)) {
       if(!was_active && stats.cpu.instruction_count != 0) {
         // we have just transitioned to an active mode
         elapsed_cycles += scheme->restore(&stats);
@@ -152,7 +152,7 @@ stats_bundle simulate(char const *binary_file,
 
     stats.system.time += get_time(elapsed_cycles, scheme->clock_frequency());
 
-    if(always_harvest || !scheme->is_active()) {
+    if(always_harvest || !was_active) {
       // harvest energy
       auto const harvested_energy = charging_rate * elapsed_cycles;
       battery.harvest_energy(harvested_energy);

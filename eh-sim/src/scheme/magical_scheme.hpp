@@ -37,7 +37,7 @@ public:
     battery.consume_energy(energy_per_instruction);
   }
 
-  bool is_active() const override
+  bool is_active(stats_bundle *stats) const override
   {
     return battery.energy_stored() > energy_per_instruction;
   }

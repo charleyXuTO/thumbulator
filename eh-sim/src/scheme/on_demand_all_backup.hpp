@@ -35,10 +35,16 @@ public:
     stats->models.back().instruction_energy += normal_running_energy;
   }
 
-  bool is_active() const override
+  bool is_active(stats_bundle *stats) const override
   {
-    return battery.energy_stored() >
-           (normal_running_energy + backup_energy_penalty + recovery_energy_penalty);
+    auto required_energy = normal_running_energy + backup_energy_penalty;
+
+    if(stats->cpu.instruction_count != 0) {
+      // we only need to restore if an instruction has been executed
+      required_energy += recovery_energy_penalty;
+    }
+
+    return battery.energy_stored() > required_energy;
   }
 
   bool will_backup(stats_bundle *stats) const override
