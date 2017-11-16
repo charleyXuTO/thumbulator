@@ -14,7 +14,7 @@ namespace ehsim {
  */
 class backup_every_cycle : public eh_scheme {
 public:
-  backup_every_cycle() : battery(4.7e-5)
+  backup_every_cycle() : battery(capacitance)
   {
   }
 
@@ -87,6 +87,8 @@ private:
   static constexpr auto recovery_energy_penalty = 0.25;
   // see Figure 10 from paper - recovery time penalty is 1 cycle
   static constexpr uint64_t restore_time_penalty = 1;
+  // see Section V from paper - capacitor used in the system is 470 nF
+  static constexpr double capacitance = 470e-9;
 };
 }
 
