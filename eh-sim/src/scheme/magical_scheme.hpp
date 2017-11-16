@@ -51,7 +51,11 @@ public:
   uint64_t backup(stats_bundle *stats) override
   {
     // do not touch arch/app state
-    stats->models.back().backup_times.push_back(stats->cpu.cycle_count);
+
+    stats->models.back().backup_times += stats->cpu.cycle_count - last_cycle_count;
+    stats->models.back().num_backups++;
+
+    last_cycle_count = stats->cpu.cycle_count;
 
     return 0;
   }
@@ -68,6 +72,9 @@ public:
 
 private:
   capacitor battery;
+
+  uint64_t last_cycle_count = 0u;
+
   // based on Mementos numbers for an MSP430
   static constexpr auto energy_per_instruction = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
 };

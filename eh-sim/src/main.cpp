@@ -86,9 +86,7 @@ int main(int argc, char *argv[])
     eh_file << "active.id,total.instruction.energy,tau.b\n";
     int id = 0;
     for(auto const &model : stats.models) {
-      auto const tau_sum =
-          std::accumulate(model.backup_times.begin(), model.backup_times.end(), 0ul);
-      auto const tau_b = static_cast<double>(tau_sum) / model.backup_times.size();
+      auto const tau_b = static_cast<double>(model.backup_times) / model.num_backups;
       eh_file << id++ << "," << model.instruction_energy << "," << tau_b << "\n";
     }
 

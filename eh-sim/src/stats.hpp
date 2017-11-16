@@ -39,9 +39,14 @@ struct system_stats {
  */
 struct eh_model {
   /**
-   * The cycle count of each backup.
+   * The accumulated cycle count of all backups.
    */
-  std::deque<uint64_t> backup_times;
+  uint64_t backup_times;
+
+  /**
+   * The number of backups performed.
+   */
+  uint32_t num_backups;
 
   /**
    * The total amount of energy spent on executing instructions.

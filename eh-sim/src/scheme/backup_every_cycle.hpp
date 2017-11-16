@@ -52,7 +52,9 @@ public:
 
     battery.consume_energy(backup_energy_penalty);
 
-    stats->models.back().backup_times.push_back(stats->cpu.cycle_count - last_cycle_count);
+    stats->models.back().backup_times += stats->cpu.cycle_count - last_cycle_count;
+    stats->models.back().num_backups++;
+
     last_cycle_count = stats->cpu.cycle_count;
 
     return backup_time_penalty;
