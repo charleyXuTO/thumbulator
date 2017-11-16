@@ -75,19 +75,6 @@ uint32_t step_cpu()
   return instruction_ticks;
 }
 
-/**
- * Calculate the energy stored in a capacitor.
- *
- * @param voltage The voltage across the capacitor.
- * @param capacitance The capacitance.
- *
- * @return Energy in nJ.
- */
-double calculate_energy(double const voltage, double const capacitance)
-{
-  return 0.5 * capacitance * voltage * voltage * 1e9;
-}
-
 std::chrono::nanoseconds get_time(uint64_t const cycle_count, uint32_t const frequency)
 {
   double const CPU_PERIOD = 1.0 / frequency;
@@ -122,7 +109,7 @@ stats_bundle simulate(char const *binary_file,
 
   // energy harvesting
   auto &battery = scheme->get_battery();
-
+  // start in power-off mode
   auto was_active = false;
 
   auto const cycles_per_sample =
