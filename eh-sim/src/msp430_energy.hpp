@@ -4,7 +4,12 @@
 namespace ehsim {
 
 // see: https://www.usenix.org/legacy/event/hotpower08/tech/full_papers/ransford/ransford_html/
-// units are nJ
+// based on an MSP430F1232, see: http://www.ti.com/product/msp430f1232
+// energy units are nJ
+
+constexpr uint32_t MSP430_FREQUENCY = 8000000;
+constexpr double MSP430_CAPACITANCE = 10e-6;
+constexpr double MSP430_MAX_CAPACITOR_VOLTAGE = 4.5;
 
 constexpr double MSP430_INSTRUCTION_ENERGY = 2.0;
 
