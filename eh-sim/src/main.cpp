@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
       {"voltages", {"--voltage-trace"}, "path to voltage trace", 1},
       {"rate", {"--voltage-rate"}, "sampling rate of voltage trace (microseconds)", 1},
       {"harvest", {"--always-harvest"}, "harvest during active periods", 1},
+      {"scheme", {"--scheme"}, "the checkpointing scheme to use", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1}}};
 
   try {
@@ -71,7 +72,18 @@ int main(int argc, char *argv[])
     auto const path_to_voltage_trace = options["voltages"];
     std::chrono::microseconds sampling_rate(options["rate"]);
 
-    auto scheme = std::make_unique<ehsim::backup_every_cycle>();
+    std::unique_ptr<ehsim::eh_scheme> scheme = nullptr;
+    auto const scheme_select = options["scheme"].as<std::string>("bec");
+    if(scheme_select == "bec") {
+      scheme = std::make_unique<ehsim::backup_every_cycle>();
+    } else if(scheme_select == "odab") {
+      scheme = std::make_unique<ehsim::on_demand_all_backup>();
+    } else if(scheme_select == "magic") {
+      scheme = std::make_unique<ehsim::magical_scheme>();
+    } else {
+      throw std::runtime_error("Unknown scheme selected.");
+    }
+
     ehsim::voltage_trace power(path_to_voltage_trace, sampling_rate);
 
     auto const stats = ehsim::simulate(path_to_binary, power, scheme.get(), always_harvest);
@@ -82,7 +94,7 @@ int main(int argc, char *argv[])
     std::cout << "Energy harvested (J): " << stats.system.energy_harvested * 1e-9 << "\n";
     std::cout << "Energy remaining (J): " << stats.system.energy_remaining * 1e-9 << "\n";
 
-    std::ofstream eh_file("eh_model.csv");
+    std::ofstream eh_file(scheme_select + ".csv");
     eh_file << "active.id,total.instruction.energy,tau.b\n";
     int id = 0;
     for(auto const &model : stats.models) {
