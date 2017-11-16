@@ -48,18 +48,22 @@ public:
     return true;
   }
 
-  void backup(stats_bundle *stats) override
+  uint64_t backup(stats_bundle *stats) override
   {
     // do not touch arch/app state
     stats->models.back().backup_times.push_back(stats->cpu.cycle_count);
+
+    return 0;
   }
 
-  void restore(stats_bundle *stats) override
+  uint64_t restore(stats_bundle *stats) override
   {
     // do not touch arch/app state
 
     // allocate space for a new active period model
     stats->models.emplace_back();
+
+    return 0;
   }
 
 private:

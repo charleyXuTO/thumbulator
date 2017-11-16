@@ -46,7 +46,7 @@ public:
     return battery.energy_stored() > backup_energy_penalty;
   }
 
-  void backup(stats_bundle *stats) override
+  uint64_t backup(stats_bundle *stats) override
   {
     // do not touch arch/app state, assume it is all non-volatile
 
@@ -54,9 +54,11 @@ public:
 
     stats->models.back().backup_times.push_back(stats->cpu.cycle_count - last_cycle_count);
     last_cycle_count = stats->cpu.cycle_count;
+
+    return backup_time_penalty;
   }
 
-  void restore(stats_bundle *stats) override
+  uint64_t restore(stats_bundle *stats) override
   {
     // do not touch arch/app state, assume it is all non-volatile
 
@@ -64,6 +66,8 @@ public:
 
     // allocate space for a new active period model
     stats->models.emplace_back();
+
+    return restore_time_penalty;
   }
 
 private:
@@ -77,8 +81,12 @@ private:
   static constexpr auto normal_running_energy = 0.03125;
   // see Figure 11 from paper - backup energy penalty is 125 pj
   static constexpr auto backup_energy_penalty = 0.125;
+  // see Figure 10 from paper - backup time penalty is 2 cycles
+  static constexpr uint64_t backup_time_penalty = 2;
   // see Figure 11 from paper - restore cost is 250 pj
   static constexpr auto recovery_energy_penalty = 0.25;
+  // see Figure 10 from paper - recovery time penalty is 1 cycle
+  static constexpr uint64_t restore_time_penalty = 1;
 };
 }
 

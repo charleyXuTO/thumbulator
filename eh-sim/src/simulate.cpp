@@ -134,31 +134,33 @@ stats_bundle simulate(char const *binary_file,
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
-    uint64_t elapsed_cycles = 1;
+    uint64_t elapsed_cycles = 0;
 
     if(scheme->is_active()) {
       if(!was_active && stats.cpu.instruction_count != 0) {
         // we have just transitioned to an active mode
-        scheme->restore(&stats);
+        elapsed_cycles += scheme->restore(&stats);
       } else if(stats.cpu.instruction_count == 0) {
         stats.models.emplace_back();
       }
 
       was_active = true;
 
-      elapsed_cycles = step_cpu();
+      auto const instruction_ticks = step_cpu();
 
       stats.cpu.instruction_count++;
-      stats.cpu.cycle_count += elapsed_cycles;
+      stats.cpu.cycle_count += instruction_ticks;
+      elapsed_cycles += instruction_ticks;
 
       // consume energy for execution
       scheme->execute_instruction(&stats);
 
       if(scheme->will_backup(&stats)) {
-        scheme->backup(&stats);
+        elapsed_cycles += scheme->backup(&stats);
       }
     } else {
       was_active = false;
+      elapsed_cycles = 1;
     }
 
     stats.system.time += get_time(elapsed_cycles, scheme->clock_frequency());
