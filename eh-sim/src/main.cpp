@@ -98,7 +98,11 @@ int main(int argc, char *argv[])
     eh_file << "active.id,total.instruction.energy,tau.b\n";
     int id = 0;
     for(auto const &model : stats.models) {
-      auto const tau_b = static_cast<double>(model.backup_times) / model.num_backups;
+      double tau_b = 0.0;
+      if(model.num_backups > 0) {
+        tau_b = static_cast<double>(model.backup_times) / model.num_backups;
+      }
+
       eh_file << id++ << "," << model.instruction_energy << "," << tau_b << "\n";
     }
 
