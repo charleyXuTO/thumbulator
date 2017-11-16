@@ -34,10 +34,7 @@ struct system_stats {
   double energy_remaining = 0.0;
 };
 
-/**
- * A model of one active period.
- */
-struct eh_model {
+struct active_stats {
   /**
    * The accumulated cycle count of all backups.
    */
@@ -61,7 +58,7 @@ struct stats_bundle {
   /**
    * Model of multiple active periods.
    */
-  std::deque<eh_model> models;
+  std::deque<active_stats> models;
 };
 }
 
