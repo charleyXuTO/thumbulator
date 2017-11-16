@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
   argagg::parser arguments{{{"help", {"-h", "--help"}, "display help information", 0},
       {"voltages", {"--voltage-trace"}, "path to voltage trace", 1},
       {"rate", {"--voltage-rate"}, "sampling rate of voltage trace (microseconds)", 1},
+      {"harvest", {"--always-harvest"}, "harvest during active periods", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1}}};
 
   try {
@@ -64,6 +65,7 @@ int main(int argc, char *argv[])
     validate(options);
 
     auto const path_to_binary = options["binary"];
+    bool always_harvest = options["harvest"].as<int>(1) == 1;
 
     auto const path_to_voltage_trace = options["voltages"];
     std::chrono::microseconds sampling_rate(options["rate"]);
@@ -71,7 +73,7 @@ int main(int argc, char *argv[])
     auto scheme = std::make_unique<ehsim::backup_every_cycle>();
     ehsim::voltage_trace power(path_to_voltage_trace, sampling_rate);
 
-    auto const stats = ehsim::simulate(path_to_binary, power, scheme.get(), false);
+    auto const stats = ehsim::simulate(path_to_binary, power, scheme.get(), always_harvest);
 
     std::cout << "CPU instructions executed: " << stats.cpu.instruction_count << "\n";
     std::cout << "CPU time (cycles): " << stats.cpu.cycle_count << "\n";
