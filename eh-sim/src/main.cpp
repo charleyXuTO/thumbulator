@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     auto scheme = std::make_unique<ehsim::backup_every_cycle>();
     ehsim::voltage_trace power(path_to_voltage_trace, sampling_rate);
 
-    auto const stats = ehsim::simulate(path_to_binary, power, scheme.get());
+    auto const stats = ehsim::simulate(path_to_binary, power, scheme.get(), false);
 
     std::cout << "CPU instructions executed: " << stats.cpu.instruction_count << "\n";
     std::cout << "CPU time (cycles): " << stats.cpu.cycle_count << "\n";

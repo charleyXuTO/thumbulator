@@ -107,7 +107,10 @@ double calculate_charging_rate(double voltage, double capacitance, double cycles
   return energy / cycles_per_sample;
 }
 
-stats_bundle simulate(char const *binary_file, voltage_trace const &power, eh_scheme *scheme)
+stats_bundle simulate(char const *binary_file,
+    ehsim::voltage_trace const &power,
+    eh_scheme *scheme,
+    bool always_harvest)
 {
   using namespace std::chrono_literals;
 
@@ -158,13 +161,15 @@ stats_bundle simulate(char const *binary_file, voltage_trace const &power, eh_sc
       was_active = false;
     }
 
-    // harvest energy
-    auto const harvested_energy = charging_rate * elapsed_cycles;
-    battery.harvest_energy(harvested_energy);
-
-    // track stats
     stats.system.time += get_time(elapsed_cycles, scheme->clock_frequency());
-    stats.system.energy_harvested += harvested_energy;
+
+    if(always_harvest || !scheme->is_active()) {
+      // harvest energy
+      auto const harvested_energy = charging_rate * elapsed_cycles;
+      battery.harvest_energy(harvested_energy);
+
+      stats.system.energy_harvested += harvested_energy;
+    }
 
     if(stats.system.time >= next_charge_time) {
       next_charge_time += power.sample_rate();
