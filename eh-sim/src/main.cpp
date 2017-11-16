@@ -79,16 +79,14 @@ int main(int argc, char *argv[])
     std::cout << "Energy harvested (J): " << stats.system.energy_harvested * 1e-9 << "\n";
     std::cout << "Energy remaining (J): " << stats.system.energy_remaining * 1e-9 << "\n";
 
+    std::ofstream eh_file("eh_model.csv");
+    eh_file << "active.id,total.instruction.energy,tau.b\n";
     int id = 0;
-    std::cout << "\nThe EH Model\n\n";
     for(auto const &model : stats.models) {
-      std::cout << "Active Period: " << id++ << "\n";
-      std::cout << "Total instruction energy (nJ): " << model.instruction_energy << "\n";
-
       auto const tau_sum =
           std::accumulate(model.backup_times.begin(), model.backup_times.end(), 0ul);
       auto const tau_b = static_cast<double>(tau_sum) / model.backup_times.size();
-      std::cout << "Tau_b (cycles): " << tau_b << "\n";
+      eh_file << id++ << "," << model.instruction_energy << "," << tau_b << "\n";
     }
 
   } catch(std::exception const &e) {
