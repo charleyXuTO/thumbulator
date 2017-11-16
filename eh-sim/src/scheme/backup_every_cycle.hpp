@@ -49,7 +49,7 @@ public:
 
   bool will_backup(stats_bundle *stats) const override
   {
-    return battery.energy_stored() > backup_energy_penalty;
+    return true;
   }
 
   uint64_t backup(stats_bundle *stats) override
