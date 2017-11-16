@@ -37,26 +37,33 @@ public:
 
   bool is_active(stats_bundle *stats) const override
   {
-    auto required_energy = normal_running_energy + backup_energy_penalty;
-
-    if(stats->cpu.instruction_count != 0) {
-      // we only need to restore if an instruction has been executed
-      required_energy += recovery_energy_penalty;
+    if(battery.energy_stored() == battery.maximum_energy_stored()) {
+      assert(!active);
+      active = true;
     }
 
-    return battery.energy_stored() > required_energy;
+    return active;
   }
 
   bool will_backup(stats_bundle *stats) const override
   {
-    return battery.energy_stored() > backup_energy_penalty;
+    // can't backup if the power is off
+    assert(active);
+
+    auto const energy_warning = backup_energy_penalty + normal_running_energy;
+
+    return battery.energy_stored() <= energy_warning;
   }
 
   uint64_t backup(stats_bundle *stats) override
   {
-    // do not touch arch/app state, assume it is all non-volatile
+    // can't backup if the power is off
+    assert(active);
 
     battery.consume_energy(backup_energy_penalty);
+
+    // we only backup when moving to power-off mode
+    active = false;
 
     stats->models.back().backup_times += stats->cpu.cycle_count - last_cycle_count;
     stats->models.back().num_backups++;
@@ -68,7 +75,8 @@ public:
 
   uint64_t restore(stats_bundle *stats) override
   {
-    // do not touch arch/app state, assume it is all non-volatile
+    // is_active should have set this to true before a restore can happen
+    assert(active);
 
     battery.consume_energy(recovery_energy_penalty);
 
@@ -82,6 +90,8 @@ private:
   capacitor battery;
 
   uint64_t last_cycle_count = 0u;
+
+  mutable bool active = false;
 
   // see Section 3 from paper - 8 KHz clock frequency
   static constexpr uint32_t cpu_frequency = 8000;

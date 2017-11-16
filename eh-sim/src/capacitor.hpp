@@ -51,6 +51,14 @@ public:
   }
 
   /**
+   * @return The maximum amount of energy (nJ) this capacitor can store.
+   */
+  double maximum_energy_stored() const
+  {
+    return maximum_energy;
+  }
+
+  /**
    * Consume energy from the capacitor.
    *
    * @param energy_to_consume The amount of energy to consume in nJ.
