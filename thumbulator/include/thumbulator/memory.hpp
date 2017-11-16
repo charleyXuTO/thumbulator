@@ -15,6 +15,29 @@ namespace thumbulator {
  */
 extern uint32_t RAM[RAM_SIZE_ELEMENTS];
 
+/**
+ * Hook into loads to RAM.
+ *
+ * The first parameter is the address.
+ * The second parameter is the data that would be loaded.
+ *
+ * The function returns the data that will be loaded, potentially different than the second parameter.
+ */
+using ram_load_hook_function = uint32_t (*)(uint32_t, uint32_t);
+extern ram_load_hook_function ram_load_hook;
+
+/**
+ * Hook into stores to RAM.
+ *
+ * The first parameter is the address.
+ * The second parameter is the value at the address before the store.
+ * The third parameter is the desired value to store at the address.
+ *
+ * The function returns the data that will be stored, potentially different from the third parameter.
+ */
+using ram_store_hook_function = uint32_t (*)(uint32_t, uint32_t, uint32_t);
+extern ram_store_hook_function ram_store_hook;
+
 #define FLASH_START 0x0
 #define FLASH_SIZE_BYTES (1 << 23) // 8 MB
 #define FLASH_SIZE_ELEMENTS (FLASH_SIZE_BYTES >> 2)

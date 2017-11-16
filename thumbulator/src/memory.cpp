@@ -9,16 +9,30 @@ namespace thumbulator {
 
 uint32_t RAM[RAM_SIZE_BYTES >> 2];
 
+ram_load_hook_function ram_load_hook = nullptr;
+ram_store_hook_function ram_store_hook = nullptr;
+
 uint32_t FLASH_MEMORY[FLASH_SIZE_BYTES >> 2];
 
 uint32_t ram_load(uint32_t address, bool false_read)
 {
-  auto const data = RAM[(address & RAM_ADDRESS_MASK) >> 2];
+  auto data = RAM[(address & RAM_ADDRESS_MASK) >> 2];
+
+  if(!false_read && ram_load_hook != nullptr) {
+    data = ram_load_hook(address, data);
+  }
+
   return data;
 }
 
 void ram_store(uint32_t address, uint32_t value)
 {
+  if(ram_store_hook != nullptr) {
+    auto const old_value = ram_load(address, true);
+
+    value = ram_store_hook(address, old_value, value);
+  }
+
   RAM[(address & RAM_ADDRESS_MASK) >> 2] = value;
 }
 
