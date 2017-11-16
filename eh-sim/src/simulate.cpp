@@ -26,12 +26,6 @@ void load_program(char const *file_name)
 
 void initialize_system(char const *binary_file)
 {
-  std::fprintf(stderr, "Simulating file %s\n", binary_file);
-  std::fprintf(stderr, "Flash start:\t0x%8.8X\n", FLASH_START);
-  std::fprintf(stderr, "Flash end:\t0x%8.8X\n", (FLASH_START + FLASH_SIZE_BYTES));
-  std::fprintf(stderr, "Ram start:\t0x%8.8X\n", RAM_START);
-  std::fprintf(stderr, "Ram end:\t0x%8.8X\n", (RAM_START + RAM_SIZE_BYTES));
-
   // Reset memory, then load program to memory
   std::memset(thumbulator::RAM, 0, sizeof(thumbulator::RAM));
   std::memset(thumbulator::FLASH_MEMORY, 0, sizeof(thumbulator::FLASH_MEMORY));
