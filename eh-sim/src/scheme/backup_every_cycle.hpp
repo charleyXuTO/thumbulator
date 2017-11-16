@@ -14,7 +14,7 @@ namespace ehsim {
  */
 class backup_every_cycle : public eh_scheme {
 public:
-  backup_every_cycle() : battery(capacitance)
+  backup_every_cycle() : battery(capacitance, 7.5)
   {
   }
 

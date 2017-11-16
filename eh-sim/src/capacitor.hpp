@@ -26,9 +26,12 @@ public:
    * Create a capacitor.
    *
    * @param capacitance The capacitance in farads (F).
+   * @param maximum_voltage The maximum voltage the capacitor can sustain.
    */
-  explicit capacitor(double const capacitance) : C(capacitance), energy(0)
+  capacitor(double const capacitance, double const maximum_voltage)
+      : C(capacitance), maximum_energy(calculate_energy(maximum_voltage, C)), energy(0)
   {
+    assert(maximum_energy > 0);
   }
 
   /**
@@ -69,12 +72,14 @@ public:
   {
     assert(energy_harvested >= 0);
 
-    energy += energy_harvested;
+    energy = std::min(energy + energy_harvested, maximum_energy);
   }
 
 private:
   // capacitance
   double const C;
+  // maximum energy that can be stored
+  double const maximum_energy;
   // stored energy
   double energy;
 };

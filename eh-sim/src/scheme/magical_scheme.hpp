@@ -17,7 +17,7 @@ namespace ehsim {
  */
 class magical_scheme : public eh_scheme {
 public:
-  magical_scheme() : battery(4.7e-5)
+  magical_scheme() : battery(4.7e-5, 7.5)
   {
   }
 
