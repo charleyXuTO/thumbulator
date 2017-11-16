@@ -9,8 +9,8 @@ namespace thumbulator {
 
 uint32_t RAM[RAM_SIZE_BYTES >> 2];
 
-ram_load_hook_function ram_load_hook = nullptr;
-ram_store_hook_function ram_store_hook = nullptr;
+std::function<uint32_t(uint32_t, uint32_t)> ram_load_hook;
+std::function<uint32_t(uint32_t, uint32_t, uint32_t)> ram_store_hook;
 
 uint32_t FLASH_MEMORY[FLASH_SIZE_BYTES >> 2];
 

@@ -2,6 +2,7 @@
 #define THUMBULATOR_SIM_SUPPORT_H
 
 #include <cstdint>
+#include <functional>
 
 namespace thumbulator {
 
@@ -23,8 +24,7 @@ extern uint32_t RAM[RAM_SIZE_ELEMENTS];
  *
  * The function returns the data that will be loaded, potentially different than the second parameter.
  */
-using ram_load_hook_function = uint32_t (*)(uint32_t, uint32_t);
-extern ram_load_hook_function ram_load_hook;
+extern std::function<uint32_t(uint32_t, uint32_t)> ram_load_hook;
 
 /**
  * Hook into stores to RAM.
@@ -35,8 +35,7 @@ extern ram_load_hook_function ram_load_hook;
  *
  * The function returns the data that will be stored, potentially different from the third parameter.
  */
-using ram_store_hook_function = uint32_t (*)(uint32_t, uint32_t, uint32_t);
-extern ram_store_hook_function ram_store_hook;
+extern std::function<uint32_t(uint32_t, uint32_t, uint32_t)> ram_store_hook;
 
 #define FLASH_START 0x0
 #define FLASH_SIZE_BYTES (1 << 23) // 8 MB
