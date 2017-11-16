@@ -6,6 +6,7 @@
 
 #include "scheme/backup_every_cycle.hpp"
 #include "scheme/magical_scheme.hpp"
+#include "scheme/on_demand_all_backup.hpp"
 #include "simulate.hpp"
 #include "voltage_trace.hpp"
 
