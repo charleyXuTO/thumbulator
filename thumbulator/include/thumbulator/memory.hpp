@@ -40,9 +40,9 @@ void fetch_instruction(uint32_t address, uint16_t *value);
  *
  * @param address The address to load data from.
  * @param value The data in memory at that address.
- * @param falseRead true if this is a read due to anything other than the program.
+ * @param false_read true if this is a read due to anything other than the program.
  */
-void load(uint32_t address, uint32_t *value, uint32_t falseRead);
+void load(uint32_t address, uint32_t *value, uint32_t false_read);
 
 /**
  * Store data into memory.

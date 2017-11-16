@@ -8,7 +8,19 @@
 namespace thumbulator {
 
 uint32_t RAM[RAM_SIZE_BYTES >> 2];
+
 uint32_t FLASH_MEMORY[FLASH_SIZE_BYTES >> 2];
+
+uint32_t ram_load(uint32_t address, bool false_read)
+{
+  auto const data = RAM[(address & RAM_ADDRESS_MASK) >> 2];
+  return data;
+}
+
+void ram_store(uint32_t address, uint32_t value)
+{
+  RAM[(address & RAM_ADDRESS_MASK) >> 2] = value;
+}
 
 // Memory access functions assume that RAM has a higher address than Flash
 void fetch_instruction(uint32_t address, uint16_t *value)
@@ -22,7 +34,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
       terminate_simulation(1);
     }
 
-    fromMem = RAM[(address & RAM_ADDRESS_MASK) >> 2];
+    fromMem = ram_load(address, false);
   } else {
     if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
       fprintf(
@@ -37,7 +49,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
   *value = ((address & 0x2) != 0) ? (uint16_t)(fromMem >> 16) : (uint16_t)fromMem;
 }
 
-void load(uint32_t address, uint32_t *value, uint32_t falseRead)
+void load(uint32_t address, uint32_t *value, uint32_t false_read)
 {
   if(address >= RAM_START) {
     if(address >= (RAM_START + RAM_SIZE_BYTES)) {
@@ -61,7 +73,7 @@ void load(uint32_t address, uint32_t *value, uint32_t falseRead)
       terminate_simulation(1);
     }
 
-    *value = RAM[(address & RAM_ADDRESS_MASK) >> 2];
+    *value = ram_load(address, false_read == 1);
   } else {
     if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
       fprintf(
@@ -105,7 +117,7 @@ void store(uint32_t address, uint32_t value)
       terminate_simulation(1);
     }
 
-    RAM[(address & RAM_ADDRESS_MASK) >> 2] = value;
+    ram_store(address, value);
   } else {
     if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
       fprintf(
