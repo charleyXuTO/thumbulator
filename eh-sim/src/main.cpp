@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "scheme/backup_every_cycle.hpp"
+#include "scheme/clank.hpp"
 #include "scheme/magical_scheme.hpp"
 #include "scheme/on_demand_all_backup.hpp"
 #include "simulate.hpp"
@@ -80,6 +81,8 @@ int main(int argc, char *argv[])
       scheme = std::make_unique<ehsim::on_demand_all_backup>();
     } else if(scheme_select == "magic") {
       scheme = std::make_unique<ehsim::magical_scheme>();
+    } else if(scheme_select == "clank") {
+      scheme = std::make_unique<ehsim::clank>();
     } else {
       throw std::runtime_error("Unknown scheme selected.");
     }

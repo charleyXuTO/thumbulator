@@ -9,6 +9,7 @@ project(
 add_executable(
   ${PROJECT_NAME}
   src/scheme/backup_every_cycle.hpp
+  src/scheme/clank.hpp
   src/scheme/eh_scheme.hpp
   src/scheme/magical_scheme.hpp
   src/scheme/on_demand_all_backup.hpp
