@@ -2,8 +2,8 @@
 #define EH_SIM_CLANK_HPP
 
 #include "scheme/eh_scheme.hpp"
+#include "scheme/data_sheet.hpp"
 #include "capacitor.hpp"
-#include "data_sheet.hpp"
 #include "stats.hpp"
 
 #include <thumbulator/memory.hpp>
@@ -35,7 +35,7 @@ public:
       size_t wf_entries,
       size_t wb_entries,
       size_t ap_entries)
-      : battery(capacitance, MSP430_MAX_CAPACITOR_VOLTAGE)
+      : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
       , BITS_PER_ENTRY(entry_bits)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
@@ -67,14 +67,14 @@ public:
 
   uint32_t clock_frequency() const override
   {
-    return cpu_frequency;
+    return MEMENTOS_CPU_FREQUENCY;
   }
 
   void execute_instruction(stats_bundle *stats) override
   {
-    battery.consume_energy(instruction_energy);
+    battery.consume_energy(MEMENTOS_INSTRUCTION_ENERGY);
 
-    stats->models.back().instruction_energy += instruction_energy;
+    stats->models.back().instruction_energy += MEMENTOS_INSTRUCTION_ENERGY;
   }
 
   bool is_active(stats_bundle *stats) const override
@@ -125,11 +125,6 @@ private:
 
   thumbulator::cpu_state architectural_state{};
 
-  // base the architecture on MSP430 empirical measurements
-  static constexpr double capacitance = MSP430_CAPACITANCE;
-  static constexpr uint32_t cpu_frequency = MSP430_FREQUENCY;
-  static constexpr double instruction_energy = MSP430_INSTRUCTION_ENERGY;
-
   size_t const BITS_PER_ENTRY;
   size_t const READFIRST_ENTRIES;
   size_t const WRITEFIRST_ENTRIES;
@@ -151,14 +146,12 @@ private:
 
   void checkpoint()
   {
-    // based on the timings (cycles) in Clank's java source code
-    static constexpr auto BACKUP_ARCH_TIME = 40u;
-    static constexpr auto BACKUP_WBB_ACCESS_TIME = 2u;
-    static constexpr auto BACKUP_WBB_ENTRY_TIME = 2u;
-
-    backup_time = BACKUP_ARCH_TIME;
+    backup_time = CLANK_BACKUP_ARCH_TIME;
     if(!writeback_buffer.empty()) {
-      backup_time += BACKUP_WBB_ACCESS_TIME + (BACKUP_WBB_ENTRY_TIME * writeback_buffer.size());
+      // time to access writeback buffer
+      backup_time += CLANK_BACKUP_WBB_ACCESS_TIME;
+      // time to write values in writeback buffer
+      backup_time += (CLANK_BACKUP_WBB_ENTRY_TIME * writeback_buffer.size());
     }
 
     // set flags

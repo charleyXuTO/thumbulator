@@ -4,8 +4,8 @@
 #include <thumbulator/cpu.hpp>
 
 #include "scheme/eh_scheme.hpp"
+#include "scheme/data_sheet.hpp"
 #include "capacitor.hpp"
-#include "data_sheet.hpp"
 #include "stats.hpp"
 
 namespace ehsim {
@@ -17,7 +17,7 @@ namespace ehsim {
  */
 class magical_scheme : public eh_scheme {
 public:
-  magical_scheme() : battery(4.7e-5, 7.5)
+  magical_scheme() : battery(BATTERYLESS_CAPACITANCE, BATTERYLESS_MAX_CAPACITOR_VOLTAGE)
   {
   }
 
@@ -76,7 +76,7 @@ private:
   uint64_t last_cycle_count = 0u;
 
   // based on Mementos numbers for an MSP430
-  static constexpr auto energy_per_instruction = MSP430_INSTRUCTION_ENERGY + MSP430_REG_FLASH;
+  static constexpr auto energy_per_instruction = MEMENTOS_INSTRUCTION_ENERGY + MEMENTOS_REG_FLASH;
 };
 }
 
