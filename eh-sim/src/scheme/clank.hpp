@@ -41,7 +41,7 @@ public:
       size_t wf_entries,
       size_t wb_entries,
       size_t ap_entries)
-      : battery(BATTERYLESS_CAPACITANCE, BATTERYLESS_MAX_CAPACITOR_VOLTAGE)
+      : battery(10e-3, BATTERYLESS_MAX_CAPACITOR_VOLTAGE)
       , BITS_PER_ENTRY(entry_bits)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
@@ -99,7 +99,9 @@ public:
   bool will_backup(stats_bundle *stats) const override
   {
     // TODO: watchdog timer
-    return idempotent_violation;
+    auto const energy_warning = CLANK_BACKUP_ARCH_ENERGY + MEMENTOS_INSTRUCTION_ENERGY;
+
+    return idempotent_violation || (battery.energy_stored() <= energy_warning);
   }
 
   uint64_t backup(stats_bundle *stats) override
@@ -110,7 +112,7 @@ public:
     last_cycle_count = stats->cpu.cycle_count;
 
     battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
-    battery.consume_energy(writeback_backups * MEMENTOS_FLASH_REG);
+    //battery.consume_energy(writeback_backups * MEMENTOS_FLASH_REG);
 
     // save architectural state
     architectural_state = thumbulator::cpu;
@@ -123,6 +125,9 @@ public:
 
   uint64_t restore(stats_bundle *stats) override
   {
+    // allocate space for a new active period model
+    stats->models.emplace_back();
+
     // restore saved architectural state
     thumbulator::cpu_reset();
     thumbulator::cpu = architectural_state;
@@ -195,134 +200,49 @@ private:
 
   enum class operation { read, write };
 
-  void process_address(uint32_t address, operation op, bool value_changed, uint32_t value)
+  bool try_insert(std::set<uint32_t> *buffer, uint32_t address, size_t max_buffer_size)
   {
-    if(ADDRESS_PREFIX_ENTRIES > 0) {
-      // the address prefix buffer exists
-      auto const prefix = address & PREFIX_MASK;
+    if(buffer->size() < max_buffer_size) {
+      buffer->insert(address);
 
-      if(addressprefix_buffer.find(prefix) == addressprefix_buffer.end()) {
-        // the prefix was not in the buffer
-        if(addressprefix_buffer.size() == ADDRESS_PREFIX_ENTRIES) {
-          // the address prefix buffer is full
-
-          if(op == operation::write) {
-            if(!value_changed) {
-              // false write
-              return;
-            } else if(checkpoint_on_next_addressprefix_write) {
-              // idempotent violation - addressprefix buffer was full earlier
-              checkpoint();
-              process_address(address, op, value_changed, value);
-
-              return;
-            }
-
-            // idempotent violation - addressprefix buffer is full
-            checkpoint();
-            process_address(address, op, value_changed, value);
-
-            return;
-          } else {
-            // addressprefix buffer is full but this is a read, can delay checkpoint
-            checkpoint_on_next_addressprefix_write = true;
-
-            return;
-          }
-        } else {
-          // the buffer is not full
-          addressprefix_buffer.insert(prefix);
-        }
-      }
+      return true;
     }
 
-    if(op == operation::read) {
-      if(writefirst_buffer.find(address) == writefirst_buffer.end()) {
-        // read dominated
+    return false;
+  }
 
-        if(writeback_buffer.find(address) == writeback_buffer.end()) {
-          if(readfirst_buffer.find(address) == readfirst_buffer.end()) {
-            if(readfirst_buffer.size() < READFIRST_ENTRIES) {
-              // the read buffer has room
-              readfirst_buffer.insert(address);
-            } else {
-              // the readfirst buffer is full, delay checkpoint till next write
-              checkpoint_on_next_write = true;
-            }
-          }
-        }
+  void process_address(uint32_t address, operation op, bool value_changed, uint32_t value)
+  {
+    auto const readfirst_it = readfirst_buffer.find(address);
+    auto const readfirst_hit = readfirst_it != readfirst_buffer.end();
+
+    auto const writefirst_it = writefirst_buffer.find(address);
+    auto const writefirst_hit = writefirst_it != writefirst_buffer.end();
+
+    if(!readfirst_hit && !writefirst_hit) {
+      // the memory access is in neither buffer
+
+      // add the memory access to the appropriate buffer
+      bool was_added = false;
+      if(op == operation::read) {
+        was_added = try_insert(&readfirst_buffer, address, READFIRST_ENTRIES);
+      } else if(op == operation::write) {
+        was_added = try_insert(&writefirst_buffer, address, WRITEFIRST_ENTRIES);
       }
-    } else if(op == operation::write) {
-      if(readfirst_buffer.find(address) != readfirst_buffer.end()) {
-        // read dominated
 
-        if(value_changed) {
-          if(writeback_buffer.find(address) != writeback_buffer.end()) {
-            // the address is already in the writeback buffer
-
-            // update the writeback buffer with the new value
-            writeback_buffer[address] = value;
-            return;
-          } else if(writeback_buffer.size() < WRITEBACK_ENTRIES) {
-            writeback_buffer[address] = value;
-
-            // buffer optimization
-            readfirst_buffer.erase(address);
-
-            return;
-          } else {
-            // idempotent violation - writeback buffer is full
-            checkpoint();
-            process_address(address, op, value_changed, value);
-
-            return;
-          }
-        }
-      } else if(writefirst_buffer.find(address) == writefirst_buffer.end()) {
-        // write dominated
-
-        if(writeback_buffer.find(address) == writeback_buffer.end()) {
-          if(!value_changed) {
-            // false write
-            return;
-          }
-
-          if(checkpoint_on_next_write) {
-            // idempotent violation - readfirst buffer was full earlier
-            checkpoint();
-            process_address(address, op, value_changed, value);
-
-            return;
-          }
-
-          if(writefirst_buffer.size() < WRITEFIRST_ENTRIES) {
-            writefirst_buffer.insert(address);
-          } else {
-            // idempotent violation - writefirst buffer is full
-            checkpoint();
-            process_address(address, op, value_changed, value);
-
-            return;
-          }
-        } else {
-          // the address is already in the writeback buffer
-
-          // update the writeback buffer with the new value
-          writeback_buffer[address] = value;
-        }
+      if(!was_added) {
+        // idempotent violation - a buffer was full
+        checkpoint();
       }
+    } else if(op == operation::write && readfirst_hit) {
+      // idempotent violation - write to read-dominated address
+      checkpoint();
     }
   }
 
   uint32_t process_read(uint32_t address, uint32_t data)
   {
     process_address(address, operation::read, false, data);
-
-    auto const it = writeback_buffer.find(address);
-    if(it != writeback_buffer.end()) {
-      // data is in the writeback buffer, use that value instead
-      data = it->second;
-    }
 
     return data;
   }
@@ -331,12 +251,6 @@ private:
   {
     // this may call checkpoint, which would: set idempotent violation to true, clear all buffers
     process_address(address, operation::write, old_value != value, value);
-
-    auto const it = writeback_buffer.find(address);
-    if(it != writeback_buffer.end()) {
-      // data is in the writeback buffer, do not put the new value in memory until checkpoint
-      value = old_value;
-    }
 
     return value;
   }

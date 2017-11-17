@@ -141,7 +141,7 @@ stats_bundle simulate(char const *binary_file,
       scheme->execute_instruction(&stats);
 
       if(scheme->will_backup(&stats)) {
-        printf("Backup, PC: 0x%08X\n", thumbulator::cpu_get_pc());
+        //printf("Backup, PC: 0x%08X\n", thumbulator::cpu_get_pc());
         elapsed_cycles += scheme->backup(&stats);
       }
     } else {
