@@ -36,9 +36,9 @@ struct system_stats {
 
 struct active_stats {
   /**
-   * The accumulated cycle count of all backups.
+   * The accumulated cycle count of the time between all backups.
    */
-  uint64_t backup_times = 0;
+  uint64_t time_between_backups = 0;
 
   /**
    * The number of backups performed.

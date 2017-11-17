@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     for(auto const &model : stats.models) {
       double tau_b = 0.0;
       if(model.num_backups > 0) {
-        tau_b = static_cast<double>(model.backup_times) / model.num_backups;
+        tau_b = static_cast<double>(model.time_between_backups) / model.num_backups;
       }
 
       eh_file << id++ << "," << model.instruction_energy << "," << tau_b << "\n";

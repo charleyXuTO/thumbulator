@@ -59,7 +59,7 @@ public:
 
     battery.consume_energy(NVP_BEC_BACKUP_ENERGY);
 
-    stats->models.back().backup_times += stats->cpu.cycle_count - last_cycle_count;
+    stats->models.back().time_between_backups += stats->cpu.cycle_count - last_cycle_count;
     stats->models.back().num_backups++;
 
     last_cycle_count = stats->cpu.cycle_count;
