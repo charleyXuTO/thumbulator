@@ -15,7 +15,7 @@ add_executable(
   src/scheme/on_demand_all_backup.hpp
   src/capacitor.hpp
   src/main.cpp
-  src/msp430_energy.hpp
+  src/scheme/data_sheet.hpp
   src/simulate.cpp
   src/simulate.hpp
   src/stats.hpp

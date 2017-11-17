@@ -3,7 +3,7 @@
 
 #include "scheme/eh_scheme.hpp"
 #include "capacitor.hpp"
-#include "msp430_energy.hpp"
+#include "data_sheet.hpp"
 #include "stats.hpp"
 
 #include <thumbulator/memory.hpp>
