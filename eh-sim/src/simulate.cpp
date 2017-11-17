@@ -9,7 +9,6 @@
 #include "voltage_trace.hpp"
 
 #include <cstring>
-#include <cstdio>
 
 namespace ehsim {
 
@@ -121,10 +120,8 @@ stats_bundle simulate(char const *binary_file,
 
     if(scheme->is_active(&stats)) {
       if(!was_active && stats.cpu.instruction_count != 0) {
-        //auto const old_pc = thumbulator::cpu_get_pc();
         // we have just transitioned to an active mode
         elapsed_cycles += scheme->restore(&stats);
-        //printf("Restore, PC_old: 0x%08X, PC_restored: 0x%08X\n", old_pc, thumbulator::cpu_get_pc());
       } else if(stats.cpu.instruction_count == 0) {
         stats.models.emplace_back();
       }
@@ -141,7 +138,6 @@ stats_bundle simulate(char const *binary_file,
       scheme->execute_instruction(&stats);
 
       if(scheme->will_backup(&stats)) {
-        //printf("Backup, PC: 0x%08X\n", thumbulator::cpu_get_pc());
         elapsed_cycles += scheme->backup(&stats);
       }
     } else {
