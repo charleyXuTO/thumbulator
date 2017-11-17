@@ -18,6 +18,12 @@ namespace ehsim {
  * Based on Clank: Architectural Support for Intermittent Computation.
  *
  * All optimizations, except text segments, are enabled.
+ *
+ * Clank claims that backups take 40 cycles to save architectural state. Based on thumbulator, we see that
+ * are 20 registers, so that's 2 cycles/register.
+ *
+ * Clank does not provide energy numbers, so we assume Mementos' energy numbers. The source of error here is in
+ * the different ISA (Thumb vs RISC) and that the MSP430 is a 16-bit processor while Clank's M0+ is 32-bit.
  */
 class clank : public eh_scheme {
 public:
@@ -35,13 +41,14 @@ public:
       size_t wf_entries,
       size_t wb_entries,
       size_t ap_entries)
-      : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+      : battery(BATTERYLESS_CAPACITANCE, BATTERYLESS_MAX_CAPACITOR_VOLTAGE)
       , BITS_PER_ENTRY(entry_bits)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
       , WRITEBACK_ENTRIES(wb_entries)
       , ADDRESS_PREFIX_ENTRIES(ap_entries)
       , PREFIX_MASK(entry_bits > 29 ? 0 : 0xFFFFFFFF >> (entry_bits + 2) << (entry_bits + 2))
+      , MAX_BACKUP_ENERGY(CLANK_BACKUP_ARCH_ENERGY + WRITEBACK_ENTRIES * MEMENTOS_FLASH_REG)
   {
     assert(BITS_PER_ENTRY >= 0);
     assert(READFIRST_ENTRIES >= 1);
@@ -79,8 +86,14 @@ public:
 
   bool is_active(stats_bundle *stats) const override
   {
-    // TODO: set threshold
-    return true;
+    if(battery.energy_stored() == battery.maximum_energy_stored()) {
+      assert(!active);
+      active = true;
+    } else if(battery.energy_stored() <= MAX_BACKUP_ENERGY) {
+      active = false;
+    }
+
+    return active;
   }
 
   bool will_backup(stats_bundle *stats) const override
@@ -96,7 +109,8 @@ public:
 
     last_cycle_count = stats->cpu.cycle_count;
 
-    // TODO: consume energy
+    battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
+    battery.consume_energy(writeback_backups * MEMENTOS_FLASH_REG);
 
     // save architectural state
     architectural_state = thumbulator::cpu;
@@ -110,12 +124,13 @@ public:
   uint64_t restore(stats_bundle *stats) override
   {
     // restore saved architectural state
+    thumbulator::cpu_reset();
     thumbulator::cpu = architectural_state;
 
-    // TODO: consume energy
+    battery.consume_energy(CLANK_RESTORE_ENERGY);
 
-    // TODO: restore time penalty
-    return 0;
+    // assume memory access latency for reads and writes is the same
+    return CLANK_BACKUP_ARCH_TIME;
   }
 
 private:
@@ -124,6 +139,7 @@ private:
   uint64_t last_cycle_count = 0u;
 
   thumbulator::cpu_state architectural_state{};
+  mutable bool active = false;
 
   size_t const BITS_PER_ENTRY;
   size_t const READFIRST_ENTRIES;
@@ -131,6 +147,7 @@ private:
   size_t const WRITEBACK_ENTRIES;
   size_t const ADDRESS_PREFIX_ENTRIES;
   int const PREFIX_MASK;
+  double const MAX_BACKUP_ENERGY;
 
   bool idempotent_violation = false;
 
@@ -143,15 +160,25 @@ private:
   bool checkpoint_on_next_addressprefix_write = false;
 
   uint64_t backup_time = 0;
+  size_t writeback_backups = 0;
 
   void checkpoint()
   {
+    writeback_backups = writeback_buffer.size();
     backup_time = CLANK_BACKUP_ARCH_TIME;
     if(!writeback_buffer.empty()) {
       // time to access writeback buffer
       backup_time += CLANK_BACKUP_WBB_ACCESS_TIME;
       // time to write values in writeback buffer
       backup_time += (CLANK_BACKUP_WBB_ENTRY_TIME * writeback_buffer.size());
+    }
+
+    for(auto const &memory_access : writeback_buffer) {
+      auto const address = memory_access.first;
+      auto const value = memory_access.second;
+
+      // actually save the data into non-volatile memory
+      thumbulator::RAM[(address & RAM_ADDRESS_MASK) >> 2] = value;
     }
 
     // set flags
@@ -231,7 +258,10 @@ private:
 
         if(value_changed) {
           if(writeback_buffer.find(address) != writeback_buffer.end()) {
-            // the value is already in the writeback buffer
+            // the address is already in the writeback buffer
+
+            // update the writeback buffer with the new value
+            writeback_buffer[address] = value;
             return;
           } else if(writeback_buffer.size() < WRITEBACK_ENTRIES) {
             writeback_buffer[address] = value;
@@ -274,6 +304,11 @@ private:
 
             return;
           }
+        } else {
+          // the address is already in the writeback buffer
+
+          // update the writeback buffer with the new value
+          writeback_buffer[address] = value;
         }
       }
     }
@@ -282,12 +317,27 @@ private:
   uint32_t process_read(uint32_t address, uint32_t data)
   {
     process_address(address, operation::read, false, data);
+
+    auto const it = writeback_buffer.find(address);
+    if(it != writeback_buffer.end()) {
+      // data is in the writeback buffer, use that value instead
+      data = it->second;
+    }
+
     return data;
   }
 
   uint32_t process_store(uint32_t address, uint32_t old_value, uint32_t value)
   {
+    // this may call checkpoint, which would: set idempotent violation to true, clear all buffers
     process_address(address, operation::write, old_value != value, value);
+
+    auto const it = writeback_buffer.find(address);
+    if(it != writeback_buffer.end()) {
+      // data is in the writeback buffer, do not put the new value in memory until checkpoint
+      value = old_value;
+    }
+
     return value;
   }
 };

@@ -47,6 +47,10 @@ constexpr uint64_t NVP_BEC_RESTORE_TIME = 1;
 constexpr uint64_t CLANK_BACKUP_ARCH_TIME = 40;
 constexpr uint64_t CLANK_BACKUP_WBB_ACCESS_TIME = 2;
 constexpr uint64_t CLANK_BACKUP_WBB_ENTRY_TIME = 2;
+// save 20 registers into flash memory
+constexpr double CLANK_BACKUP_ARCH_ENERGY = 20 * MEMENTOS_FLASH_REG;
+// retrieve 20 register values from flash memory
+constexpr double CLANK_RESTORE_ENERGY = 20 * MEMENTOS_REG_FLASH;
 }
 
 #endif //EH_SIM_DATA_SHEET_ENERGY_HPP
