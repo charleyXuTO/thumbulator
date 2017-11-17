@@ -17,48 +17,25 @@ namespace ehsim {
 /**
  * Based on Clank: Architectural Support for Intermittent Computation.
  *
- * All optimizations, except text segments, are enabled.
- *
- * Clank claims that backups take 40 cycles to save architectural state. Based on thumbulator, we see that
- * are 20 registers, so that's 2 cycles/register.
- *
- * Clank does not provide energy numbers, so we assume Mementos' energy numbers. The source of error here is in
- * the different ISA (Thumb vs RISC) and that the MSP430 is a 16-bit processor while Clank's M0+ is 32-bit.
+ * Only implements the read- and write-first buffers.
  */
 class clank : public eh_scheme {
 public:
   /**
-   * Construct the pareto-optimal clank.
-   *
-   * See Table 2 in the paper.
+   * Construct a default clank configuration.
    */
-  clank() : clank(14, 16, 8, 4, 4)
+  clank() : clank(16, 8)
   {
   }
 
-  clank(size_t entry_bits,
-      size_t rf_entries,
-      size_t wf_entries,
-      size_t wb_entries,
-      size_t ap_entries)
-      : battery(10e-3, BATTERYLESS_MAX_CAPACITOR_VOLTAGE)
-      , BITS_PER_ENTRY(entry_bits)
+  clank(size_t rf_entries, size_t wf_entries)
+      : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
-      , WRITEBACK_ENTRIES(wb_entries)
-      , ADDRESS_PREFIX_ENTRIES(ap_entries)
-      , PREFIX_MASK(entry_bits > 29 ? 0 : 0xFFFFFFFF >> (entry_bits + 2) << (entry_bits + 2))
-      , MAX_BACKUP_ENERGY(CLANK_BACKUP_ARCH_ENERGY + WRITEBACK_ENTRIES * MEMENTOS_FLASH_REG)
+      , MAX_BACKUP_ENERGY(CLANK_BACKUP_ARCH_ENERGY)
   {
-    assert(BITS_PER_ENTRY >= 0);
     assert(READFIRST_ENTRIES >= 1);
     assert(WRITEFIRST_ENTRIES >= 0);
-    assert(WRITEBACK_ENTRIES >= 0);
-    assert(ADDRESS_PREFIX_ENTRIES >= 0);
-
-    if(ADDRESS_PREFIX_ENTRIES == 0) {
-      assert(BITS_PER_ENTRY == 30);
-    }
 
     thumbulator::ram_load_hook = [this](
         uint32_t address, uint32_t data) -> uint32_t { return this->process_read(address, data); };
@@ -84,12 +61,13 @@ public:
     stats->models.back().instruction_energy += MEMENTOS_INSTRUCTION_ENERGY;
   }
 
-  bool is_active(stats_bundle *stats) const override
+  bool is_active(stats_bundle *stats) override
   {
     if(battery.energy_stored() == battery.maximum_energy_stored()) {
       assert(!active);
       active = true;
-    } else if(battery.energy_stored() <= MAX_BACKUP_ENERGY) {
+    } else if(battery.energy_stored() <= MAX_BACKUP_ENERGY + MEMENTOS_INSTRUCTION_ENERGY) {
+      clear_buffers();
       active = false;
     }
 
@@ -98,29 +76,26 @@ public:
 
   bool will_backup(stats_bundle *stats) const override
   {
-    // TODO: watchdog timer
-    auto const energy_warning = CLANK_BACKUP_ARCH_ENERGY + MEMENTOS_INSTRUCTION_ENERGY;
-
-    return idempotent_violation || (battery.energy_stored() <= energy_warning);
+    return idempotent_violation;
   }
 
   uint64_t backup(stats_bundle *stats) override
   {
+    battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
+
     stats->models.back().backup_times += stats->cpu.cycle_count - last_cycle_count;
     stats->models.back().num_backups++;
-
     last_cycle_count = stats->cpu.cycle_count;
-
-    battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
-    //battery.consume_energy(writeback_backups * MEMENTOS_FLASH_REG);
 
     // save architectural state
     architectural_state = thumbulator::cpu;
 
-    // the backup has resolved the idempotancy violation
+    clear_buffers();
+
+    // the backup has resolved the idempotancy violation and/or exception
     idempotent_violation = false;
 
-    return backup_time;
+    return CLANK_BACKUP_ARCH_TIME;
   }
 
   uint64_t restore(stats_bundle *stats) override
@@ -146,61 +121,24 @@ private:
   thumbulator::cpu_state architectural_state{};
   mutable bool active = false;
 
-  size_t const BITS_PER_ENTRY;
   size_t const READFIRST_ENTRIES;
   size_t const WRITEFIRST_ENTRIES;
-  size_t const WRITEBACK_ENTRIES;
-  size_t const ADDRESS_PREFIX_ENTRIES;
-  int const PREFIX_MASK;
   double const MAX_BACKUP_ENERGY;
 
   bool idempotent_violation = false;
 
   std::set<uint32_t> readfirst_buffer;
   std::set<uint32_t> writefirst_buffer;
-  std::set<uint32_t> addressprefix_buffer;
-  std::unordered_map<uint32_t, uint32_t> writeback_buffer;
-
-  bool checkpoint_on_next_write = false;
-  bool checkpoint_on_next_addressprefix_write = false;
-
-  uint64_t backup_time = 0;
-  size_t writeback_backups = 0;
-
-  void checkpoint()
-  {
-    writeback_backups = writeback_buffer.size();
-    backup_time = CLANK_BACKUP_ARCH_TIME;
-    if(!writeback_buffer.empty()) {
-      // time to access writeback buffer
-      backup_time += CLANK_BACKUP_WBB_ACCESS_TIME;
-      // time to write values in writeback buffer
-      backup_time += (CLANK_BACKUP_WBB_ENTRY_TIME * writeback_buffer.size());
-    }
-
-    for(auto const &memory_access : writeback_buffer) {
-      auto const address = memory_access.first;
-      auto const value = memory_access.second;
-
-      // actually save the data into non-volatile memory
-      thumbulator::RAM[(address & RAM_ADDRESS_MASK) >> 2] = value;
-    }
-
-    // set flags
-    idempotent_violation = true;
-    checkpoint_on_next_write = false;
-    checkpoint_on_next_addressprefix_write = false;
-
-    // clear all buffers
-    readfirst_buffer.clear();
-    writefirst_buffer.clear();
-    addressprefix_buffer.clear();
-    writeback_buffer.clear();
-  }
 
   enum class operation { read, write };
 
-  bool try_insert(std::set<uint32_t> *buffer, uint32_t address, size_t max_buffer_size)
+  void clear_buffers()
+  {
+    readfirst_buffer.clear();
+    writefirst_buffer.clear();
+  }
+
+  bool try_insert(std::set<uint32_t> *buffer, uint32_t const address, size_t const max_buffer_size)
   {
     if(buffer->size() < max_buffer_size) {
       buffer->insert(address);
@@ -211,7 +149,10 @@ private:
     return false;
   }
 
-  void process_address(uint32_t address, operation op, bool value_changed, uint32_t value)
+  /**
+   * Detection logic for idempotency violations.
+   */
+  void detect_violation(uint32_t address, operation op, uint32_t old_value, uint32_t value)
   {
     auto const readfirst_it = readfirst_buffer.find(address);
     auto const readfirst_hit = readfirst_it != readfirst_buffer.end();
@@ -232,26 +173,23 @@ private:
 
       if(!was_added) {
         // idempotent violation - a buffer was full
-        checkpoint();
+        idempotent_violation = true;
       }
     } else if(op == operation::write && readfirst_hit) {
       // idempotent violation - write to read-dominated address
-      checkpoint();
+      idempotent_violation = true;
     }
   }
 
-  uint32_t process_read(uint32_t address, uint32_t data)
+  uint32_t process_read(uint32_t address, uint32_t value)
   {
-    process_address(address, operation::read, false, data);
-
-    return data;
+    detect_violation(address, operation::read, value, value);
+    return value;
   }
 
   uint32_t process_store(uint32_t address, uint32_t old_value, uint32_t value)
   {
-    // this may call checkpoint, which would: set idempotent violation to true, clear all buffers
-    process_address(address, operation::write, old_value != value, value);
-
+    detect_violation(address, operation::write, old_value, value);
     return value;
   }
 };

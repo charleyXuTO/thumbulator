@@ -36,7 +36,7 @@ public:
     stats->models.back().instruction_energy += NVP_INSTRUCTION_ENERGY;
   }
 
-  bool is_active(stats_bundle *stats) const override
+  bool is_active(stats_bundle *stats) override
   {
     auto required_energy = NVP_INSTRUCTION_ENERGY + NVP_BEC_BACKUP_ENERGY;
 

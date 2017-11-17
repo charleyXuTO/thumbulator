@@ -36,7 +36,7 @@ public:
     stats->models.back().instruction_energy += NVP_INSTRUCTION_ENERGY;
   }
 
-  bool is_active(stats_bundle *stats) const override
+  bool is_active(stats_bundle *stats) override
   {
     if(battery.energy_stored() == battery.maximum_energy_stored()) {
       assert(!active);
@@ -92,7 +92,7 @@ private:
 
   uint64_t last_cycle_count = 0u;
 
-  mutable bool active = false;
+  bool active = false;
 };
 }
 #endif //EH_SIM_ON_DEMAND_ALL_BACKUP_HPP

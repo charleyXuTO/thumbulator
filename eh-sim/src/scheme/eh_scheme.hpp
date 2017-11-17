@@ -17,7 +17,7 @@ public:
 
   virtual void execute_instruction(stats_bundle *stats) = 0;
 
-  virtual bool is_active(stats_bundle *stats) const = 0;
+  virtual bool is_active(stats_bundle *stats) = 0;
 
   virtual bool will_backup(stats_bundle *stats) const = 0;
 
