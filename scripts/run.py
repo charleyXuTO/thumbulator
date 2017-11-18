@@ -51,7 +51,7 @@ if __name__ == "__main__":
     vtrace_whitelist = ['1', '3', '4', '5', '6', '7', '8', '9']
     # the time between samples of the voltage trace, in microseconds. The longer the time, the smaller the rate
     # of charge per cycle
-    vtrace_rates = {'bec': 10000, 'odab': 10000, 'clank': 1000}
+    vtrace_rates = {'bec': 10000, 'odab': 100000, 'clank': 1000}
 
     for benchmark in benchmark_whitelist:
         for vtrace in vtrace_whitelist:
