@@ -101,6 +101,8 @@ public:
     // save architectural state
     architectural_state = thumbulator::cpu;
 
+    // reset the watchdog
+    progress_watchdog = WATCHDOG_PERIOD;
     // clear idempotency-tracking buffers
     clear_buffers();
     // the backup has resolved the idempotancy violation and/or exception
@@ -115,6 +117,7 @@ public:
 
   uint64_t restore(stats_bundle *stats) override
   {
+    progress_watchdog = WATCHDOG_PERIOD;
     last_backup_cycle = stats->cpu.cycle_count;
 
     // allocate space for a new active period model
@@ -162,7 +165,6 @@ private:
   void power_on()
   {
     active = true;
-    progress_watchdog = WATCHDOG_PERIOD;
   }
 
   void power_off()
