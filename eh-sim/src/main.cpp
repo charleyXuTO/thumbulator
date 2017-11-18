@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 
     std::ofstream eh_file(scheme_select + ".csv");
     eh_file.setf(std::ios::fixed);
-    eh_file << "id, n_B, tau_B, e_B, inst_energy, e_P, tau_P, tau_D\n";
+    eh_file << "id, n_B, tau_B, e_B, e_P, tau_P, tau_D, p\n";
 
     int id = 0;
     for(auto const &model : stats.models) {
@@ -112,14 +112,19 @@ int main(int argc, char *argv[])
         e_b = model.energy_for_backups / model.num_backups;
       }
 
+      double p = 0.0;
+      if(model.energy_for_instructions > 0) {
+        p = model.energy_forward_progress / model.energy_for_instructions;
+      }
+
       eh_file << id++ << ", ";
       eh_file << std::setprecision(0) << model.num_backups << ", ";
       eh_file << std::setprecision(2) << tau_b << ", ";
       eh_file << std::setprecision(3) << e_b << ", ";
-      eh_file << std::setprecision(3) << model.energy_for_instructions << ", ";
       eh_file << std::setprecision(3) << model.energy_forward_progress << ", ";
       eh_file << std::setprecision(0) << model.time_forward_progress << ", ";
-      eh_file << std::setprecision(0) << model.time_cpu_total - model.time_forward_progress << "\n";
+      eh_file << std::setprecision(0) << model.time_cpu_total - model.time_forward_progress << ", ";
+      eh_file << std::setprecision(3) << p << "\n";
     }
 
   } catch(std::exception const &e) {
