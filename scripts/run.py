@@ -5,7 +5,8 @@ import os
 
 
 def run(eh_sim, app, trace, rate, s, harvest, out_dir):
-    path_to_output = out_dir + "/" + scheme + ".csv"
+    base_name = s + "-" + str(harvest)
+    path_to_output = out_dir + "/" + base_name + ".csv"
 
     to_run = "{} -b{} --voltage-trace={} --voltage-rate={} --scheme={} -o{}".format(eh_sim, app, trace, rate, s,
                                                                                     path_to_output)
@@ -16,8 +17,8 @@ def run(eh_sim, app, trace, rate, s, harvest, out_dir):
     else:
         to_run.append('--always-harvest=0')
 
-    stdout_file = open(out_dir + "/" + scheme + ".stdout", "w")
-    stderr_file = open(out_dir + "/" + scheme + ".stderr", "w")
+    stdout_file = open(out_dir + "/" + base_name + ".stdout", "w")
+    stderr_file = open(out_dir + "/" + base_name + ".stderr", "w")
     subprocess.run(to_run, stdout=stdout_file, stderr=stderr_file)
 
 
