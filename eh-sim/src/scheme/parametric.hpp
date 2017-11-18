@@ -51,6 +51,11 @@ public:
       power_on();
     } else if(battery.energy_stored() <= CLANK_INSTRUCTION_ENERGY) {
       power_off();
+    } else if(countdown_to_backup < 0) {
+      // the countdown continues to decrease even if there is not enough energy
+      // to backup. Once the countdown is negative, we should power off and wait
+      // for more energy.
+      power_off();
     }
 
     return active;
@@ -91,6 +96,8 @@ public:
 
   uint64_t restore(stats_bundle *stats) override
   {
+    // reset countdown
+    countdown_to_backup = BACKUP_PERIOD;
     last_backup_cycle = stats->cpu.cycle_count;
 
     // allocate space for a new active period model
@@ -122,7 +129,6 @@ private:
   void power_on()
   {
     active = true;
-    countdown_to_backup = BACKUP_PERIOD;
   }
 
   void power_off()
