@@ -81,11 +81,10 @@ public:
     // is_active should have set this to true before a restore can happen
     assert(active);
 
-    battery.consume_energy(NVP_ODAB_RESTORE_ENERGY);
-
     // allocate space for a new active period model
     stats->models.emplace_back();
 
+    battery.consume_energy(NVP_ODAB_RESTORE_ENERGY);
     return NVP_ODAB_RESTORE_TIME;
   }
 
