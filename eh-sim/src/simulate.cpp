@@ -114,6 +114,8 @@ stats_bundle simulate(char const *binary_file,
   auto charging_rate = calculate_charging_rate(voltage, battery.capacitance(), cycles_per_sample);
   auto next_charge_time = power.sample_rate();
 
+  uint64_t active_start = 0u;
+
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
@@ -123,6 +125,7 @@ stats_bundle simulate(char const *binary_file,
       if(!was_active && stats.cpu.instruction_count != 0) {
         // we have just transitioned to an active mode
         elapsed_cycles += scheme->restore(&stats);
+        active_start = stats.cpu.cycle_count;
       }
 
       was_active = true;
@@ -139,7 +142,9 @@ stats_bundle simulate(char const *binary_file,
       if(scheme->will_backup(&stats)) {
         elapsed_cycles += scheme->backup(&stats);
 
-        stats.models.back().energy_forward_progress = stats.models.back().energy_for_instructions;
+        auto &active_stats = stats.models.back();
+        active_stats.energy_forward_progress = active_stats.energy_for_instructions;
+        active_stats.time_forward_progress = stats.cpu.cycle_count - active_start;
       }
     } else {
       was_active = false;

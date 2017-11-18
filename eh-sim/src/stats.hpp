@@ -64,6 +64,11 @@ struct active_stats {
    * Energy spent on executing instructions that were backed up.
    */
   double energy_forward_progress = 0.0;
+
+  /**
+   * The total CPU cycles spent on forward progress.
+   */
+  uint64_t time_forward_progress = 0u;
 };
 
 struct stats_bundle {
