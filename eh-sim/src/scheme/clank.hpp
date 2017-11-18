@@ -24,15 +24,17 @@ public:
   /**
    * Construct a default clank configuration.
    */
-  clank() : clank(8, 8)
+  clank() : clank(8, 8, 8000)
   {
   }
 
-  clank(size_t rf_entries, size_t wf_entries)
+  clank(size_t rf_entries, size_t wf_entries, int watchdog_period)
       : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+      , WATCHDOG_PERIOD(watchdog_period)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
       , MAX_BACKUP_ENERGY(CLANK_BACKUP_ARCH_ENERGY)
+      , progress_watchdog(WATCHDOG_PERIOD)
   {
     assert(READFIRST_ENTRIES >= 1);
     assert(WRITEFIRST_ENTRIES >= 0);
@@ -59,13 +61,15 @@ public:
     battery.consume_energy(CLANK_INSTRUCTION_ENERGY);
 
     stats->models.back().energy_for_instructions += CLANK_INSTRUCTION_ENERGY;
+
+    progress_watchdog -= stats->cpu.cycle_count - last_tick;
+    last_tick = stats->cpu.cycle_count;
   }
 
   bool is_active(stats_bundle *stats) override
   {
     if(battery.energy_stored() == battery.maximum_energy_stored()) {
-      assert(!active);
-      active = true;
+      power_on();
     } else if(battery.energy_stored() <= CLANK_INSTRUCTION_ENERGY) {
       power_off();
     }
@@ -77,6 +81,10 @@ public:
   {
     if(battery.energy_stored() < MAX_BACKUP_ENERGY) {
       return false;
+    }
+
+    if(progress_watchdog <= 0) {
+      return true;
     }
 
     return idempotent_violation;
@@ -125,14 +133,17 @@ private:
   capacitor battery;
 
   uint64_t last_backup_cycle = 0u;
+  uint64_t last_tick = 0u;
 
   thumbulator::cpu_state architectural_state{};
   bool active = false;
 
+  int const WATCHDOG_PERIOD;
   size_t const READFIRST_ENTRIES;
   size_t const WRITEFIRST_ENTRIES;
   double const MAX_BACKUP_ENERGY;
 
+  int progress_watchdog;
   bool idempotent_violation = false;
 
   std::set<uint32_t> readfirst_buffer;
@@ -144,6 +155,12 @@ private:
   {
     readfirst_buffer.clear();
     writefirst_buffer.clear();
+  }
+
+  void power_on()
+  {
+    active = true;
+    progress_watchdog = WATCHDOG_PERIOD;
   }
 
   void power_off()
