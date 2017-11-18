@@ -113,10 +113,10 @@ int main(int argc, char *argv[])
       eh_file << id++ << ", ";
       eh_file << std::setprecision(0) << model.num_backups << ", ";
       eh_file << std::setprecision(2) << tau_b << ", ";
-      eh_file << std::setprecision(2) << model.energy_for_instructions << ", ";
-      eh_file << std::setprecision(2) << model.energy_for_backups << ", ";
+      eh_file << std::setprecision(3) << model.energy_for_instructions << ", ";
+      eh_file << std::setprecision(3) << model.energy_for_backups << ", ";
       eh_file << std::setprecision(0) << model.time_for_backups << ", ";
-      eh_file << std::setprecision(2) << model.energy_forward_progress << "\n";
+      eh_file << std::setprecision(3) << model.energy_forward_progress << "\n";
     }
 
   } catch(std::exception const &e) {
