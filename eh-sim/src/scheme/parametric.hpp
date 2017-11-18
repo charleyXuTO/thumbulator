@@ -1,0 +1,170 @@
+#ifndef EH_SIM_PARAMETRIC_HPP
+#define EH_SIM_PARAMETRIC_HPP
+
+#include "scheme/eh_scheme.hpp"
+#include "scheme/data_sheet.hpp"
+#include "capacitor.hpp"
+#include "stats.hpp"
+
+#include <thumbulator/memory.hpp>
+
+#include <unordered_map>
+
+namespace ehsim {
+
+class parametric : public eh_scheme {
+public:
+  explicit parametric(int backup_period)
+      : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+      , BACKUP_PERIOD(backup_period)
+      , countdown_to_backup(BACKUP_PERIOD)
+  {
+    thumbulator::ram_load_hook = [this](
+        uint32_t address, uint32_t data) -> uint32_t { return this->process_read(address, data); };
+
+    thumbulator::ram_store_hook = [this](uint32_t address, uint32_t last_value,
+        uint32_t value) -> uint32_t { return this->process_store(address, last_value, value); };
+  }
+
+  capacitor &get_battery() override
+  {
+    return battery;
+  }
+
+  uint32_t clock_frequency() const override
+  {
+    return MEMENTOS_CPU_FREQUENCY;
+  }
+
+  void execute_instruction(stats_bundle *stats) override
+  {
+    battery.consume_energy(CLANK_INSTRUCTION_ENERGY);
+    stats->models.back().energy_for_instructions += CLANK_INSTRUCTION_ENERGY;
+
+    countdown_to_backup -= stats->cpu.cycle_count - last_tick;
+    last_tick = stats->cpu.cycle_count;
+  }
+
+  bool is_active(stats_bundle *stats) override
+  {
+    if(battery.energy_stored() == battery.maximum_energy_stored()) {
+      power_on();
+    } else if(battery.energy_stored() <= CLANK_INSTRUCTION_ENERGY) {
+      power_off();
+    }
+
+    return active;
+  }
+
+  bool will_backup(stats_bundle *stats) const override
+  {
+    if(battery.energy_stored() < calculate_backup_energy()) {
+      return false;
+    }
+
+    return countdown_to_backup <= 0;
+  }
+
+  uint64_t backup(stats_bundle *stats) override
+  {
+    auto &active_stats = stats->models.back();
+    active_stats.num_backups++;
+
+    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
+    last_backup_cycle = stats->cpu.cycle_count;
+
+    // reset countdown
+    countdown_to_backup = BACKUP_PERIOD;
+    // save architectural state
+    architectural_state = thumbulator::cpu;
+    // save application state
+    auto const num_stores = write_back();
+
+    auto const backup_energy = calculate_backup_energy();
+    active_stats.energy_for_backups += backup_energy;
+    battery.consume_energy(backup_energy);
+
+    auto const backup_time = CLANK_BACKUP_ARCH_TIME + (num_stores * CLANK_MEMORY_TIME);
+    active_stats.time_for_backups += backup_time;
+    return backup_time;
+  }
+
+  uint64_t restore(stats_bundle *stats) override
+  {
+    // allocate space for a new active period model
+    stats->models.emplace_back();
+
+    // restore saved architectural state
+    thumbulator::cpu_reset();
+    thumbulator::cpu = architectural_state;
+
+    return CLANK_BACKUP_ARCH_TIME;
+  }
+
+private:
+  capacitor battery;
+  bool active = false;
+
+  uint64_t last_backup_cycle = 0u;
+  uint64_t last_tick = 0u;
+
+  int const BACKUP_PERIOD;
+  int countdown_to_backup;
+
+  thumbulator::cpu_state architectural_state{};
+  std::unordered_map<uint32_t, uint32_t> stores;
+
+  void power_on()
+  {
+    active = true;
+    countdown_to_backup = BACKUP_PERIOD;
+  }
+
+  void power_off()
+  {
+    active = false;
+    stores.clear();
+  }
+
+  double calculate_backup_energy() const
+  {
+     return CLANK_BACKUP_ARCH_ENERGY + (stores.size() * MEMENTOS_FLASH_REG);
+  }
+
+  size_t write_back()
+  {
+    auto const count = stores.size();
+
+    for(auto const &store : stores) {
+      thumbulator::RAM[(store.first & RAM_ADDRESS_MASK) >> 2] = store.second;
+    }
+    stores.clear();
+
+    return count;
+  }
+
+  uint32_t process_read(uint32_t address, uint32_t value)
+  {
+    auto it = stores.find(address);
+    if(it != stores.end()) {
+      return it->second;
+    }
+
+    return value;
+  }
+
+  uint32_t process_store(uint32_t address, uint32_t old_value, uint32_t value)
+  {
+    auto it = stores.find(address);
+    if(it != stores.end()) {
+      it->second = value;
+    } else {
+      stores.emplace(address, value);
+    }
+
+    return old_value;
+  }
+};
+}
+
+#endif //EH_SIM_PARAMETRIC_HPP

@@ -9,6 +9,8 @@
 #include "scheme/clank.hpp"
 #include "scheme/magical_scheme.hpp"
 #include "scheme/on_demand_all_backup.hpp"
+#include "scheme/parametric.hpp"
+
 #include "simulate.hpp"
 #include "voltage_trace.hpp"
 
@@ -85,6 +87,8 @@ int main(int argc, char *argv[])
       scheme = std::make_unique<ehsim::magical_scheme>();
     } else if(scheme_select == "clank") {
       scheme = std::make_unique<ehsim::clank>();
+    } else if(scheme_select == "parametric") {
+      scheme = std::make_unique<ehsim::parametric>(1000);
     } else {
       throw std::runtime_error("Unknown scheme selected.");
     }

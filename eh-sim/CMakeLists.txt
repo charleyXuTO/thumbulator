@@ -13,6 +13,7 @@ add_executable(
   src/scheme/eh_scheme.hpp
   src/scheme/magical_scheme.hpp
   src/scheme/on_demand_all_backup.hpp
+  src/scheme/parametric.hpp
   src/capacitor.hpp
   src/main.cpp
   src/scheme/data_sheet.hpp
