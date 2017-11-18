@@ -57,7 +57,8 @@ int main(int argc, char *argv[])
       {"rate", {"--voltage-rate"}, "sampling rate of voltage trace (microseconds)", 1},
       {"harvest", {"--always-harvest"}, "harvest during active periods", 1},
       {"scheme", {"--scheme"}, "the checkpointing scheme to use", 1},
-      {"binary", {"-b", "--binary"}, "path to application binary", 1}}};
+      {"binary", {"-b", "--binary"}, "path to application binary", 1},
+      {"output", {"-o", "--output"}, "output file", 1}}};
 
   try {
     auto const options = arguments.parse(argc, argv);
@@ -98,9 +99,14 @@ int main(int argc, char *argv[])
     std::cout << "Energy harvested (J): " << stats.system.energy_harvested * 1e-9 << "\n";
     std::cout << "Energy remaining (J): " << stats.system.energy_remaining * 1e-9 << "\n";
 
-    std::ofstream eh_file(scheme_select + ".csv");
-    eh_file.setf(std::ios::fixed);
-    eh_file << "id, n_B, tau_B, e_B, e_R, e_P, tau_P, tau_D, p\n";
+    std::string output_file_name(scheme_select + ".csv");
+    if(options["output"].count() > 0) {
+      output_file_name = options["output"].as<std::string>();
+    }
+
+    std::ofstream out(output_file_name);
+    out.setf(std::ios::fixed);
+    out << "id, n_B, tau_B, e_B, e_R, e_P, tau_P, tau_D, p\n";
 
     int id = 0;
     for(auto const &model : stats.models) {
@@ -117,15 +123,15 @@ int main(int argc, char *argv[])
         p = model.energy_forward_progress / model.energy_for_instructions;
       }
 
-      eh_file << id++ << ", ";
-      eh_file << std::setprecision(0) << model.num_backups << ", ";
-      eh_file << std::setprecision(2) << tau_b << ", ";
-      eh_file << std::setprecision(3) << e_B << ", ";
-      eh_file << std::setprecision(3) << model.energy_for_restore << ", ";
-      eh_file << std::setprecision(3) << model.energy_forward_progress << ", ";
-      eh_file << std::setprecision(0) << model.time_forward_progress << ", ";
-      eh_file << std::setprecision(0) << model.time_cpu_total - model.time_forward_progress << ", ";
-      eh_file << std::setprecision(3) << p << "\n";
+      out << id++ << ", ";
+      out << std::setprecision(0) << model.num_backups << ", ";
+      out << std::setprecision(2) << tau_b << ", ";
+      out << std::setprecision(3) << e_B << ", ";
+      out << std::setprecision(3) << model.energy_for_restore << ", ";
+      out << std::setprecision(3) << model.energy_forward_progress << ", ";
+      out << std::setprecision(0) << model.time_forward_progress << ", ";
+      out << std::setprecision(0) << model.time_cpu_total - model.time_forward_progress << ", ";
+      out << std::setprecision(3) << p << "\n";
     }
 
   } catch(std::exception const &e) {
