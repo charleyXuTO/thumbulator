@@ -24,7 +24,7 @@ public:
   /**
    * Construct a default clank configuration.
    */
-  clank() : clank(16, 8)
+  clank() : clank(8, 8)
   {
   }
 
