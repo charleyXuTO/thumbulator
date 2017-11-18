@@ -82,6 +82,8 @@ public:
     // is_active should have set this to true before a restore can happen
     assert(active);
 
+    last_backup_cycle = stats->cpu.cycle_count;
+
     // allocate space for a new active period model
     stats->models.emplace_back();
 

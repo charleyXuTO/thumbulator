@@ -71,6 +71,8 @@ public:
 
   uint64_t restore(stats_bundle *stats) override
   {
+    last_backup_cycle = stats->cpu.cycle_count;
+
     // do not touch arch/app state, assume it is all non-volatile
 
     // allocate space for a new active period model
