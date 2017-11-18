@@ -100,8 +100,8 @@ int main(int argc, char *argv[])
 
     std::ofstream eh_file(scheme_select + ".csv");
     eh_file.setf(std::ios::fixed);
-    eh_file << "id,instruction.energy,time.between.backups,time.all.backup,energy.all."
-               "backup,num.backups\n";
+    eh_file << "id, time.between.backups, instruction.energy, energy.all.backup, time.all."
+               "backup, num.backups\n";
 
     int id = 0;
     for(auto const &model : stats.models) {
@@ -111,11 +111,11 @@ int main(int argc, char *argv[])
         tau_b = static_cast<double>(model.time_between_backups) / model.num_backups;
       }
 
-      eh_file << id++ << ",";
-      eh_file << std::setprecision(2) << tau_b << ",";
-      eh_file << std::setprecision(0) << model.energy_for_instructions << ",";
-      eh_file << std::setprecision(0) << model.energy_for_backups << ",";
-      eh_file << std::setprecision(0) << model.time_for_backups << ",";
+      eh_file << id++ << ", ";
+      eh_file << std::setprecision(2) << tau_b << ", ";
+      eh_file << std::setprecision(2) << model.energy_for_instructions << ", ";
+      eh_file << std::setprecision(2) << model.energy_for_backups << ", ";
+      eh_file << std::setprecision(0) << model.time_for_backups << ", ";
       eh_file << std::setprecision(0) << model.num_backups << "\n";
     }
 
