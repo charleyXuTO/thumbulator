@@ -66,9 +66,8 @@ public:
     if(battery.energy_stored() == battery.maximum_energy_stored()) {
       assert(!active);
       active = true;
-    } else if(battery.energy_stored() <= MAX_BACKUP_ENERGY + CLANK_INSTRUCTION_ENERGY) {
-      clear_buffers();
-      active = false;
+    } else if(battery.energy_stored() <= CLANK_INSTRUCTION_ENERGY) {
+      power_off();
     }
 
     return active;
@@ -76,6 +75,10 @@ public:
 
   bool will_backup(stats_bundle *stats) const override
   {
+    if(battery.energy_stored() < MAX_BACKUP_ENERGY) {
+      return false;
+    }
+
     return idempotent_violation;
   }
 
@@ -140,6 +143,12 @@ private:
     writefirst_buffer.clear();
   }
 
+  void power_off()
+  {
+    active = false;
+    clear_buffers();
+  }
+
   bool try_insert(std::set<uint32_t> *buffer, uint32_t const address, size_t const max_buffer_size)
   {
     if(buffer->size() < max_buffer_size) {
@@ -186,12 +195,24 @@ private:
   uint32_t process_read(uint32_t address, uint32_t value)
   {
     detect_violation(address, operation::read, value, value);
+
+    if(idempotent_violation && battery.energy_stored() < MAX_BACKUP_ENERGY) {
+      power_off();
+    }
+
     return value;
   }
 
   uint32_t process_store(uint32_t address, uint32_t old_value, uint32_t value)
   {
     detect_violation(address, operation::write, old_value, value);
+
+    if(idempotent_violation && battery.energy_stored() < MAX_BACKUP_ENERGY) {
+      power_off();
+
+      return old_value;
+    }
+
     return value;
   }
 };
