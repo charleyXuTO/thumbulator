@@ -17,7 +17,7 @@ namespace ehsim {
  */
 class magical_scheme : public eh_scheme {
 public:
-  magical_scheme() : battery(BATTERYLESS_CAPACITANCE, BATTERYLESS_MAX_CAPACITOR_VOLTAGE)
+  magical_scheme() : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
   {
   }
 
@@ -28,7 +28,7 @@ public:
 
   uint32_t clock_frequency() const override
   {
-    return thumbulator::CPU_FREQ;
+    return MEMENTOS_CPU_FREQUENCY;
   }
 
   void execute_instruction(stats_bundle *stats) override
