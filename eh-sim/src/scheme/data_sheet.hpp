@@ -45,11 +45,9 @@ constexpr uint64_t NVP_BEC_RESTORE_TIME = 1;
 
 // based on Clank: Architectural Support for Intermittent Computation
 constexpr uint64_t CLANK_BACKUP_ARCH_TIME = 40;
-constexpr uint64_t CLANK_BACKUP_WBB_ACCESS_TIME = 2;
-constexpr uint64_t CLANK_BACKUP_WBB_ENTRY_TIME = 2;
 constexpr double CLANK_INSTRUCTION_ENERGY = MEMENTOS_INSTRUCTION_ENERGY + MEMENTOS_REG_FLASH;
-constexpr double CLANK_BACKUP_ARCH_ENERGY = NVP_ODAB_BACKUP_ENERGY * 1000;
-constexpr double CLANK_RESTORE_ENERGY = NVP_ODAB_RESTORE_ENERGY * 1000;
+constexpr double CLANK_BACKUP_ARCH_ENERGY = MEMENTOS_FLASH_REG * 20;
+constexpr double CLANK_RESTORE_ENERGY = MEMENTOS_REG_FLASH * 20;
 }
 
 #endif //EH_SIM_DATA_SHEET_ENERGY_HPP
