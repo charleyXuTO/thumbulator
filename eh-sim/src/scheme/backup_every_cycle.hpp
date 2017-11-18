@@ -33,7 +33,7 @@ public:
   {
     battery.consume_energy(NVP_INSTRUCTION_ENERGY);
 
-    stats->models.back().instruction_energy += NVP_INSTRUCTION_ENERGY;
+    stats->models.back().energy_for_instructions += NVP_INSTRUCTION_ENERGY;
   }
 
   bool is_active(stats_bundle *stats) override

@@ -58,7 +58,7 @@ public:
   {
     battery.consume_energy(MEMENTOS_INSTRUCTION_ENERGY);
 
-    stats->models.back().instruction_energy += MEMENTOS_INSTRUCTION_ENERGY;
+    stats->models.back().energy_for_instructions += MEMENTOS_INSTRUCTION_ENERGY;
   }
 
   bool is_active(stats_bundle *stats) override

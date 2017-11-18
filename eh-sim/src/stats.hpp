@@ -58,7 +58,7 @@ struct active_stats {
   /**
    * The total amount of energy spent on executing instructions.
    */
-  double instruction_energy = 0.0;
+  double energy_for_instructions = 0.0;
 };
 
 struct stats_bundle {
