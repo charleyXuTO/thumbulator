@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
       {"rate", {"--voltage-rate"}, "sampling rate of voltage trace (microseconds)", 1},
       {"harvest", {"--always-harvest"}, "harvest during active periods", 1},
       {"scheme", {"--scheme"}, "the checkpointing scheme to use", 1},
+      {"tau_B", {"--tau-b"}, "the backup period for the parametric scheme", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1},
       {"output", {"-o", "--output"}, "output file", 1}}};
 
@@ -88,7 +89,8 @@ int main(int argc, char *argv[])
     } else if(scheme_select == "clank") {
       scheme = std::make_unique<ehsim::clank>();
     } else if(scheme_select == "parametric") {
-      scheme = std::make_unique<ehsim::parametric>(1000);
+      auto const tau_b = options["tau_B"].as<int>(1000);
+      scheme = std::make_unique<ehsim::parametric>(tau_b);
     } else {
       throw std::runtime_error("Unknown scheme selected.");
     }
