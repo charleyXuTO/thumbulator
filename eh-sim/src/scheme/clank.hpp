@@ -56,9 +56,9 @@ public:
 
   void execute_instruction(stats_bundle *stats) override
   {
-    battery.consume_energy(MEMENTOS_INSTRUCTION_ENERGY);
+    battery.consume_energy(CLANK_INSTRUCTION_ENERGY);
 
-    stats->models.back().energy_for_instructions += MEMENTOS_INSTRUCTION_ENERGY;
+    stats->models.back().energy_for_instructions += CLANK_INSTRUCTION_ENERGY;
   }
 
   bool is_active(stats_bundle *stats) override
@@ -66,7 +66,7 @@ public:
     if(battery.energy_stored() == battery.maximum_energy_stored()) {
       assert(!active);
       active = true;
-    } else if(battery.energy_stored() <= MAX_BACKUP_ENERGY + MEMENTOS_INSTRUCTION_ENERGY) {
+    } else if(battery.energy_stored() <= MAX_BACKUP_ENERGY + CLANK_INSTRUCTION_ENERGY) {
       clear_buffers();
       active = false;
     }
@@ -121,7 +121,7 @@ private:
   uint64_t last_backup_cycle = 0u;
 
   thumbulator::cpu_state architectural_state{};
-  mutable bool active = false;
+  bool active = false;
 
   size_t const READFIRST_ENTRIES;
   size_t const WRITEFIRST_ENTRIES;
