@@ -99,6 +99,7 @@ stats_bundle simulate(char const *binary_file,
   // stats tracking
   stats_bundle stats{};
   stats.system.time = 0ns;
+  stats.models.emplace_back();
 
   initialize_system(binary_file);
 
@@ -122,8 +123,6 @@ stats_bundle simulate(char const *binary_file,
       if(!was_active && stats.cpu.instruction_count != 0) {
         // we have just transitioned to an active mode
         elapsed_cycles += scheme->restore(&stats);
-      } else if(stats.cpu.instruction_count == 0) {
-        stats.models.emplace_back();
       }
 
       was_active = true;
@@ -139,6 +138,8 @@ stats_bundle simulate(char const *binary_file,
 
       if(scheme->will_backup(&stats)) {
         elapsed_cycles += scheme->backup(&stats);
+
+        stats.models.back().energy_forward_progress = stats.models.back().energy_for_instructions;
       }
     } else {
       was_active = false;

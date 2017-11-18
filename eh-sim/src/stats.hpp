@@ -59,6 +59,11 @@ struct active_stats {
    * The total amount of energy spent on executing instructions.
    */
   double energy_for_instructions = 0.0;
+
+  /**
+   * Energy spent on executing instructions that were backed up.
+   */
+  double energy_forward_progress = 0.0;
 };
 
 struct stats_bundle {
