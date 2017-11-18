@@ -115,6 +115,7 @@ stats_bundle simulate(char const *binary_file,
   auto next_charge_time = power.sample_rate();
 
   uint64_t active_start = 0u;
+  int no_forward_progress = 0;
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
@@ -148,6 +149,19 @@ stats_bundle simulate(char const *binary_file,
         active_stats.time_forward_progress = stats.cpu.cycle_count - active_start;
       }
     } else {
+      if(was_active) {
+        auto &last_stats = stats.models.back();
+        if(last_stats.num_backups == 0) {
+          no_forward_progress++;
+
+          if(no_forward_progress >= 5) {
+            throw std::runtime_error("No forward progress made across 5 active periods.");
+          }
+        } else {
+          no_forward_progress = 0;
+        }
+      }
+
       was_active = false;
       elapsed_cycles = 1;
     }
