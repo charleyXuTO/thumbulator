@@ -69,6 +69,11 @@ struct active_stats {
    * The total CPU cycles spent on forward progress.
    */
   uint64_t time_forward_progress = 0u;
+
+  /**
+   * The total CPU cycles of this active period.
+   */
+  uint64_t time_cpu_total = 0u;
 };
 
 struct stats_bundle {

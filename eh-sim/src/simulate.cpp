@@ -134,6 +134,7 @@ stats_bundle simulate(char const *binary_file,
 
       stats.cpu.instruction_count++;
       stats.cpu.cycle_count += instruction_ticks;
+      stats.models.back().time_cpu_total += instruction_ticks;
       elapsed_cycles += instruction_ticks;
 
       // consume energy for execution
