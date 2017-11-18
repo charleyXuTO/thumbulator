@@ -57,14 +57,15 @@ public:
   {
     // do not touch arch/app state, assume it is all non-volatile
     auto &active_stats = stats->models.back();
-    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
-    active_stats.time_for_backups += NVP_BEC_BACKUP_TIME;
-    active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
     active_stats.num_backups++;
 
+    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
     last_backup_cycle = stats->cpu.cycle_count;
 
+    active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
     battery.consume_energy(NVP_BEC_BACKUP_ENERGY);
+
+    active_stats.time_for_backups += NVP_BEC_BACKUP_TIME;
     return NVP_BEC_BACKUP_TIME;
   }
 
@@ -75,7 +76,9 @@ public:
     // allocate space for a new active period model
     stats->models.emplace_back();
 
+    stats->models.back().energy_for_restore = NVP_BEC_RESTORE_ENERGY;
     battery.consume_energy(NVP_BEC_RESTORE_ENERGY);
+
     return NVP_BEC_RESTORE_TIME;
   }
 

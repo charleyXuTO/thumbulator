@@ -61,18 +61,19 @@ public:
     // can't backup if the power is off
     assert(active);
 
-    auto &active_stats = stats->models.back();
-    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
-    active_stats.time_for_backups += NVP_BEC_BACKUP_TIME;
-    active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
-    active_stats.num_backups++;
-
-    last_backup_cycle = stats->cpu.cycle_count;
-
     // we only backup when moving to power-off mode
     active = false;
 
+    auto &active_stats = stats->models.back();
+    active_stats.num_backups++;
+
+    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
+    last_backup_cycle = stats->cpu.cycle_count;
+
+    active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
     battery.consume_energy(NVP_ODAB_BACKUP_ENERGY);
+
+    active_stats.time_for_backups += NVP_BEC_BACKUP_TIME;
     return NVP_ODAB_BACKUP_TIME;
   }
 
@@ -84,7 +85,9 @@ public:
     // allocate space for a new active period model
     stats->models.emplace_back();
 
+    stats->models.back().energy_for_restore = NVP_ODAB_RESTORE_ENERGY;
     battery.consume_energy(NVP_ODAB_RESTORE_ENERGY);
+
     return NVP_ODAB_RESTORE_TIME;
   }
 

@@ -56,6 +56,11 @@ struct active_stats {
   int num_backups = 0;
 
   /**
+   * The energy (nJ) spent doing the restore.
+   */
+  double energy_for_restore = 0.0;
+
+  /**
    * The total amount of energy spent on executing instructions.
    */
   double energy_for_instructions = 0.0;

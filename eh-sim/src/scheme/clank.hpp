@@ -85,11 +85,9 @@ public:
   uint64_t backup(stats_bundle *stats) override
   {
     auto &active_stats = stats->models.back();
-    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
-    active_stats.time_for_backups += CLANK_BACKUP_ARCH_TIME;
-    active_stats.energy_for_backups += CLANK_BACKUP_ARCH_ENERGY;
     active_stats.num_backups++;
 
+    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
     last_backup_cycle = stats->cpu.cycle_count;
 
     // save architectural state
@@ -100,7 +98,10 @@ public:
     // the backup has resolved the idempotancy violation and/or exception
     idempotent_violation = false;
 
+    active_stats.energy_for_backups += CLANK_BACKUP_ARCH_ENERGY;
     battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
+
+    active_stats.time_for_backups += CLANK_BACKUP_ARCH_TIME;
     return CLANK_BACKUP_ARCH_TIME;
   }
 
@@ -113,7 +114,9 @@ public:
     thumbulator::cpu_reset();
     thumbulator::cpu = architectural_state;
 
+    stats->models.back().energy_for_restore = CLANK_RESTORE_ENERGY;
     battery.consume_energy(CLANK_RESTORE_ENERGY);
+
     // assume memory access latency for reads and writes is the same
     return CLANK_BACKUP_ARCH_TIME;
   }
