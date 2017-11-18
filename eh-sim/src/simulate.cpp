@@ -123,10 +123,19 @@ stats_bundle simulate(char const *binary_file,
     uint64_t elapsed_cycles = 0;
 
     if(scheme->is_active(&stats)) {
-      if(!was_active && stats.cpu.instruction_count != 0) {
+      if(!was_active) {
         // we have just transitioned to an active mode
-        elapsed_cycles += scheme->restore(&stats);
+        auto const energy_stored = battery.energy_stored();
+
+        if(stats.cpu.instruction_count != 0) {
+          // restore state
+          elapsed_cycles += scheme->restore(&stats);
+        }
+
+        // track the time this active mode started
         active_start = stats.cpu.cycle_count;
+        // track the energy available for this active mode
+        stats.models.back().energy_total = energy_stored;
       }
 
       was_active = true;
@@ -170,10 +179,14 @@ stats_bundle simulate(char const *binary_file,
 
     if(always_harvest || !was_active) {
       // harvest energy
-      auto const harvested_energy = charging_rate * elapsed_cycles;
-      battery.harvest_energy(harvested_energy);
+      auto harvested_energy = charging_rate * elapsed_cycles;
+      harvested_energy = battery.harvest_energy(harvested_energy);
 
       stats.system.energy_harvested += harvested_energy;
+
+      if(was_active) {
+        stats.models.back().energy_total += harvested_energy;
+      }
     }
 
     if(stats.system.time >= next_charge_time) {

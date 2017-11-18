@@ -74,13 +74,23 @@ public:
   /**
    * Add energy to the capacitor.
    *
-   * @param energy_harvested The amount of energy harvested in nJ.
+   * @param energy_harvested The amount of energy to harvest in nJ.
+   *
+   * @return The amount of energy that could be stored.
    */
-  void harvest_energy(double const energy_harvested)
+  double harvest_energy(double const energy_harvested)
   {
     assert(energy_harvested >= 0);
 
-    energy = std::min(energy + energy_harvested, maximum_energy);
+    double can_harvest = energy_harvested;
+    if(energy + energy_harvested > maximum_energy) {
+      can_harvest = energy + energy_harvested - maximum_energy;
+    }
+
+    // clamp to maximum energy, avoiding floating point precision errors
+    energy = std::min(energy + can_harvest, maximum_energy);
+
+    return can_harvest;
   }
 
 private:

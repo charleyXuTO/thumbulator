@@ -56,6 +56,11 @@ struct active_stats {
   int num_backups = 0;
 
   /**
+   * The total energy available for the active period.
+   */
+  double energy_total = 0.0;
+
+  /**
    * The energy (nJ) spent doing the restore.
    */
   double energy_for_restore = 0.0;
