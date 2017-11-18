@@ -61,16 +61,18 @@ public:
     // can't backup if the power is off
     assert(active);
 
-    battery.consume_energy(NVP_ODAB_BACKUP_ENERGY);
+    auto &active_stats = stats->models.back();
+    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
+    active_stats.time_for_backups += NVP_BEC_BACKUP_TIME;
+    active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
+    active_stats.num_backups++;
+
+    last_backup_cycle = stats->cpu.cycle_count;
 
     // we only backup when moving to power-off mode
     active = false;
 
-    stats->models.back().time_between_backups += stats->cpu.cycle_count - last_cycle_count;
-    stats->models.back().num_backups++;
-
-    last_cycle_count = stats->cpu.cycle_count;
-
+    battery.consume_energy(NVP_ODAB_BACKUP_ENERGY);
     return NVP_ODAB_BACKUP_TIME;
   }
 
@@ -90,7 +92,7 @@ public:
 private:
   capacitor battery;
 
-  uint64_t last_cycle_count = 0u;
+  uint64_t last_backup_cycle = 0u;
 
   bool active = false;
 };

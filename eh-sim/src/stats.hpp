@@ -41,6 +41,16 @@ struct active_stats {
   uint64_t time_between_backups = 0;
 
   /**
+   * The accumulated cycle count the spent doing backups.
+   */
+  uint64_t time_for_backups = 0;
+
+  /**
+   * The accumulated energy (nJ) spent doing backups.
+   */
+  double energy_for_backups = 0.0;
+
+  /**
    * The number of backups performed.
    */
   int num_backups = 0;

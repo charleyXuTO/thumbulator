@@ -56,14 +56,15 @@ public:
   uint64_t backup(stats_bundle *stats) override
   {
     // do not touch arch/app state, assume it is all non-volatile
+    auto &active_stats = stats->models.back();
+    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
+    active_stats.time_for_backups += NVP_BEC_BACKUP_TIME;
+    active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
+    active_stats.num_backups++;
+
+    last_backup_cycle = stats->cpu.cycle_count;
 
     battery.consume_energy(NVP_BEC_BACKUP_ENERGY);
-
-    stats->models.back().time_between_backups += stats->cpu.cycle_count - last_cycle_count;
-    stats->models.back().num_backups++;
-
-    last_cycle_count = stats->cpu.cycle_count;
-
     return NVP_BEC_BACKUP_TIME;
   }
 
@@ -82,7 +83,7 @@ public:
 private:
   capacitor battery;
 
-  uint64_t last_cycle_count = 0u;
+  uint64_t last_backup_cycle = 0u;
 };
 }
 
