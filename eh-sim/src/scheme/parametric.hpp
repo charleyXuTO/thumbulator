@@ -100,6 +100,9 @@ public:
     thumbulator::cpu_reset();
     thumbulator::cpu = architectural_state;
 
+    stats->models.back().energy_for_restore = CLANK_RESTORE_ENERGY;
+    battery.consume_energy(CLANK_RESTORE_ENERGY);
+
     return CLANK_BACKUP_ARCH_TIME;
   }
 
