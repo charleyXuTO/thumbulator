@@ -33,13 +33,11 @@ public:
 
   void execute_instruction(stats_bundle *stats) override
   {
-    // energy to fetch and execute
-    battery.consume_energy(energy_per_instruction);
   }
 
   bool is_active(stats_bundle *stats) override
   {
-    return battery.energy_stored() > energy_per_instruction;
+    return true;
   }
 
   bool will_backup(stats_bundle *stats) const override
@@ -61,9 +59,6 @@ public:
 
 private:
   capacitor battery;
-
-  // based on Mementos numbers for an MSP430
-  static constexpr auto energy_per_instruction = MEMENTOS_INSTRUCTION_ENERGY + MEMENTOS_REG_FLASH;
 };
 }
 
