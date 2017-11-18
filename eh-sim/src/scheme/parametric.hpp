@@ -78,16 +78,16 @@ public:
     active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
     last_backup_cycle = stats->cpu.cycle_count;
 
+    auto const backup_energy = calculate_backup_energy();
+    active_stats.energy_for_backups += backup_energy;
+    battery.consume_energy(backup_energy);
+
     // reset countdown
     countdown_to_backup = BACKUP_PERIOD;
     // save architectural state
     architectural_state = thumbulator::cpu;
     // save application state
     auto const num_stores = write_back();
-
-    auto const backup_energy = calculate_backup_energy();
-    active_stats.energy_for_backups += backup_energy;
-    battery.consume_energy(backup_energy);
 
     auto const backup_time = CLANK_BACKUP_ARCH_TIME + (num_stores * CLANK_MEMORY_TIME);
     active_stats.time_for_backups += backup_time;
