@@ -43,11 +43,22 @@ constexpr uint64_t NVP_ODAB_RESTORE_TIME = 35;
 constexpr uint64_t NVP_BEC_BACKUP_TIME = 2;
 constexpr uint64_t NVP_BEC_RESTORE_TIME = 1;
 
+// see data sheet for STM32L011K4 (M0+) at: http://eembc.org/benchmark/reports/benchreport.php
+// Table 22
+constexpr uint32_t CORTEX_M0PLUS_FREQUENCY = 8000000;
+constexpr double CORTEX_M0PLUS_CURRENT = 1.3e-3;
+constexpr double CORTEX_M0PLUS_VOLTAGE = 1.8;
+// this includes the fetching of the instruction
+constexpr double CORTEX_M0PLUS_INSTRUCTION_ENERGY_PER_CYCLE =
+    1e9 * (CORTEX_M0PLUS_CURRENT * CORTEX_M0PLUS_VOLTAGE) / CORTEX_M0PLUS_FREQUENCY;
+// Table 43 - energy per byte
+constexpr double CORTEX_M0PLUS_ENERGY_FLASH = 1e9 * 0.7e-6 * 3.6 * 3.94e-3;
+
 // based on Clank: Architectural Support for Intermittent Computation
 constexpr uint64_t CLANK_BACKUP_ARCH_TIME = 40;
-constexpr double CLANK_INSTRUCTION_ENERGY = MEMENTOS_INSTRUCTION_ENERGY + MEMENTOS_REG_FLASH;
-constexpr double CLANK_BACKUP_ARCH_ENERGY = MEMENTOS_FLASH_REG * 20;
-constexpr double CLANK_RESTORE_ENERGY = MEMENTOS_REG_FLASH * 20;
+constexpr double CLANK_INSTRUCTION_ENERGY = CORTEX_M0PLUS_INSTRUCTION_ENERGY_PER_CYCLE;
+constexpr double CLANK_BACKUP_ARCH_ENERGY = CORTEX_M0PLUS_ENERGY_FLASH * 4 * 20;
+constexpr double CLANK_RESTORE_ENERGY = CORTEX_M0PLUS_ENERGY_FLASH * 4 * 20;
 constexpr uint64_t CLANK_MEMORY_TIME = 2;
 }
 

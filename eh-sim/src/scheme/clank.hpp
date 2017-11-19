@@ -29,7 +29,7 @@ public:
   }
 
   clank(size_t rf_entries, size_t wf_entries, int watchdog_period)
-      : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+      : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
       , WATCHDOG_PERIOD(watchdog_period)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
@@ -53,17 +53,20 @@ public:
 
   uint32_t clock_frequency() const override
   {
-    return MEMENTOS_CPU_FREQUENCY;
+    return CORTEX_M0PLUS_FREQUENCY;
   }
 
   void execute_instruction(stats_bundle *stats) override
   {
-    battery.consume_energy(CLANK_INSTRUCTION_ENERGY);
-
-    stats->models.back().energy_for_instructions += CLANK_INSTRUCTION_ENERGY;
-
-    progress_watchdog -= stats->cpu.cycle_count - last_tick;
+    auto const elapsed_cycles = stats->cpu.cycle_count - last_tick;
     last_tick = stats->cpu.cycle_count;
+
+    progress_watchdog -= elapsed_cycles;
+
+    // clank's instruction energy is in Energy-per-Cycle
+    auto const instruction_energy = CLANK_INSTRUCTION_ENERGY * elapsed_cycles;
+    battery.consume_energy(instruction_energy);
+    stats->models.back().energy_for_instructions += instruction_energy;
   }
 
   bool is_active(stats_bundle *stats) override

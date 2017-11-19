@@ -140,7 +140,7 @@ private:
 
   double calculate_backup_energy() const
   {
-     return CLANK_BACKUP_ARCH_ENERGY + (stores.size() * MEMENTOS_FLASH_REG);
+     return CLANK_BACKUP_ARCH_ENERGY + (stores.size() * 4 * CORTEX_M0PLUS_ENERGY_FLASH);
   }
 
   size_t write_back()
