@@ -51,8 +51,8 @@ if __name__ == "__main__":
     # different backup periods (in cycles) to try
     backup_periods = [1000, 1500, 2000, 2500, 3000]
 
-    for benchmark in benchmark_whitelist:
-        for vtrace in vtrace_whitelist:
+    for vtrace in vtrace_whitelist:
+        for benchmark in benchmark_whitelist:
             for bperiod in backup_periods:
                 print("Running {}.bin with {}.txt voltage trace with tau_b={}".format(benchmark, vtrace, bperiod))
 

@@ -53,8 +53,8 @@ if __name__ == "__main__":
     # of charge per cycle
     vtrace_rates = {'bec': 10000, 'odab': 100000, 'clank': 1000}
 
-    for benchmark in benchmark_whitelist:
-        for vtrace in vtrace_whitelist:
+    for vtrace in vtrace_whitelist:
+        for benchmark in benchmark_whitelist:
             for scheme in schemes:
                 print("Running {}.bin with {}.txt voltage trace in {} scheme".format(benchmark, vtrace, scheme))
 
