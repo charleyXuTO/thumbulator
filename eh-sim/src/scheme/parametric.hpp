@@ -88,7 +88,7 @@ public:
     architectural_state = thumbulator::cpu;
     // save application state
     auto const num_stores = write_back();
-    active_stats.bytes_application = num_stores * 4;
+    active_stats.bytes_application += num_stores * 4;
 
     auto const backup_time = CLANK_BACKUP_ARCH_TIME + (num_stores * CLANK_MEMORY_TIME);
     active_stats.time_for_backups += backup_time;
