@@ -84,6 +84,11 @@ struct active_stats {
    * The total CPU cycles of this active period.
    */
   uint64_t time_cpu_total = 0u;
+
+  /**
+   * The accumulated bytes backed up by the application.
+   */
+  uint64_t bytes_application = 0u;
 };
 
 struct stats_bundle {

@@ -112,16 +112,18 @@ int main(int argc, char *argv[])
 
     std::ofstream out(output_file_name);
     out.setf(std::ios::fixed);
-    out << "id, E, n_B, tau_B, e_B, e_R, e_P, tau_P, tau_D, p\n";
+    out << "id, E, n_B, tau_B, e_B, alpha_B, e_R, e_P, tau_P, tau_D, p\n";
 
     int id = 0;
     for(auto const &model : stats.models) {
       double tau_b = 0.0;
       double e_B = 0.0;
+      double alpha_B = 0.0;
 
       if(model.num_backups > 0) {
         tau_b = static_cast<double>(model.time_between_backups) / model.num_backups;
         e_B = model.energy_for_backups / model.num_backups;
+        alpha_B = model.bytes_application / model.num_backups;
       }
 
       double p = 0.0;
@@ -134,6 +136,7 @@ int main(int argc, char *argv[])
       out << std::setprecision(0) << model.num_backups << ", ";
       out << std::setprecision(2) << tau_b << ", ";
       out << std::setprecision(3) << e_B << ", ";
+      out << std::setprecision(2) << alpha_B << ", ";
       out << std::setprecision(3) << model.energy_for_restore << ", ";
       out << std::setprecision(3) << model.energy_forward_progress << ", ";
       out << std::setprecision(0) << model.time_forward_progress << ", ";
