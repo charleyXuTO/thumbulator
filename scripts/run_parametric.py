@@ -63,4 +63,3 @@ if __name__ == "__main__":
                 os.makedirs(path_to_destination, exist_ok=True)
 
                 run(args.eh_sim, path_to_benchmark, path_to_vtrace, 1000, bperiod, True, path_to_destination)
-                run(args.eh_sim, path_to_benchmark, path_to_vtrace, 1000, bperiod, False, path_to_destination)
