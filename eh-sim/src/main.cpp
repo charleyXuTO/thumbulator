@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 
       double p = 0.0;
       if(model.energy_for_instructions > 0) {
-        p = model.energy_forward_progress / model.energy_for_instructions;
+        p = model.energy_forward_progress / model.energy_total;
       }
 
       out << id++ << ", ";
