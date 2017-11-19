@@ -38,7 +38,7 @@ public:
 
   bool is_active(stats_bundle *stats) override
   {
-    if(battery.energy_stored() == battery.maximum_energy_stored()) {
+    if(battery.energy_stored() >= battery.maximum_energy_stored()) {
       assert(!active);
       active = true;
     }

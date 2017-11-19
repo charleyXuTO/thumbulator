@@ -68,7 +68,7 @@ public:
 
   bool is_active(stats_bundle *stats) override
   {
-    if(battery.energy_stored() == battery.maximum_energy_stored()) {
+    if(battery.energy_stored() >= battery.maximum_energy_stored()) {
       power_on();
     } else if(battery.energy_stored() <= CLANK_INSTRUCTION_ENERGY) {
       power_off();
