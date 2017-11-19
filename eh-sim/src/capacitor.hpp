@@ -84,7 +84,7 @@ public:
 
     double can_harvest = energy_harvested;
     if(energy + energy_harvested > maximum_energy) {
-      can_harvest = energy + energy_harvested - maximum_energy;
+      can_harvest = maximum_energy - energy;
     }
 
     // clamp to maximum energy, avoiding floating point precision errors
