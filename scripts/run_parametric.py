@@ -44,12 +44,12 @@ if __name__ == "__main__":
 
     # the benchmarks to run, from Matthew Hicks' version of MiBench
     benchmark_whitelist = ['adpcm_decode', 'adpcm_encode', 'aes', 'crc', 'limits', 'lzfx', 'overflow', 'picojpeg',
-                           'randmath', 'rc4', 'regress', 'rsa', 'susan', 'vcflags']
+                           'randmath', 'rc4', 'regress', 'susan', 'vcflags']
 
     # the voltage traces to use, from BatterylessSim
-    vtrace_whitelist = ['1', '3', '4', '5', '6', '7', '8', '9']
+    vtrace_whitelist = ['6']
     # different backup periods (in cycles) to try
-    backup_periods = [1000, 1500, 2000, 2500, 3000]
+    backup_periods = list(range(250, 10000, 250))
 
     for vtrace in vtrace_whitelist:
         for benchmark in benchmark_whitelist:
