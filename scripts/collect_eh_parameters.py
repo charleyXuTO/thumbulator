@@ -52,7 +52,6 @@ CLANK.arch_restore = 80
 CLANK.alpha_restore = 0
 
 
-# epsilon = 0.031, epsilon_c = 0.0184, tau_B = 1
 def eh_model_estimate(active_id, energy_supply, epsilon, epsilon_charge, tau_backup):
     tau_dead = tau_backup / 2
 
