@@ -73,7 +73,7 @@ public:
   {
     if(battery.energy_stored() >= battery.maximum_energy_stored()) {
       power_on();
-    } else if(battery.energy_stored() <= CLANK_INSTRUCTION_ENERGY) {
+    } else if(battery.energy_stored() < MAX_BACKUP_ENERGY) {
       power_off();
     }
 
