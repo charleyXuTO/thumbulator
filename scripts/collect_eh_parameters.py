@@ -51,8 +51,20 @@ CLANK.omega_restore = CLANK.omega_backup
 CLANK.arch_restore = 80
 CLANK.alpha_restore = 0
 
+PARAMETRIC = Scheme()
+PARAMETRIC.name = 'parametric'
+PARAMETRIC.energy_supply = calculate_energy(10e-6, 4.5)
+PARAMETRIC.sigma_backup = 0.5
+PARAMETRIC.omega_backup = 1e9 * 0.7e-6 * 3.6 * 3.94e-3
+PARAMETRIC.arch_backup = 80
+PARAMETRIC.alpha_backup = 0
+PARAMETRIC.sigma_restore = 0.5
+PARAMETRIC.omega_restore = PARAMETRIC.omega_backup
+PARAMETRIC.arch_restore = 80
+PARAMETRIC.alpha_restore = 0
 
-def eh_model_estimate(active_id, energy_supply, epsilon, epsilon_charge, tau_backup):
+
+def eh_model_estimate(active_id, energy_supply, epsilon, epsilon_charge, tau_backup, alpha_backup):
     tau_dead = tau_backup / 2
 
     # calculate dead energy - Equation 5
@@ -68,8 +80,8 @@ def eh_model_estimate(active_id, energy_supply, epsilon, epsilon_charge, tau_bac
     numerator = 1 - (energy_dead / energy_supply) - (energy_restore / energy_supply)
 
     # calculate backup energy - Equation 4
-    energy_backup = (SCHEME.omega_backup - epsilon_charge / SCHEME.sigma_backup) * (SCHEME.arch_backup +
-                                                                                    SCHEME.alpha_backup * tau_backup)
+    energy_backup = (SCHEME.omega_backup - epsilon_charge / SCHEME.sigma_backup) * (SCHEME.arch_backup + alpha_backup
+                                                                                    * tau_backup)
     # denominator of Equation 9 (assume e_Theta is 0)
     denominator = (1 + energy_backup / ((epsilon - epsilon_charge) * tau_backup)) * (1 - epsilon_charge / epsilon)
 
@@ -89,9 +101,19 @@ def read_data(data_file):
             if backup_count == 0:
                 continue
 
+            tau_b = float(row['tau_B'])
+            alpha_backup = float(row['alpha_B'])
+
+            if scheme == 'parametric':
+                backup_time = CLANK.backup_time + (SCHEME.omega_backup * alpha_backup * tau_b)
+            else:
+                backup_time = SCHEME.backup_time
+
+            backup_time = backup_time * backup_count
+
             dead_cycles = int(row['tau_D'])
             # calculate total cycles in active period
-            active_time = (SCHEME.backup_time * backup_count) + SCHEME.restore_time + forward_cycles + dead_cycles
+            active_time = backup_time + SCHEME.restore_time + forward_cycles + dead_cycles
 
             # calculate charging energy per cycle (epc)
             active_energy = float(row['E'])
@@ -113,8 +135,9 @@ def read_data(data_file):
             if epc > epsilon:
                 continue
 
-            tau_b = float(row['tau_B'])
-            if tau_b <= 0:
+            if scheme == 'parametric':
+                tau_b = parametric_tau
+            elif tau_b <= 0:
                 continue
 
             if scheme == "clank" and (benchmark == "overflow" or benchmark == "vcflags"):
@@ -122,7 +145,11 @@ def read_data(data_file):
                 active_energy = SCHEME.energy_supply - 1233.858
 
             active_id = int(row['id'])
-            model_progress = eh_model_estimate(active_id, active_energy, epsilon, epc, tau_b)
+
+            if scheme == 'parametric':
+                model_progress = eh_model_estimate(active_id, active_energy, epsilon, epc, tau_b, alpha_backup)
+            else:
+                model_progress = eh_model_estimate(active_id, active_energy, epsilon, epc, tau_b, SCHEME.alpha_backup)
 
             simulator_progress = float(row['p'])
 
@@ -166,10 +193,14 @@ if __name__ == "__main__":
                         scheme = file.replace('.csv', '')
 
                         scheme_array = scheme.split('-')
-                        scheme = scheme_array[0]
 
+                        scheme = scheme_array[0]
                         if scheme == 'odab':
                             continue
+
+                        parametric_tau = 0
+                        if scheme == 'parametric':
+                            parametric_tau = int(scheme_array[1])
                     else:
                         continue
 
@@ -180,6 +211,8 @@ if __name__ == "__main__":
                         SCHEME = CLANK
                     elif scheme == 'bec':
                         SCHEME = BEC
+                    elif scheme == 'parametric':
+                        SCHEME = PARAMETRIC
 
                     file = os.path.join(trace_dir, file)
                     read_data(file)
