@@ -181,6 +181,7 @@ stats_bundle simulate(char const *binary_file,
                                      active_period.energy_for_restore;
 
         active_period.progress = active_period.energy_forward_progress / active_period.energy_total;
+        active_period.eh_progress = scheme->estimate_progress(active_period);
       }
 
       was_active = false;

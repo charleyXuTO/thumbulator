@@ -112,6 +112,11 @@ public:
     return CLANK_BACKUP_ARCH_TIME;
   }
 
+  double estimate_progress(active_stats const &active_period) const override
+  {
+    return 0;
+  }
+
 private:
   capacitor battery;
   bool active = false;
@@ -138,7 +143,7 @@ private:
 
   double calculate_backup_energy() const
   {
-     return CLANK_BACKUP_ARCH_ENERGY + (stores.size() * 4 * CORTEX_M0PLUS_ENERGY_FLASH);
+    return CLANK_BACKUP_ARCH_ENERGY + (stores.size() * 4 * CORTEX_M0PLUS_ENERGY_FLASH);
   }
 
   size_t write_back()

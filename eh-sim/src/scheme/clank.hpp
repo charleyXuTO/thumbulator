@@ -134,6 +134,11 @@ public:
     return CLANK_BACKUP_ARCH_TIME;
   }
 
+  double estimate_progress(active_stats const &active_period) const override
+  {
+    return 0;
+  }
+
 private:
   capacitor battery;
 
