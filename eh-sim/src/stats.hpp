@@ -141,6 +141,12 @@ struct eh_model_parameters {
       auto const energy_charged = active_period.energy_consumed - active_period.energy_start;
       epsilon_C = energy_charged / active_period.time_total;
     }
+
+    if(epsilon_C > epsilon) {
+      // special case
+      epsilon_C = 0.0;
+      E = active_period.energy_consumed;
+    }
   }
 
   double E;
