@@ -98,7 +98,12 @@ def read_data(data_file):
             energy_charged = 0
             if active_energy >= SCHEME.energy_supply:
                 energy_charged = active_energy - SCHEME.energy_supply
-                active_energy = SCHEME.energy_supply
+
+                if scheme != "clank":
+                    active_energy = SCHEME.energy_supply
+                else:
+                    active_energy = SCHEME.energy_supply - 794.304
+
             epc = energy_charged / active_time
 
             # calculate execution energy per cycle (epsilon)
