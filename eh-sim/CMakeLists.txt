@@ -10,13 +10,14 @@ add_executable(
   ${PROJECT_NAME}
   src/scheme/backup_every_cycle.hpp
   src/scheme/clank.hpp
+  src/scheme/data_sheet.hpp
+  src/scheme/eh_model.hpp
   src/scheme/eh_scheme.hpp
   src/scheme/magical_scheme.hpp
   src/scheme/on_demand_all_backup.hpp
   src/scheme/parametric.hpp
   src/capacitor.hpp
   src/main.cpp
-  src/scheme/data_sheet.hpp
   src/simulate.cpp
   src/simulate.hpp
   src/stats.hpp

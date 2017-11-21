@@ -3,8 +3,8 @@
 
 #include "scheme/eh_scheme.hpp"
 #include "scheme/data_sheet.hpp"
+#include "scheme/eh_model.hpp"
 #include "capacitor.hpp"
-#include "stats.hpp"
 
 namespace ehsim {
 
@@ -82,29 +82,8 @@ public:
 
   double estimate_progress(eh_model_parameters const &eh) const override
   {
-    double const tau_D = 0.0; // BEC has no dead cycles
-
-    // calculate dead energy - Equation 5
-    double const e_D = (eh.epsilon - eh.epsilon_C) * tau_D;
-
-    double e_R = 0.0;
-    if(eh.do_restore) {
-      // calculate restore energy - Equation 8
-      e_R = (NVP_BEC_OMEGA_R - eh.epsilon_C / NVP_BEC_SIGMA_R) * (NVP_BEC_A_R + eh.alpha_R * tau_D);
-    }
-
-    // numerator of Equation 9
-    double const numerator = 1 - (e_D / eh.E) - (e_R / eh.E);
-
-    // calculate backup energy = Equation 9
-    double const e_B =
-        (NVP_BEC_OMEGA_B - eh.epsilon_C / NVP_BEC_SIGMA_B) * (NVP_BEC_A_B + eh.alpha_B * eh.tau_B);
-
-    // denominator of Equation 9 (assume e_Theta is 0)
-    double const denominator =
-        (1 + e_B / ((eh.epsilon - eh.epsilon_C) * eh.tau_B)) * (1 - eh.epsilon_C / eh.epsilon);
-
-    return numerator / denominator;
+    return estimate_eh_progress(eh, dead_cycles::best_case, NVP_BEC_OMEGA_R, NVP_BEC_SIGMA_R, NVP_BEC_A_R,
+        NVP_BEC_OMEGA_B, NVP_BEC_SIGMA_B, NVP_BEC_A_B);
   }
 
 private:
