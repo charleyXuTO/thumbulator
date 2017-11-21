@@ -5,7 +5,7 @@ namespace ehsim {
 
 class capacitor;
 struct stats_bundle;
-struct active_stats;
+struct eh_model_parameters;
 
 /**
  * An abstract checkpointing scheme.
@@ -26,7 +26,7 @@ public:
 
   virtual uint64_t restore(stats_bundle *stats) = 0;
 
-  virtual double estimate_progress(active_stats const &active_period) const = 0;
+  virtual double estimate_progress(eh_model_parameters const &) const = 0;
 };
 }
 

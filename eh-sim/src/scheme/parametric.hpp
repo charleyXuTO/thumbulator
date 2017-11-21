@@ -91,7 +91,6 @@ public:
     auto const num_stores = write_back();
 
     auto const backup_time = CLANK_BACKUP_ARCH_TIME + (num_stores * CLANK_MEMORY_TIME);
-    active_stats.time_for_backups += backup_time;
     active_stats.bytes_application += static_cast<double>(num_stores * 4) / tau_B;
     return backup_time;
   }
@@ -112,7 +111,7 @@ public:
     return CLANK_BACKUP_ARCH_TIME;
   }
 
-  double estimate_progress(active_stats const &active_period) const override
+  double estimate_progress(eh_model_parameters const &active_period) const override
   {
     return 0;
   }

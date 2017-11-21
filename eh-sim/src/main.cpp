@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
     std::ofstream out(output_file_name);
     out.setf(std::ios::fixed);
-    out << "id, E, E_C, n_B, tau_B, e_B, alpha_B, e_R, e_P, tau_P, tau_D, p\n";
+    out << "id, E, E_C, n_B, tau_B, e_B, alpha_B, e_R, e_P, tau_P, tau_D, p, model_p\n";
 
     int id = 0;
     for(auto const &model : stats.models) {
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
       }
 
       out << id++ << ", ";
-      out << std::setprecision(3) << model.energy_total << ", ";
+      out << std::setprecision(3) << model.energy_consumed << ", ";
        out << std::setprecision(3) << model.energy_charged << ", ";
       out << std::setprecision(0) << model.num_backups << ", ";
       out << std::setprecision(2) << tau_b << ", ";
@@ -134,8 +134,9 @@ int main(int argc, char *argv[])
       out << std::setprecision(3) << model.energy_for_restore << ", ";
       out << std::setprecision(3) << model.energy_forward_progress << ", ";
       out << std::setprecision(0) << model.time_forward_progress << ", ";
-      out << std::setprecision(0) << model.time_cpu_total - model.time_forward_progress << ", ";
-      out << std::setprecision(3) << model.progress << "\n";
+      out << std::setprecision(0) << model.time_for_instructions - model.time_forward_progress << ", ";
+      out << std::setprecision(3) << model.progress << ", ";
+      out << std::setprecision(3) << model.eh_progress << "\n";
     }
   } catch(std::exception const &e) {
     std::cerr << "Error: " << e.what() << "\n";

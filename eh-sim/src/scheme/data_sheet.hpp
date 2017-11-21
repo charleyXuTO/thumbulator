@@ -44,11 +44,11 @@ constexpr uint64_t NVP_BEC_BACKUP_TIME = 2;
 constexpr uint64_t NVP_BEC_RESTORE_TIME = 1;
 
 // EH Model Parameters
-constexpr auto NVP_BEC_A_B = 4 * 4; // 4 32-bit registers
-constexpr auto NVP_BEC_SIGMA_B = NVP_BEC_BACKUP_TIME / NVP_BEC_A_B;
+constexpr auto NVP_BEC_A_B = 4 * 4; // 4 32-bit registers is 16 bytes
+constexpr auto NVP_BEC_SIGMA_B = static_cast<double>(NVP_BEC_A_B) / NVP_BEC_BACKUP_TIME;
 constexpr auto NVP_BEC_OMEGA_B = NVP_BEC_BACKUP_ENERGY / NVP_BEC_A_B;
-constexpr auto NVP_BEC_A_R = 4; // 1 32-bit register (the PC)
-constexpr auto NVP_BEC_SIGMA_R = NVP_BEC_RESTORE_TIME / NVP_BEC_A_R;
+constexpr auto NVP_BEC_A_R = 4; // 1 32-bit register (the PC) is 4 bytes
+constexpr auto NVP_BEC_SIGMA_R = static_cast<double>(NVP_BEC_A_R) / NVP_BEC_RESTORE_TIME;
 constexpr auto NVP_BEC_OMEGA_R = NVP_BEC_RESTORE_ENERGY / NVP_BEC_A_R;
 
 // see data sheet for STM32L011K4 (M0+) at: http://eembc.org/benchmark/reports/benchreport.php
@@ -71,10 +71,10 @@ constexpr uint64_t CLANK_MEMORY_TIME = 2;
 
 // EH Model Parameters
 constexpr auto CLANK_A_B = 80; // 20 32-bit registers
-constexpr auto CLANK_SIGMA_B = CLANK_BACKUP_ARCH_TIME / CLANK_A_B;
+constexpr auto CLANK_SIGMA_B = static_cast<double>(CLANK_A_B) / CLANK_BACKUP_ARCH_TIME;
 constexpr auto CLANK_OMEGA_B = CORTEX_M0PLUS_ENERGY_FLASH;
 constexpr auto CLANK_A_R = 80; // 20 32-bit registers
-constexpr auto CLANK_SIGMA_R = CLANK_BACKUP_ARCH_TIME / CLANK_A_R;
+constexpr auto CLANK_SIGMA_R = static_cast<double>(CLANK_A_R) / CLANK_BACKUP_ARCH_TIME;
 constexpr auto CLANK_OMEGA_R = CORTEX_M0PLUS_ENERGY_FLASH;
 
 constexpr auto PARAMETRIC_A_B = 80; // 20 32-bit registers

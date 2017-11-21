@@ -41,9 +41,14 @@ struct active_stats {
   uint64_t time_between_backups = 0;
 
   /**
-   * The accumulated cycle count the spent doing backups.
+   * The accumulated cycle count spent doing backups.
    */
   uint64_t time_for_backups = 0;
+
+  /**
+   * The accumulated cycle count spent doing restores.
+   */
+  uint64_t time_for_restores = 0;
 
   /**
    * The total CPU cycles spent on forward progress.
@@ -53,7 +58,12 @@ struct active_stats {
   /**
    * The total CPU cycles of this active period.
    */
-  uint64_t time_cpu_total = 0u;
+  uint64_t time_for_instructions = 0u;
+
+  /**
+   * The total cycles of this active period.
+   */
+  uint64_t time_total = 0u;
 
   /**
    * The number of backups performed.
@@ -61,9 +71,14 @@ struct active_stats {
   int num_backups = 0;
 
   /**
+   * The energy in the capacitor at the start of the active period.
+   */
+  double energy_start = 0.0;
+
+  /**
    * The total energy used in an active period, including energy charged.
    */
-  double energy_total = 0.0;
+  double energy_consumed = 0.0;
 
   /**
    * The accumulated energy (nJ) spent doing backups.
@@ -104,6 +119,45 @@ struct active_stats {
    * Estimated forward progress made as a percentage of total energy used.
    */
   double eh_progress = 0.0;
+};
+
+struct eh_model_parameters {
+  explicit eh_model_parameters(active_stats const &active_period)
+      : E(0.0)
+      , epsilon(active_period.energy_for_instructions / active_period.time_for_instructions)
+      , epsilon_C(0.0)
+      , tau_B(static_cast<double>(active_period.time_between_backups) / active_period.num_backups)
+      , alpha_B(active_period.bytes_application / active_period.num_backups)
+      , alpha_R(0.0)
+      , do_restore(active_period.energy_for_restore > 0)
+  {
+    if(active_period.energy_consumed <= active_period.energy_start) {
+      E = active_period.energy_consumed;
+    } else {
+      E = active_period.energy_start;
+    }
+
+    if(active_period.energy_consumed > active_period.energy_start) {
+      auto const energy_charged = active_period.energy_consumed - active_period.energy_start;
+      epsilon_C = energy_charged / active_period.time_total;
+
+      assert(energy_charged <= active_period.energy_charged);
+    }
+  }
+
+  double E;
+
+  double const epsilon;
+
+  double epsilon_C;
+
+  double const tau_B;
+
+  double const alpha_B;
+
+  double const alpha_R;
+
+  bool const do_restore;
 };
 
 struct stats_bundle {

@@ -65,7 +65,6 @@ public:
     active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
     battery.consume_energy(NVP_BEC_BACKUP_ENERGY);
 
-    active_stats.time_for_backups += NVP_BEC_BACKUP_TIME;
     return NVP_BEC_BACKUP_TIME;
   }
 
@@ -81,9 +80,31 @@ public:
     return NVP_BEC_RESTORE_TIME;
   }
 
-  double estimate_progress(active_stats const &active_period) const override
+  double estimate_progress(eh_model_parameters const &eh) const override
   {
-    return 0;
+    double const tau_D = 0.0; // BEC has no dead cycles
+
+    // calculate dead energy - Equation 5
+    double const e_D = (eh.epsilon - eh.epsilon_C) * tau_D;
+
+    double e_R = 0.0;
+    if(eh.do_restore) {
+      // calculate restore energy - Equation 8
+      e_R = (NVP_BEC_OMEGA_R - eh.epsilon_C / NVP_BEC_SIGMA_R) * (NVP_BEC_A_R + eh.alpha_R * tau_D);
+    }
+
+    // numerator of Equation 9
+    double const numerator = 1 - (e_D / eh.E) - (e_R / eh.E);
+
+    // calculate backup energy = Equation 9
+    double const e_B =
+        (NVP_BEC_OMEGA_B - eh.epsilon_C / NVP_BEC_SIGMA_B) * (NVP_BEC_A_B + eh.alpha_B * eh.tau_B);
+
+    // denominator of Equation 9 (assume e_Theta is 0)
+    double const denominator =
+        (1 + e_B / ((eh.epsilon - eh.epsilon_C) * eh.tau_B)) * (1 - eh.epsilon_C / eh.epsilon);
+
+    return numerator / denominator;
   }
 
 private:

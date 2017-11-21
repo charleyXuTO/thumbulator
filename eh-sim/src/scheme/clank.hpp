@@ -114,7 +114,6 @@ public:
     active_stats.energy_for_backups += CLANK_BACKUP_ARCH_ENERGY;
     battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
 
-    active_stats.time_for_backups += CLANK_BACKUP_ARCH_TIME;
     return CLANK_BACKUP_ARCH_TIME;
   }
 
@@ -134,7 +133,7 @@ public:
     return CLANK_BACKUP_ARCH_TIME;
   }
 
-  double estimate_progress(active_stats const &active_period) const override
+  double estimate_progress(eh_model_parameters const &active_period) const override
   {
     return 0;
   }

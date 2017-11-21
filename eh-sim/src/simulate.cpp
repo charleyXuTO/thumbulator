@@ -112,7 +112,6 @@ stats_bundle simulate(char const *binary_file,
   // stats tracking
   stats_bundle stats{};
   stats.system.time = 0ns;
-  stats.models.emplace_back();
 
   initialize_system(binary_file);
 
@@ -137,16 +136,20 @@ stats_bundle simulate(char const *binary_file,
 
     if(scheme->is_active(&stats)) {
       if(!was_active) {
-        if(stats.cpu.instruction_count != 0) {
-          // allocate space for a new active period model
-          stats.models.emplace_back();
-
-          // restore state
-          elapsed_cycles += scheme->restore(&stats);
-        }
-
+        // allocate space for a new active period model
+        stats.models.emplace_back();
         // track the time this active mode started
         active_start = stats.cpu.cycle_count;
+        stats.models.back().energy_start = battery.energy_stored();
+
+        if(stats.cpu.instruction_count != 0) {
+
+          // restore state
+          auto const restore_time = scheme->restore(&stats);
+          elapsed_cycles += restore_time;
+
+          stats.models.back().time_for_restores += restore_time;
+        }
       }
 
       was_active = true;
@@ -155,33 +158,39 @@ stats_bundle simulate(char const *binary_file,
 
       stats.cpu.instruction_count++;
       stats.cpu.cycle_count += instruction_ticks;
-      stats.models.back().time_cpu_total += instruction_ticks;
+      stats.models.back().time_for_instructions += instruction_ticks;
       elapsed_cycles += instruction_ticks;
 
       // consume energy for execution
       scheme->execute_instruction(&stats);
 
       if(scheme->will_backup(&stats)) {
-        elapsed_cycles += scheme->backup(&stats);
+        auto const backup_time = scheme->backup(&stats);
+        elapsed_cycles += backup_time;
 
         auto &active_stats = stats.models.back();
+        active_stats.time_for_backups += backup_time;
         active_stats.energy_forward_progress = active_stats.energy_for_instructions;
         active_stats.time_forward_progress = stats.cpu.cycle_count - active_start;
       }
     } else {
       if(was_active) {
         // we just powered off
+        auto const active_id = stats.models.size() - 1;
         auto &active_period = stats.models.back();
 
         // ensure forward progress is being made, otherwise throw
         ensure_forward_progress(&no_progress_counter, active_period.num_backups, 5);
 
-        active_period.energy_total = active_period.energy_for_instructions +
+        active_period.time_total = active_period.time_for_instructions + active_period.time_for_backups +
+                                   active_period.time_for_restores;
+
+        active_period.energy_consumed = active_period.energy_for_instructions +
                                      active_period.energy_for_backups +
                                      active_period.energy_for_restore;
 
-        active_period.progress = active_period.energy_forward_progress / active_period.energy_total;
-        active_period.eh_progress = scheme->estimate_progress(active_period);
+        active_period.progress = active_period.energy_forward_progress / active_period.energy_consumed;
+        active_period.eh_progress = scheme->estimate_progress(eh_model_parameters(active_period));
       }
 
       was_active = false;
