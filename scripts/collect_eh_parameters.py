@@ -54,10 +54,7 @@ CLANK.alpha_restore = 0
 
 # epsilon = 0.031, epsilon_c = 0.0184, tau_B = 1
 def eh_model_estimate(active_id, energy_supply, epsilon, epsilon_charge, tau_backup):
-    tau_dead = 0
-    if scheme != 'bec':
-        # assume the average case for dead cycles
-        tau_dead = tau_backup / 2
+    tau_dead = tau_backup / 2
 
     # calculate dead energy - Equation 5
     energy_dead = (epsilon - epsilon_charge) * tau_dead
@@ -115,6 +112,10 @@ def read_data(data_file):
             tau_b = float(row['tau_B'])
             if tau_b <= 0:
                 continue
+
+            if scheme == "clank" and (benchmark == "overflow" or benchmark == "vcflags"):
+                # these benchmarks finish in one active period and typically have significant energy remaining
+                active_energy = SCHEME.energy_supply - 1233.858
 
             active_id = int(row['id'])
             model_progress = eh_model_estimate(active_id, active_energy, epsilon, epc, tau_b)
