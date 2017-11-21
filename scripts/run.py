@@ -41,7 +41,7 @@ if __name__ == "__main__":
         sys.exit("Error: no path given to output destination.")
 
     # the schemes to run
-    schemes = ['bec', 'odab', 'clank']
+    schemes = ['bec', 'clank']
 
     # the benchmarks to run, from Matthew Hicks' version of MiBench
     benchmark_whitelist = ['adpcm_decode', 'adpcm_encode', 'aes', 'crc', 'limits', 'lzfx', 'overflow', 'picojpeg',
