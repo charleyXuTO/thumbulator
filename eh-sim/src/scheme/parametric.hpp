@@ -111,9 +111,10 @@ public:
     return CLANK_BACKUP_ARCH_TIME;
   }
 
-  double estimate_progress(eh_model_parameters const &active_period) const override
+  double estimate_progress(eh_model_parameters const &eh) const override
   {
-    return 0;
+    return estimate_eh_progress(eh, dead_cycles::average_case, PARAMETRIC_OMEGA_R,
+        PARAMETRIC_SIGMA_R, PARAMETRIC_A_R, PARAMETRIC_OMEGA_B, PARAMETRIC_SIGMA_B, PARAMETRIC_A_B);
   }
 
 private:
