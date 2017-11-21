@@ -7,8 +7,6 @@
 
 #include "scheme/backup_every_cycle.hpp"
 #include "scheme/clank.hpp"
-#include "scheme/magical_scheme.hpp"
-#include "scheme/on_demand_all_backup.hpp"
 #include "scheme/parametric.hpp"
 
 #include "simulate.hpp"
@@ -83,9 +81,9 @@ int main(int argc, char *argv[])
     if(scheme_select == "bec") {
       scheme = std::make_unique<ehsim::backup_every_cycle>();
     } else if(scheme_select == "odab") {
-      scheme = std::make_unique<ehsim::on_demand_all_backup>();
+      throw std::runtime_error("ODAB is no longer supported.");
     } else if(scheme_select == "magic") {
-      scheme = std::make_unique<ehsim::magical_scheme>();
+      throw std::runtime_error("Magic is no longer supported.");
     } else if(scheme_select == "clank") {
       scheme = std::make_unique<ehsim::clank>();
     } else if(scheme_select == "parametric") {
@@ -112,7 +110,7 @@ int main(int argc, char *argv[])
 
     std::ofstream out(output_file_name);
     out.setf(std::ios::fixed);
-    out << "id, E, n_B, tau_B, e_B, alpha_B, e_R, e_P, tau_P, tau_D, p\n";
+    out << "id, E, E_C, n_B, tau_B, e_B, alpha_B, e_R, e_P, tau_P, tau_D, p\n";
 
     int id = 0;
     for(auto const &model : stats.models) {
@@ -126,13 +124,9 @@ int main(int argc, char *argv[])
         alpha_B = model.bytes_application / model.num_backups;
       }
 
-      double p = 0.0;
-      if(model.energy_for_instructions > 0) {
-        p = model.energy_forward_progress / model.energy_total;
-      }
-
       out << id++ << ", ";
-      out << std::setprecision(2) << model.energy_total << ", ";
+      out << std::setprecision(3) << model.energy_total << ", ";
+       out << std::setprecision(3) << model.energy_charged << ", ";
       out << std::setprecision(0) << model.num_backups << ", ";
       out << std::setprecision(2) << tau_b << ", ";
       out << std::setprecision(3) << e_B << ", ";
@@ -141,9 +135,8 @@ int main(int argc, char *argv[])
       out << std::setprecision(3) << model.energy_forward_progress << ", ";
       out << std::setprecision(0) << model.time_forward_progress << ", ";
       out << std::setprecision(0) << model.time_cpu_total - model.time_forward_progress << ", ";
-      out << std::setprecision(3) << p << "\n";
+      out << std::setprecision(3) << model.progress << "\n";
     }
-
   } catch(std::exception const &e) {
     std::cerr << "Error: " << e.what() << "\n";
     return EXIT_FAILURE;

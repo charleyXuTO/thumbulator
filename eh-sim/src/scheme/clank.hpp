@@ -123,9 +123,6 @@ public:
     progress_watchdog = WATCHDOG_PERIOD;
     last_backup_cycle = stats->cpu.cycle_count;
 
-    // allocate space for a new active period model
-    stats->models.emplace_back();
-
     // restore saved architectural state
     thumbulator::cpu_reset();
     thumbulator::cpu = architectural_state;

@@ -46,9 +46,14 @@ struct active_stats {
   uint64_t time_for_backups = 0;
 
   /**
-   * The accumulated energy (nJ) spent doing backups.
+   * The total CPU cycles spent on forward progress.
    */
-  double energy_for_backups = 0.0;
+  uint64_t time_forward_progress = 0u;
+
+  /**
+   * The total CPU cycles of this active period.
+   */
+  uint64_t time_cpu_total = 0u;
 
   /**
    * The number of backups performed.
@@ -56,9 +61,19 @@ struct active_stats {
   int num_backups = 0;
 
   /**
-   * The total energy available for the active period.
+   * The total energy used in an active period, including energy charged.
    */
   double energy_total = 0.0;
+
+  /**
+   * The accumulated energy (nJ) spent doing backups.
+   */
+  double energy_for_backups = 0.0;
+
+  /**
+   * The total energy charged during the active period.
+   */
+  double energy_charged = 0.0;
 
   /**
    * The energy (nJ) spent doing the restore.
@@ -76,19 +91,19 @@ struct active_stats {
   double energy_forward_progress = 0.0;
 
   /**
-   * The total CPU cycles spent on forward progress.
-   */
-  uint64_t time_forward_progress = 0u;
-
-  /**
-   * The total CPU cycles of this active period.
-   */
-  uint64_t time_cpu_total = 0u;
-
-  /**
    * The accumulated bytes/cycle backed up by the application.
    */
   double bytes_application = 0u;
+
+  /**
+   * Forward progress made as a percentage of total energy used.
+   */
+  double progress = 0.0;
+
+  /**
+   * Estimated forward progress made as a percentage of total energy used.
+   */
+  double eh_progress = 0.0;
 };
 
 struct stats_bundle {

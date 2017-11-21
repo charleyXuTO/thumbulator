@@ -89,6 +89,19 @@ double calculate_charging_rate(double voltage, double capacitance, double cycles
   return energy / cycles_per_sample;
 }
 
+void ensure_forward_progress(int *no_progress_count, int num_backups, int threshold)
+{
+  if(num_backups == 0) {
+    no_progress_count++;
+
+    if(*no_progress_count >= threshold) {
+      throw std::runtime_error("No forward progress made across multiple active periods.");
+    }
+  } else {
+    *no_progress_count = 0;
+  }
+}
+
 stats_bundle simulate(char const *binary_file,
     ehsim::voltage_trace const &power,
     eh_scheme *scheme,
@@ -115,7 +128,7 @@ stats_bundle simulate(char const *binary_file,
   auto next_charge_time = power.sample_rate();
 
   uint64_t active_start = 0u;
-  int no_forward_progress = 0;
+  int no_progress_counter = 0;
 
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
@@ -124,18 +137,16 @@ stats_bundle simulate(char const *binary_file,
 
     if(scheme->is_active(&stats)) {
       if(!was_active) {
-        // we have just transitioned to an active mode
-        auto const energy_stored = battery.energy_stored();
-
         if(stats.cpu.instruction_count != 0) {
+          // allocate space for a new active period model
+          stats.models.emplace_back();
+
           // restore state
           elapsed_cycles += scheme->restore(&stats);
         }
 
         // track the time this active mode started
         active_start = stats.cpu.cycle_count;
-        // track the energy available for this active mode
-        stats.models.back().energy_total = energy_stored;
       }
 
       was_active = true;
@@ -159,16 +170,17 @@ stats_bundle simulate(char const *binary_file,
       }
     } else {
       if(was_active) {
-        auto &last_stats = stats.models.back();
-        if(last_stats.num_backups == 0) {
-          no_forward_progress++;
+        // we just powered off
+        auto &active_period = stats.models.back();
 
-          if(no_forward_progress >= 5) {
-            throw std::runtime_error("No forward progress made across 5 active periods.");
-          }
-        } else {
-          no_forward_progress = 0;
-        }
+        // ensure forward progress is being made, otherwise throw
+        ensure_forward_progress(&no_progress_counter, active_period.num_backups, 5);
+
+        active_period.energy_total = active_period.energy_for_instructions +
+                                     active_period.energy_for_backups +
+                                     active_period.energy_for_restore;
+
+        active_period.progress = active_period.energy_forward_progress / active_period.energy_total;
       }
 
       was_active = false;
@@ -185,7 +197,7 @@ stats_bundle simulate(char const *binary_file,
       stats.system.energy_harvested += harvested_energy;
 
       if(was_active) {
-        stats.models.back().energy_total += harvested_energy;
+        stats.models.back().energy_charged += harvested_energy;
       }
     }
 

@@ -75,9 +75,6 @@ public:
 
     // do not touch arch/app state, assume it is all non-volatile
 
-    // allocate space for a new active period model
-    stats->models.emplace_back();
-
     stats->models.back().energy_for_restore = NVP_BEC_RESTORE_ENERGY;
     battery.consume_energy(NVP_BEC_RESTORE_ENERGY);
 
