@@ -49,7 +49,7 @@ public:
   {
     if(battery.energy_stored() == battery.maximum_energy_stored()) {
       power_on();
-    } else if(battery.energy_stored() <= CLANK_INSTRUCTION_ENERGY) {
+    } else if(battery.energy_stored() < calculate_backup_energy()) {
       power_off();
     } else if(countdown_to_backup < 0) {
       // the countdown continues to decrease even if there is not enough energy
@@ -75,7 +75,8 @@ public:
     auto &active_stats = stats->models.back();
     active_stats.num_backups++;
 
-    active_stats.time_between_backups += stats->cpu.cycle_count - last_backup_cycle;
+    auto const tau_B = stats->cpu.cycle_count - last_backup_cycle;
+    active_stats.time_between_backups += tau_B;
     last_backup_cycle = stats->cpu.cycle_count;
 
     auto const backup_energy = calculate_backup_energy();
@@ -88,10 +89,10 @@ public:
     architectural_state = thumbulator::cpu;
     // save application state
     auto const num_stores = write_back();
-    active_stats.bytes_application += num_stores * 4;
 
     auto const backup_time = CLANK_BACKUP_ARCH_TIME + (num_stores * CLANK_MEMORY_TIME);
     active_stats.time_for_backups += backup_time;
+    active_stats.bytes_application += static_cast<double>(num_stores * 4) / tau_B;
     return backup_time;
   }
 

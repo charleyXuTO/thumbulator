@@ -86,9 +86,9 @@ struct active_stats {
   uint64_t time_cpu_total = 0u;
 
   /**
-   * The accumulated bytes backed up by the application.
+   * The accumulated bytes/cycle backed up by the application.
    */
-  uint64_t bytes_application = 0u;
+  double bytes_application = 0u;
 };
 
 struct stats_bundle {

@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
       if(model.num_backups > 0) {
         tau_b = static_cast<double>(model.time_between_backups) / model.num_backups;
         e_B = model.energy_for_backups / model.num_backups;
-        alpha_B = static_cast<double>(model.bytes_application) / model.num_backups;
+        alpha_B = model.bytes_application / model.num_backups;
       }
 
       double p = 0.0;
