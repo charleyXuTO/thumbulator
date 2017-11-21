@@ -176,20 +176,20 @@ stats_bundle simulate(char const *binary_file,
     } else {
       if(was_active) {
         // we just powered off
-        auto const active_id = stats.models.size() - 1;
         auto &active_period = stats.models.back();
 
         // ensure forward progress is being made, otherwise throw
         ensure_forward_progress(&no_progress_counter, active_period.num_backups, 5);
 
-        active_period.time_total = active_period.time_for_instructions + active_period.time_for_backups +
-                                   active_period.time_for_restores;
+        active_period.time_total = active_period.time_for_instructions +
+                                   active_period.time_for_backups + active_period.time_for_restores;
 
         active_period.energy_consumed = active_period.energy_for_instructions +
-                                     active_period.energy_for_backups +
-                                     active_period.energy_for_restore;
+                                        active_period.energy_for_backups +
+                                        active_period.energy_for_restore;
 
-        active_period.progress = active_period.energy_forward_progress / active_period.energy_consumed;
+        active_period.progress =
+            active_period.energy_forward_progress / active_period.energy_consumed;
         active_period.eh_progress = scheme->estimate_progress(eh_model_parameters(active_period));
       }
 
@@ -218,6 +218,17 @@ stats_bundle simulate(char const *binary_file,
       charging_rate = calculate_charging_rate(voltage, battery.capacitance(), cycles_per_sample);
     }
   }
+
+  auto &active_period = stats.models.back();
+  active_period.time_total = active_period.time_for_instructions + active_period.time_for_backups +
+                             active_period.time_for_restores;
+
+  active_period.energy_consumed = active_period.energy_for_instructions +
+                                  active_period.energy_for_backups +
+                                  active_period.energy_for_restore;
+
+  active_period.progress = active_period.energy_forward_progress / active_period.energy_consumed;
+  active_period.eh_progress = scheme->estimate_progress(eh_model_parameters(active_period));
 
   stats.system.energy_remaining = battery.energy_stored();
 
