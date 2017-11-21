@@ -43,6 +43,14 @@ constexpr uint64_t NVP_ODAB_RESTORE_TIME = 35;
 constexpr uint64_t NVP_BEC_BACKUP_TIME = 2;
 constexpr uint64_t NVP_BEC_RESTORE_TIME = 1;
 
+// EH Model Parameters
+constexpr auto NVP_BEC_A_B = 4 * 4; // 4 32-bit registers
+constexpr auto NVP_BEC_SIGMA_B = NVP_BEC_BACKUP_TIME / NVP_BEC_A_B;
+constexpr auto NVP_BEC_OMEGA_B = NVP_BEC_BACKUP_ENERGY / NVP_BEC_A_B;
+constexpr auto NVP_BEC_A_R = 4; // 1 32-bit register (the PC)
+constexpr auto NVP_BEC_SIGMA_R = NVP_BEC_RESTORE_TIME / NVP_BEC_A_R;
+constexpr auto NVP_BEC_OMEGA_R = NVP_BEC_RESTORE_ENERGY / NVP_BEC_A_R;
+
 // see data sheet for STM32L011K4 (M0+) at: http://eembc.org/benchmark/reports/benchreport.php
 // Table 22
 constexpr uint32_t CORTEX_M0PLUS_FREQUENCY = 8000000;
@@ -60,6 +68,21 @@ constexpr double CLANK_INSTRUCTION_ENERGY = CORTEX_M0PLUS_INSTRUCTION_ENERGY_PER
 constexpr double CLANK_BACKUP_ARCH_ENERGY = CORTEX_M0PLUS_ENERGY_FLASH * 4 * 20;
 constexpr double CLANK_RESTORE_ENERGY = CORTEX_M0PLUS_ENERGY_FLASH * 4 * 20;
 constexpr uint64_t CLANK_MEMORY_TIME = 2;
+
+// EH Model Parameters
+constexpr auto CLANK_A_B = 80; // 20 32-bit registers
+constexpr auto CLANK_SIGMA_B = CLANK_BACKUP_ARCH_TIME / CLANK_A_B;
+constexpr auto CLANK_OMEGA_B = CORTEX_M0PLUS_ENERGY_FLASH;
+constexpr auto CLANK_A_R = 80; // 20 32-bit registers
+constexpr auto CLANK_SIGMA_R = CLANK_BACKUP_ARCH_TIME / CLANK_A_R;
+constexpr auto CLANK_OMEGA_R = CORTEX_M0PLUS_ENERGY_FLASH;
+
+constexpr auto PARAMETRIC_A_B = 80; // 20 32-bit registers
+constexpr auto PARAMETRIC_SIGMA_B = CLANK_SIGMA_B;
+constexpr auto PARAMETRIC_OMEGA_B = CLANK_OMEGA_B;
+constexpr auto PARAMETRIC_A_R = 80; // 20 32-bit registers
+constexpr auto PARAMETRIC_SIGMA_R = CLANK_SIGMA_R;
+constexpr auto PARAMETRIC_OMEGA_R = CLANK_OMEGA_R;
 }
 
 #endif //EH_SIM_DATA_SHEET_ENERGY_HPP
