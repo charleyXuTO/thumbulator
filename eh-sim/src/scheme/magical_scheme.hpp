@@ -17,7 +17,7 @@ namespace ehsim {
  */
 class magical_scheme : public eh_scheme {
 public:
-  magical_scheme() : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+  magical_scheme() : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE, MEMENTOS_MAX_CURRENT)
   {
   }
 

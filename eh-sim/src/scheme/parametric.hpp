@@ -15,7 +15,7 @@ namespace ehsim {
 class parametric : public eh_scheme {
 public:
   explicit parametric(int backup_period)
-      : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+      : battery(MEMENTOS_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE, MEMENTOS_MAX_CURRENT)
       , BACKUP_PERIOD(backup_period)
       , countdown_to_backup(BACKUP_PERIOD)
   {
@@ -34,6 +34,11 @@ public:
   uint32_t clock_frequency() const override
   {
     return MEMENTOS_CPU_FREQUENCY;
+  }
+
+  double min_energy_to_power_on(stats_bundle *stats) override
+  {
+    return battery.maximum_energy_stored();
   }
 
   void execute_instruction(stats_bundle *stats) override

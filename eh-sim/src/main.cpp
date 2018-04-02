@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     bool always_harvest = options["harvest"].as<int>(1) == 1;
 
     auto const path_to_voltage_trace = options["voltages"];
-    std::chrono::microseconds sampling_rate(options["rate"]);
+    std::chrono::milliseconds sampling_period(options["rate"]);
 
     std::unique_ptr<ehsim::eh_scheme> scheme = nullptr;
     auto const scheme_select = options["scheme"].as<std::string>("bec");
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
       throw std::runtime_error("Unknown scheme selected.");
     }
 
-    ehsim::voltage_trace power(path_to_voltage_trace, sampling_rate);
+    ehsim::voltage_trace power(path_to_voltage_trace, sampling_period);
 
     auto const stats = ehsim::simulate(path_to_binary, power, scheme.get(), always_harvest);
 

@@ -15,7 +15,7 @@ namespace ehsim {
  */
 class backup_every_cycle : public eh_scheme {
 public:
-  backup_every_cycle() : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+  backup_every_cycle() : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE, MEMENTOS_MAX_CURRENT)
   {
   }
 
@@ -27,6 +27,17 @@ public:
   uint32_t clock_frequency() const override
   {
     return NVP_CPU_FREQUENCY;
+  }
+
+  double min_energy_to_power_on(stats_bundle *stats) override
+  {
+    auto required_energy = NVP_INSTRUCTION_ENERGY + NVP_BEC_BACKUP_ENERGY;
+
+    if(stats->cpu.instruction_count != 0) {
+      // we only need to restore if an instruction has been executed
+      required_energy += NVP_BEC_RESTORE_ENERGY;
+    }
+    return required_energy;
   }
 
   void execute_instruction(stats_bundle *stats) override

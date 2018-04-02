@@ -12,9 +12,9 @@ public:
    * Constructor.
    *
    * @param path_to_trace Path to an existing and valid trace file.
-   * @param sample_rate The time between samples in the trace.
+   * @param sample_period The time between samples in the trace.
    */
-  voltage_trace(std::string const &path_to_trace, std::chrono::microseconds const &sample_rate);
+  voltage_trace(std::string const &path_to_trace, std::chrono::milliseconds const &sample_period);
 
   /**
    * Get the voltage at the specified time.
@@ -23,17 +23,17 @@ public:
    *
    * @return The voltage reading at the specified time.
    */
-  double get_voltage(std::chrono::microseconds const &time) const;
+  double get_voltage(std::chrono::milliseconds const &time) const;
 
-  std::chrono::microseconds sample_rate() const
+  std::chrono::milliseconds sample_period() const
   {
-    return rate;
+    return period;
   }
 
 private:
-  std::chrono::microseconds rate;
+  std::chrono::milliseconds period;
 
-  std::chrono::microseconds maximum_time;
+  std::chrono::milliseconds maximum_time;
 
   std::vector<double> voltages;
 };

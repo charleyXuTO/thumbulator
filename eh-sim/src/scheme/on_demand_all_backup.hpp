@@ -15,7 +15,7 @@ namespace ehsim {
  */
 class on_demand_all_backup : public eh_scheme {
 public:
-  on_demand_all_backup() : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+  on_demand_all_backup() : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE, MEMENTOS_MAX_CURRENT)
   {
   }
 

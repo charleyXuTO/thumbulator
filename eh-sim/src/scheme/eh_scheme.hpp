@@ -16,6 +16,8 @@ public:
 
   virtual uint32_t clock_frequency() const = 0;
 
+  virtual double min_energy_to_power_on(stats_bundle *stats) = 0;
+
   virtual void execute_instruction(stats_bundle *stats) = 0;
 
   virtual bool is_active(stats_bundle *stats) = 0;

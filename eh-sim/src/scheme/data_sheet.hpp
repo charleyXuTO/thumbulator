@@ -10,6 +10,11 @@ namespace ehsim {
 constexpr uint32_t MEMENTOS_CPU_FREQUENCY = 8000000;
 constexpr double MEMENTOS_CAPACITANCE = 10e-6;
 constexpr double MEMENTOS_MAX_CAPACITOR_VOLTAGE = 4.5;
+// assuming R_cap = 0
+constexpr double MEMENTOS_ACTIVE_LOAD_RESISTANCE = 20e3;
+constexpr double MEMENTOS_RC_CONSTANT = 0.2;
+constexpr double MEMENTOS_MAX_CURRENT = 238e-6;
+
 constexpr double MEMENTOS_INSTRUCTION_ENERGY = 2.0;
 // memory naming scheme is MEMENTOS_DESTINATION_SOURCE
 constexpr double MEMENTOS_REG_REG = 1.1;

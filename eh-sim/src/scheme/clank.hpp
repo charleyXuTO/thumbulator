@@ -29,7 +29,7 @@ public:
   }
 
   clank(size_t rf_entries, size_t wf_entries, int watchdog_period)
-      : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE)
+      : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE, MEMENTOS_MAX_CURRENT)
       , WATCHDOG_PERIOD(watchdog_period)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
@@ -54,6 +54,11 @@ public:
   uint32_t clock_frequency() const override
   {
     return CORTEX_M0PLUS_FREQUENCY;
+  }
+
+  double min_energy_to_power_on(stats_bundle *stats) override
+  {
+    return battery.maximum_energy_stored();
   }
 
   void execute_instruction(stats_bundle *stats) override

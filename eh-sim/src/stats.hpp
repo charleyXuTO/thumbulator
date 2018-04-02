@@ -32,6 +32,7 @@ struct system_stats {
    * Remaining energy in battery.
    */
   double energy_remaining = 0.0;
+
 };
 
 struct active_stats {
