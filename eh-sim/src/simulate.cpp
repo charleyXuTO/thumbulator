@@ -98,12 +98,20 @@ double calculate_charging_rate(double env_voltage, capacitor &battery, double cp
 {
   double energy_per_cycle = 0.0;
 
+#ifdef MODEL_VOLTAGE_SOURCE
   // only charge if source voltage higher than current voltage across capacitor
   if(env_voltage > battery.voltage()) {
     // assume always max charging rate
     auto dV_dt = battery.max_current() / battery.capacitance();
     energy_per_cycle = dV_dt / cpu_freq;
   }
+#else
+  // voltage in the trace is measured across 30kohm resistor
+  double current_source = env_voltage / 30000;
+  auto dV_dt = current_source / battery.capacitance();
+  energy_per_cycle = dV_dt / cpu_freq;
+
+#endif
 
   return energy_per_cycle;
 }
@@ -190,8 +198,8 @@ stats_bundle simulate(char const *binary_file,
 
     if(scheme->is_active(&stats)) {
       if(!was_active) {
-        std::cout << "\nactive starting " <<
-          std::chrono::duration_cast<std::chrono::seconds>(stats.system.time).count() << "s\n";
+        std::cout << "[" <<
+          std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count() << "ns - ";
         // allocate space for a new active period model
         stats.models.emplace_back();
         // track the time this active mode started
@@ -251,10 +259,8 @@ stats_bundle simulate(char const *binary_file,
         }
       }
     } else { // powered off
-      std::cout << ".";
       if(was_active) {
-      std::cout << "\npowered off " <<
-          std::chrono::duration_cast<std::chrono::seconds>(stats.system.time).count() << "s\n";
+      std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count() << "ns]\n";
         // we just powered off
         auto &active_period = stats.models.back();
 
