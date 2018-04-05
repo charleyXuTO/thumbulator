@@ -185,9 +185,9 @@ stats_bundle simulate(char const *binary_file,
 
     if(scheme->is_active(&stats)) {
       if(!was_active) {
-        std::cout << "["
-                  << std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count()
-                  << "ns - ";
+        //std::cout << "["
+        //          << std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count()
+        //          << "ns - ";
         // allocate space for a new active period model
         stats.models.emplace_back();
         // track the time this active mode started
@@ -248,8 +248,8 @@ stats_bundle simulate(char const *binary_file,
       }
     } else { // powered off
       if(was_active) {
-        std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count()
-                  << "ns]\n";
+        //std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count()
+        //          << "ns]\n";
         // we just powered off
         auto &active_period = stats.models.back();
 
