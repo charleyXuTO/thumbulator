@@ -79,11 +79,6 @@ std::chrono::nanoseconds get_time(uint64_t const cycle_count, uint32_t const fre
   return std::chrono::nanoseconds(time);
 }
 
-std::chrono::microseconds to_microseconds(std::chrono::nanoseconds const &time)
-{
-  return std::chrono::duration_cast<std::chrono::microseconds>(time);
-}
-
 std::chrono::milliseconds to_milliseconds(std::chrono::nanoseconds const &time)
 {
   return std::chrono::duration_cast<std::chrono::milliseconds>(time);
@@ -98,37 +93,21 @@ uint64_t time_to_cycles(std::chrono::nanoseconds elapsed_time, uint32_t clock_fr
 // returns amount of energy per cycles
 double calculate_charging_rate(double env_voltage, capacitor &battery, double cpu_freq)
 {
-  double energy_per_cycle = 0.0;
-
 #ifdef MODEL_VOLTAGE_SOURCE
   // only charge if source voltage higher than current voltage across capacitor
   if(env_voltage > battery.voltage()) {
     // assume always max charging rate
     auto dV_dt = battery.max_current() / battery.capacitance();
-    energy_per_cycle = dV_dt / cpu_freq;
+    double energy_per_cycle = dV_dt / cpu_freq;
   }
 #else
   // voltage in the trace is measured across 30kohm resistor
   double current_source = env_voltage / 30000;
   auto dV_dt = current_source / battery.capacitance();
-  energy_per_cycle = dV_dt / cpu_freq;
-
+  double energy_per_cycle = dV_dt / cpu_freq;
 #endif
 
   return energy_per_cycle;
-}
-
-void ensure_forward_progress(int *no_progress_count, int num_backups, int threshold)
-{
-  if(num_backups == 0) {
-    no_progress_count++;
-
-    if(*no_progress_count >= threshold) {
-      throw std::runtime_error("No forward progress made across multiple active periods.");
-    }
-  } else {
-    *no_progress_count = 0;
-  }
 }
 
 double update_energy_harvested(uint64_t elapsed_cycles,
@@ -144,6 +123,7 @@ double update_energy_harvested(uint64_t elapsed_cycles,
   // accumulate charge of each periods separately
   auto potential_harvested_energy = 0.0;
   auto cycles_accounted = 0;
+
   while(exec_end_time >= next_charge_time) {
     uint64_t cycles_in_cur_charge_rate =
         elapsed_cycles - time_to_cycles(exec_end_time - next_charge_time, clock_freq);
@@ -155,6 +135,7 @@ double update_energy_harvested(uint64_t elapsed_cycles,
     env_voltage = power.get_voltage(to_milliseconds(next_charge_time));
     charging_rate = calculate_charging_rate(env_voltage, battery, clock_freq);
   }
+
   potential_harvested_energy += (elapsed_cycles - cycles_accounted) * charging_rate;
 
   // update battery -- battery may be full so ahe<=phe
@@ -291,13 +272,13 @@ stats_bundle simulate(char const *binary_file,
 
       // figure out how long to be off for
       // move in steps of voltage sample (1ms)
-      double min_energy = scheme->min_energy_to_power_on(&stats);
-      double min_voltage = sqrt(2 * min_energy / battery.capacitance());
+      double const min_energy = scheme->min_energy_to_power_on(&stats);
+      double const min_voltage = sqrt(2 * min_energy / battery.capacitance());
 
       // assume linear max dV/dt for now
-      double max_dV_dt = battery.max_current() / battery.capacitance();
-      double dV_dt_per_cycle = max_dV_dt / scheme->clock_frequency();
-      uint64_t min_cycles =
+      double const max_dV_dt = battery.max_current() / battery.capacitance();
+      double const dV_dt_per_cycle = max_dV_dt / scheme->clock_frequency();
+      auto const min_cycles =
           static_cast<uint64_t>(ceil((min_voltage - battery.voltage()) / dV_dt_per_cycle));
 
       auto time_until_next_charge = next_charge_time - stats.system.time;
