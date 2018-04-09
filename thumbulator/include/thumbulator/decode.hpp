@@ -5,6 +5,46 @@
 
 namespace thumbulator {
 
+
+
+/**
+ * Enums for instruction type
+ * TODO: decide whether to use rel or abs
+ */
+enum DoubleOpInsn {
+  MOV = 0x4,
+  ADD = 0x5,
+  ADDC = 0x6,
+  SUBC = 0x7,
+  SUB = 0x8,
+  CMP = 0x9,
+  DADD = 0xA,
+  BIT = 0xB,
+  BIC = 0xC,
+  BIS = 0xD,
+  XOR = 0xE,
+  AND = 0xF
+};
+enum SingleOpInsn { // rel
+  RRC  = 0x1000,    // 0x020,
+  SWPB = 0x1080,    // 0x021,
+  RRA  = 0x1100,    // 0x022,
+  SXT  = 0x1180,    // 0x023,
+  PUSH = 0x1200,    // 0x024,
+  CALL = 0x1280,    // 0x025,
+  RETI = 0x1300     // 0x026
+};
+enum JumpInsn {
+  JNE = 0x2000,
+  JEQ = 0x2400,
+  JNC = 0x2800,
+  JC  = 0x2C00,
+  JN  = 0x3000,
+  JGE = 0x3400,
+  JL  = 0x3800,
+  JMP = 0x3C00
+};
+
 /**
  * Registers that hold the results of instruction decoding.
  *
@@ -17,29 +57,19 @@ struct decode_result {
   uint8_t Rd;
 
   /**
-   * Operand register-index.
+   * Source register-index.
    */
-  uint8_t Rm;
+  uint8_t Rs;
 
-  /**
-   * Operand register-index.
-   */
-  uint8_t Rn;
 
-  /**
-   * Immediate value.
-   */
-  uint32_t imm;
+  uint8_t As;
+  uint8_t Ad;
+  uint16_t srcWord;
+  uint16_t dstWord;
+  bool isByte;
+  uint16_t opcode;
+  uint16_t offset;
 
-  /**
-   * Condition.
-   */
-  uint32_t cond;
-
-  /**
-   * Register list for push/pop instructions.
-   */
-  uint32_t register_list;
 };
 
 /**

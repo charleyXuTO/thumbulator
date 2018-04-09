@@ -20,8 +20,8 @@ void load_program(char const *file_name)
     throw std::runtime_error("Could not open binary file.\n");
   }
 
-  std::fread(&thumbulator::FLASH_MEMORY, sizeof(uint32_t),
-      sizeof(thumbulator::FLASH_MEMORY) / sizeof(uint32_t), fd);
+  std::fread(&thumbulator::FLASH_MEMORY, sizeof(uint16_t),
+      sizeof(thumbulator::FLASH_MEMORY) / sizeof(uint16_t), fd);
   std::fclose(fd);
 }
 
@@ -35,8 +35,8 @@ void initialize_system(char const *binary_file)
   // Initialize CPU state
   thumbulator::cpu_reset();
 
-  // PC seen is PC + 4
-  thumbulator::cpu_set_pc(thumbulator::cpu_get_pc() + 0x4);
+  // PC seen is PC + 2
+  thumbulator::cpu_set_pc(thumbulator::cpu_get_pc() + 0x2);
 }
 
 /**
@@ -49,8 +49,9 @@ uint32_t step_cpu()
   thumbulator::BRANCH_WAS_TAKEN = false;
 
   if((thumbulator::cpu_get_pc() & 0x1) == 0) {
-    printf("Oh no! Current PC: 0x%08X\n", thumbulator::cpu.gpr[15]);
-    throw std::runtime_error("PC moved out of thumb mode.");
+    printf("Address need to be word (16-bits) aligned!! Current PC: 0x%08X\n",
+           thumbulator::cpu.gpr[0]);
+    throw std::runtime_error("PC not aligned to 16-bits.");
   }
 
   // fetch

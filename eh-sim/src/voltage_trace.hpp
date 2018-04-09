@@ -35,6 +35,8 @@ private:
 
   std::chrono::milliseconds maximum_time;
 
+
+  // voltage value from trace (every ms)
   std::vector<double> voltages;
 };
 }

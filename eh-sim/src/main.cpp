@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     }
 
     ehsim::voltage_trace power(path_to_voltage_trace, sampling_period);
-
+    std::cout << "Starting simulation.\n";
     auto const stats = ehsim::simulate(path_to_binary, power, scheme.get(), always_harvest);
 
     std::cout << "CPU instructions executed: " << stats.cpu.instruction_count << "\n";

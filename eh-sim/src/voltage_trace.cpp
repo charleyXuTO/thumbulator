@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 
+//TODO: update this to use milliseconds instead of microseconds?????
 namespace ehsim {
 voltage_trace::voltage_trace(std::string const &path_to_trace, std::chrono::milliseconds const &sample_period)
   : maximum_time(0), period(sample_period)

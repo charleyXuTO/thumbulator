@@ -16,45 +16,30 @@ bool EXIT_INSTRUCTION_ENCOUNTERED = false;
 // Reset CPU state in accordance with B1.5.5 and B3.2.2
 void cpu_reset()
 {
-  constexpr auto ESPR_T = (1 << 24);
-
-  // Initialize the special-purpose registers
-  cpu.apsr = 0;       // No flags set
-  cpu.ipsr = 0;       // No exception number
-  cpu.espr = ESPR_T;  // Thumb mode
-  cpu.primask = 0;    // No except priority boosting
-  cpu.control = 0;    // Priv mode and main stack
-  cpu.sp_main = 0;    // Stack pointer for exception handling
-  cpu.sp_process = 0; // Stack pointer for process
-
   // Clear the general purpose registers
   memset(cpu.gpr, 0, sizeof(cpu.gpr));
 
-  // Set the reserved GPRs
-  cpu.gpr[GPR_LR] = 0;
+  // For MSP430, user sets SP at beginning of their program
+  ////load(0, &cpu.sp_main, 0);
+  ////cpu.sp_main &= 0xFFFFFFFC;
+  ////cpu.sp_process = 0;
+  ////cpu_set_sp(cpu.sp_main);
 
-  // May need to add logic to send writes and reads to the
-  // correct stack pointer
-  // Set the stack pointers
-  load(0, &cpu.sp_main, 0);
-  cpu.sp_main &= 0xFFFFFFFC;
-  cpu.sp_process = 0;
-  cpu_set_sp(cpu.sp_main);
+  //// Set the program counter to the address of the reset exception vector
+  //uint32_t startAddr;
+  //load(0x4, &startAddr, 0);
+  //cpu_set_pc(startAddr);
 
-  // Set the program counter to the address of the reset exception vector
-  uint32_t startAddr;
-  load(0x4, &startAddr, 0);
-  cpu_set_pc(startAddr);
+  //// No pending exceptions
+  //cpu.exceptmask = 0;
 
-  // No pending exceptions
-  cpu.exceptmask = 0;
+  //// Check for attempts to go to ARM mode
+  //if((cpu_get_pc() & 0x1) == 0) {
+  //  printf("Error: Reset PC to an ARM address 0x%08X\n", cpu_get_pc());
+  //  terminate_simulation(1);
+  //}
 
-  // Check for attempts to go to ARM mode
-  if((cpu_get_pc() & 0x1) == 0) {
-    printf("Error: Reset PC to an ARM address 0x%08X\n", cpu_get_pc());
-    terminate_simulation(1);
-  }
-
+  //TODO: what is this?!?! change it to match MSP430???
   // Reset the SYSTICK unit
   SYSTICK.control = 0x4;
   SYSTICK.reload = 0x0;
@@ -298,6 +283,7 @@ uint32_t exmemwb(uint16_t instruction, decode_result const *decoded)
 
   // Update the SYSTICK unit and look for resets
   if(SYSTICK.control & 0x1) {
+    assert(0 & "SYSTICK 2?!?!?!");
     if(insnTicks >= SYSTICK.value) {
       // Ignore resets due to reads
       if(SYSTICK.value > 0)

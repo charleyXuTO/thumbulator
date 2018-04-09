@@ -30,6 +30,7 @@ constexpr double MEMENTOS_FLASH_MEM = 1126.2;
 // Batteryless Sim numbers are from: https://github.com/PERSISTLab/BatterylessSim/
 constexpr double BATTERYLESS_CAPACITANCE = 10e-6;
 constexpr double BATTERYLESS_MAX_CAPACITOR_VOLTAGE = 7.5;
+constexpr double BATTERYLESS_RESISTANCE = 20e3;
 
 // NVP numbers from Architecture Exploration for Ambient Energy Harvesting Nonvolatile Processors
 // see Section 3 from paper - 8 KHz clock frequency

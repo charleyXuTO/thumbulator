@@ -33,6 +33,7 @@ public:
 
   uint32_t clock_frequency() const override
   {
+    // TODO: change this??
     return MEMENTOS_CPU_FREQUENCY;
   }
 

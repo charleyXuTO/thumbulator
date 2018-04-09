@@ -53,6 +53,7 @@ public:
 
   uint32_t clock_frequency() const override
   {
+    // TODO: change this??
     return CORTEX_M0PLUS_FREQUENCY;
   }
 

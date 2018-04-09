@@ -75,6 +75,7 @@ void load(uint32_t address, uint32_t *value, uint32_t false_read)
 
       // Check for SYSTICK
       if((address >> 4) == 0xE000E01) {
+        assert(0 & "SYSTICK?!?!");
         *value = ((uint32_t *)&SYSTICK)[(address >> 2) & 0x3];
         if(address == 0xE000E010)
           SYSTICK.control &= 0x00010000;

@@ -15,14 +15,6 @@ namespace thumbulator {
 #define FLAG_C_MASK (1 << FLAG_C_INDEX)
 #define FLAG_V_MASK (1 << FLAG_V_INDEX)
 
-// GPRs with special functions
-#define GPR_SP 13
-#define GPR_LR 14
-#define cpu_get_sp() cpu_get_gpr(GPR_SP)
-#define cpu_set_sp(x) (cpu_set_gpr(GPR_SP, (x)))
-#define cpu_get_lr() cpu_get_gpr(GPR_LR)
-#define cpu_set_lr(x) cpu_set_gpr(GPR_LR, (x))
-
 // Get, set, and compute the CPU flags
 #define cpu_get_flag_z() ((cpu.apsr & FLAG_Z_MASK) >> FLAG_Z_INDEX)
 #define cpu_get_flag_n() ((cpu.apsr & FLAG_N_MASK) >> FLAG_N_INDEX)
@@ -47,9 +39,6 @@ static void do_cflag(uint32_t a, uint32_t b, uint32_t carry)
   result = (result >> 31) + (a >> 31) + (b >> 31);      //carry out
   cpu_set_flag_c(result >> 1);
 }
-
-#define cpu_get_apsr() (cpu.apsr)
-#define cpu_set_apsr(x) cpu.apsr = (x)
 
 // Other SPR
 #define CPU_MODE_HANDLER 0

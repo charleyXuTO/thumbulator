@@ -26,6 +26,7 @@ public:
 
   uint32_t clock_frequency() const override
   {
+    // TODO: change this??
     return NVP_CPU_FREQUENCY;
   }
 

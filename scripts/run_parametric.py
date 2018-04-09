@@ -26,10 +26,14 @@ def run(eh_sim, app, trace, rate, tau_b, harvest, out_dir):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description='Run eh-sim.')
-    p.add_argument('-x', '--exe', dest='eh_sim', default=None)
-    p.add_argument('--benchmark-dir', dest='benchmark_dir', default=None)
-    p.add_argument('--voltage-trace-dir', dest="vtrace_dir", default=None)
-    p.add_argument('-d', '--destination', dest='output_dir', default=None)
+    #p.add_argument('-x', '--exe', dest='eh_sim', default=None)
+    #p.add_argument('--benchmark-dir', dest='benchmark_dir', default=None)
+    #p.add_argument('--voltage-trace-dir', dest="vtrace_dir", default=None)
+    #p.add_argument('-d', '--destination', dest='output_dir', default=None)
+    p.add_argument('-x', '--exe', dest='eh_sim', default="../cmake-build-debug/eh-sim/eh-sim")
+    p.add_argument('--benchmark-dir', dest='benchmark_dir', default="../../thumbulator-benchmarks")
+    p.add_argument('--voltage-trace-dir', dest="vtrace_dir", default="../../BatterylessSim/traces")
+    p.add_argument('-d', '--destination', dest='output_dir', default="../outDir")
 
     (args) = p.parse_args()
 

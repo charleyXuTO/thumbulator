@@ -6,10 +6,11 @@
 
 namespace thumbulator {
 
-#define RAM_START 0x40000000
-#define RAM_SIZE_BYTES (1 << 23) // 8 MB
-#define RAM_SIZE_ELEMENTS (RAM_SIZE_BYTES >> 2)
-#define RAM_ADDRESS_MASK (((~0) << 23) ^ (~0))
+// TODO: for now only support 16-bit address, extend to 20-bits later
+#define RAM_START 0x001C00
+#define RAM_SIZE_BYTES (1 << 13) // 8 KB
+#define RAM_SIZE_ELEMENTS (RAM_SIZE_BYTES >> 1)
+#define RAM_ADDRESS_MASK (((~0) << 13) ^ (~0))
 
 /**
  * Random-Access Memory, like SRAM.
@@ -37,10 +38,10 @@ extern std::function<uint32_t(uint32_t, uint32_t)> ram_load_hook;
  */
 extern std::function<uint32_t(uint32_t, uint32_t, uint32_t)> ram_store_hook;
 
-#define FLASH_START 0x0
-#define FLASH_SIZE_BYTES (1 << 23) // 8 MB
-#define FLASH_SIZE_ELEMENTS (FLASH_SIZE_BYTES >> 2)
-#define FLASH_ADDRESS_MASK (((~0) << 23) ^ (~0))
+#define FLASH_START 0x004000
+#define FLASH_SIZE_BYTES (1 << 18) // 256 KB
+#define FLASH_SIZE_ELEMENTS (RAM_SIZE_BYTES >> 1)
+#define FLASH_ADDRESS_MASK (((~0) << 18) ^ (~0))
 
 /**
  * Read-Only Memory.
