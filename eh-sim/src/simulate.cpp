@@ -80,67 +80,54 @@ std::chrono::nanoseconds get_time(uint64_t const cycle_count, uint32_t const fre
   return std::chrono::nanoseconds(time);
 }
 
-std::chrono::microseconds to_microseconds(std::chrono::nanoseconds const &time)
-{
-  return std::chrono::duration_cast<std::chrono::microseconds>(time);
-}
-
 std::chrono::milliseconds to_milliseconds(std::chrono::nanoseconds const &time)
 {
   return std::chrono::duration_cast<std::chrono::milliseconds>(time);
 }
 
-uint64_t time_to_cycles(std::chrono::nanoseconds elapsed_time, uint32_t clock_frequency) {
-  return static_cast<uint64_t>(ceil(clock_frequency * std::chrono::duration<double>(elapsed_time).count()));
+uint64_t time_to_cycles(std::chrono::nanoseconds elapsed_time, uint32_t clock_frequency)
+{
+  return static_cast<uint64_t>(
+      ceil(clock_frequency * std::chrono::duration<double>(elapsed_time).count()));
 }
 
 // returns amount of energy per cycles
 double calculate_charging_rate(double env_voltage, capacitor &battery, double cpu_freq)
 {
-  double energy_per_cycle = 0.0;
-
 #ifdef MODEL_VOLTAGE_SOURCE
   // only charge if source voltage higher than current voltage across capacitor
   if(env_voltage > battery.voltage()) {
     // assume always max charging rate
     auto dV_dt = battery.max_current() / battery.capacitance();
-    energy_per_cycle = dV_dt / cpu_freq;
+    double energy_per_cycle = dV_dt / cpu_freq;
   }
 #else
   // voltage in the trace is measured across 30kohm resistor
   double current_source = env_voltage / 30000;
   auto dV_dt = current_source / battery.capacitance();
-  energy_per_cycle = dV_dt / cpu_freq;
-
+  double energy_per_cycle = dV_dt / cpu_freq;
 #endif
 
   return energy_per_cycle;
 }
 
-void ensure_forward_progress(int *no_progress_count, int num_backups, int threshold)
+double update_energy_harvested(uint64_t elapsed_cycles,
+    std::chrono::nanoseconds exec_end_time,
+    double &charging_rate,
+    double &env_voltage,
+    std::chrono::nanoseconds &next_charge_time,
+    uint32_t clock_freq,
+    ehsim::voltage_trace const &power,
+    capacitor &battery)
 {
-  if(num_backups == 0) {
-    no_progress_count++;
-
-    if(*no_progress_count >= threshold) {
-      throw std::runtime_error("No forward progress made across multiple active periods.");
-    }
-  } else {
-    *no_progress_count = 0;
-  }
-}
-
-double update_energy_harvested(uint64_t elapsed_cycles, std::chrono::nanoseconds exec_end_time,
-                             double &charging_rate, double &env_voltage,
-                             std::chrono::nanoseconds &next_charge_time,
-                             uint32_t clock_freq, ehsim::voltage_trace const &power, capacitor &battery) {
   // execution can span over more than 1 voltage trace sample period
   // accumulate charge of each periods separately
   auto potential_harvested_energy = 0.0;
   auto cycles_accounted = 0;
+
   while(exec_end_time >= next_charge_time) {
-    uint64_t cycles_in_cur_charge_rate = elapsed_cycles -
-      time_to_cycles(exec_end_time - next_charge_time, clock_freq);
+    uint64_t cycles_in_cur_charge_rate =
+        elapsed_cycles - time_to_cycles(exec_end_time - next_charge_time, clock_freq);
     potential_harvested_energy += cycles_in_cur_charge_rate * charging_rate;
     cycles_accounted += cycles_in_cur_charge_rate;
 
@@ -149,6 +136,7 @@ double update_energy_harvested(uint64_t elapsed_cycles, std::chrono::nanoseconds
     env_voltage = power.get_voltage(to_milliseconds(next_charge_time));
     charging_rate = calculate_charging_rate(env_voltage, battery, clock_freq);
   }
+
   potential_harvested_energy += (elapsed_cycles - cycles_accounted) * charging_rate;
 
   // update battery -- battery may be full so ahe<=phe
@@ -156,7 +144,6 @@ double update_energy_harvested(uint64_t elapsed_cycles, std::chrono::nanoseconds
 
   return actual_harvested_energy;
 }
-
 
 stats_bundle simulate(char const *binary_file,
     ehsim::voltage_trace const &power,
@@ -177,8 +164,8 @@ stats_bundle simulate(char const *binary_file,
   auto was_active = false;
 
   // frequency in Hz, sample period in ms
-  auto cycles_per_sample = static_cast<uint64_t>(scheme->clock_frequency() *
-        std::chrono::duration<double>(power.sample_period()).count());
+  auto cycles_per_sample = static_cast<uint64_t>(
+      scheme->clock_frequency() * std::chrono::duration<double>(power.sample_period()).count());
 
   std::cout.setf(std::ios::unitbuf);
   std::cout << "cycles per sample: " << cycles_per_sample << "\n";
@@ -199,8 +186,9 @@ stats_bundle simulate(char const *binary_file,
 
     if(scheme->is_active(&stats)) {
       if(!was_active) {
-        std::cout << "[" <<
-          std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count() << "ns - ";
+        //std::cout << "["
+        //          << std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count()
+        //          << "ns - ";
         // allocate space for a new active period model
         stats.models.emplace_back();
         // track the time this active mode started
@@ -243,15 +231,15 @@ stats_bundle simulate(char const *binary_file,
 
       if(always_harvest) {
         // update energy harvested & voltage sample corresponding to current time
-        auto harvested_energy = update_energy_harvested(elapsed_cycles, stats.system.time,
-                                charging_rate, env_voltage, next_charge_time, scheme->clock_frequency(), power, battery);
+        auto harvested_energy =
+            update_energy_harvested(elapsed_cycles, stats.system.time, charging_rate, env_voltage,
+                next_charge_time, scheme->clock_frequency(), power, battery);
         stats.system.energy_harvested += harvested_energy;
         stats.models.back().energy_charged += harvested_energy;
-      }
-      else {
+      } else {
         // just update voltage sample value
         if(stats.system.time >= next_charge_time) {
-          while (stats.system.time >= next_charge_time) {
+          while(stats.system.time >= next_charge_time) {
             next_charge_time += power.sample_period();
           }
 
@@ -261,7 +249,8 @@ stats_bundle simulate(char const *binary_file,
       }
     } else { // powered off
       if(was_active) {
-      std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count() << "ns]\n";
+        //std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(stats.system.time).count()
+        //          << "ns]\n";
         // we just powered off
         auto &active_period = stats.models.back();
 
@@ -284,30 +273,32 @@ stats_bundle simulate(char const *binary_file,
 
       // figure out how long to be off for
       // move in steps of voltage sample (1ms)
-      double min_energy = scheme->min_energy_to_power_on(&stats);
-      double min_voltage = sqrt(2*min_energy/battery.capacitance());
+      double const min_energy = scheme->min_energy_to_power_on(&stats);
+      double const min_voltage = sqrt(2 * min_energy / battery.capacitance());
 
       // assume linear max dV/dt for now
-      double max_dV_dt = battery.max_current() / battery.capacitance();
-      double dV_dt_per_cycle = max_dV_dt / scheme->clock_frequency();
-      uint64_t min_cycles = static_cast<uint64_t>(ceil((min_voltage - battery.voltage()) / dV_dt_per_cycle));
+      double const max_dV_dt = battery.max_current() / battery.capacitance();
+      double const dV_dt_per_cycle = max_dV_dt / scheme->clock_frequency();
+      auto const min_cycles =
+          static_cast<uint64_t>(ceil((min_voltage - battery.voltage()) / dV_dt_per_cycle));
 
       auto time_until_next_charge = next_charge_time - stats.system.time;
-      uint64_t cycles_until_next_charge = time_to_cycles(time_until_next_charge, scheme->clock_frequency());
+      uint64_t cycles_until_next_charge =
+          time_to_cycles(time_until_next_charge, scheme->clock_frequency());
 
       if(min_cycles > cycles_until_next_charge) {
         stats.system.time = next_charge_time;
         elapsed_cycles = cycles_until_next_charge;
-      }
-      else {
+      } else {
         elapsed_cycles = min_cycles;
-        auto elapsed_time = std::chrono::nanoseconds(static_cast<uint64_t>(elapsed_cycles*scheme->clock_frequency()*1e9));
+        auto elapsed_time = std::chrono::nanoseconds(
+            static_cast<uint64_t>(elapsed_cycles * scheme->clock_frequency() * 1e9));
         stats.system.time += elapsed_time;
       }
 
       // update energy harvested & voltage sample corresponding to current time
       auto harvested_energy = update_energy_harvested(elapsed_cycles, stats.system.time,
-                              charging_rate, env_voltage, next_charge_time, scheme->clock_frequency(), power, battery);
+          charging_rate, env_voltage, next_charge_time, scheme->clock_frequency(), power, battery);
       stats.system.energy_harvested += harvested_energy;
     }
   }

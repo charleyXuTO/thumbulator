@@ -28,10 +28,13 @@ public:
    * @param capacitance The capacitance in farads (F).
    * @param maximum_voltage The maximum voltage the capacitor can sustain.
    */
-  capacitor(double const capacitance, double const maximum_voltage,
-            double const maximum_current)
-      : C(capacitance), maxV(maximum_voltage), maxI(maximum_current), V(0),
-        maximum_energy(calculate_energy(maximum_voltage, C)), energy(0)
+  capacitor(double const capacitance, double const maximum_voltage, double const maximum_current)
+      : C(capacitance)
+      , maxV(maximum_voltage)
+      , maxI(maximum_current)
+      , V(0)
+      , maximum_energy(calculate_energy(maximum_voltage, C))
+      , energy(0)
   {
     assert(maximum_energy > 0);
   }
@@ -71,8 +74,9 @@ public:
   /**
    * Updates the current voltage across capacitor based on current energy stored
    */
-  void update_voltage() {
-      V = sqrt(2*energy*1e-9/C);
+  void update_voltage()
+  {
+    V = sqrt(2 * energy * 1e-9 / C);
   }
 
   /**
