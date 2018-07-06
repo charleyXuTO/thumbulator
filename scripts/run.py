@@ -41,17 +41,19 @@ if __name__ == "__main__":
         sys.exit("Error: no path given to output destination.")
 
     # the schemes to run
-    schemes = ['bec', 'clank']
+    #schemes = ['bec', 'clank']
+    schemes = ['clank']
+
 
     # the benchmarks to run, from Matthew Hicks' version of MiBench
-    benchmark_whitelist = ['adpcm_decode', 'adpcm_encode', 'aes', 'crc', 'limits', 'lzfx', 'overflow', 'picojpeg',
+    benchmark_whitelist = ['adpcm_decode', 'adpcm_encode', 'aes', 'crc', 'limits', 'lzfx', 'overflow',
                            'randmath', 'rc4', 'regress', 'rsa', 'susan', 'vcflags']
 
     # the voltage traces to use, from BatterylessSim
     vtrace_whitelist = ['6', '3', '1']
     # the time between samples of the voltage trace, in microseconds. The longer the time, the smaller the rate
     # of charge per cycle
-    vtrace_rates = {'bec': 10000, 'odab': 1000000, 'clank': 1000}
+    vtrace_rates = {'bec': 1, 'odab': 1, 'clank': 1}
 
     for vtrace in vtrace_whitelist:
         for benchmark in benchmark_whitelist:

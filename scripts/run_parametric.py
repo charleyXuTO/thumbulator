@@ -43,13 +43,13 @@ if __name__ == "__main__":
         sys.exit("Error: no path given to output destination.")
 
     # the benchmarks to run, from Matthew Hicks' version of MiBench
-    benchmark_whitelist = ['adpcm_decode', 'adpcm_encode', 'aes', 'crc', 'limits', 'lzfx', 'overflow', 'picojpeg',
+    benchmark_whitelist = ['adpcm_decode', 'adpcm_encode', 'aes', 'crc', 'limits', 'lzfx', 'overflow',
                            'randmath', 'rc4', 'regress', 'susan', 'vcflags']
 
     # the voltage traces to use, from BatterylessSim
     vtrace_whitelist = ['6']
     # different backup periods (in cycles) to try
-    backup_periods = list(range(250, 10000, 250))
+    backup_periods = list(range(250, 3000, 250))
 
     for vtrace in vtrace_whitelist:
         for benchmark in benchmark_whitelist:
@@ -62,4 +62,4 @@ if __name__ == "__main__":
                 path_to_destination = args.output_dir + "/" + benchmark + "/" + vtrace
                 os.makedirs(path_to_destination, exist_ok=True)
 
-                run(args.eh_sim, path_to_benchmark, path_to_vtrace, 1000, bperiod, True, path_to_destination)
+                run(args.eh_sim, path_to_benchmark, path_to_vtrace, 1, bperiod, True, path_to_destination)
