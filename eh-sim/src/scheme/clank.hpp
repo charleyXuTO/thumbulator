@@ -115,7 +115,7 @@ public:
     clear_buffers();
     // the backup has resolved the idempotancy violation and/or exception
     idempotent_violation = false;
-
+    numberOfBackups++;
     active_stats.energy_for_backups += CLANK_BACKUP_ARCH_ENERGY;
     battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
 
@@ -133,7 +133,7 @@ public:
 
     stats->models.back().energy_for_restore = CLANK_RESTORE_ENERGY;
     battery.consume_energy(CLANK_RESTORE_ENERGY);
-
+    numberOfRestores++;
     // assume memory access latency for reads and writes is the same
     return CLANK_BACKUP_ARCH_TIME;
   }
@@ -219,10 +219,12 @@ private:
       if(!was_added) {
         // idempotent violation - a buffer was full
         idempotent_violation = true;
+        bufferOverflowViolations++;
       }
     } else if(op == operation::write && readfirst_hit) {
       // idempotent violation - write to read-dominated address
       idempotent_violation = true;
+      bufferWriteViolations++;
     }
   }
 

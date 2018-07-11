@@ -8,10 +8,14 @@
 #include "scheme/backup_every_cycle.hpp"
 #include "scheme/clank.hpp"
 #include "scheme/parametric.hpp"
-
+#include "stats.hpp"
 #include "simulate.hpp"
 #include "voltage_trace.hpp"
 
+int bufferOverflowViolations;
+int bufferWriteViolations;
+int numberOfBackups;
+int numberOfRestores;
 void print_usage(std::ostream &stream, argagg::parser const &arguments)
 {
   argagg::fmt_ostream help(stream);
@@ -102,7 +106,10 @@ int main(int argc, char *argv[])
     std::cout << "Total time (ns): " << stats.system.time.count() << "\n";
     std::cout << "Energy harvested (J): " << stats.system.energy_harvested * 1e-9 << "\n";
     std::cout << "Energy remaining (J): " << stats.system.energy_remaining * 1e-9 << "\n";
-
+    std::cout << "Number of Backups: "  << numberOfBackups << "\n";
+    std::cout << "Number of Restores: " << numberOfRestores << "\n";
+    std::cout << "Buffer overflow violations: " << bufferOverflowViolations << "\n";
+    std::cout << "Buffer write violations: " << bufferWriteViolations << "\n";
     std::string output_file_name(scheme_select + ".csv");
     if(options["output"].count() > 0) {
       output_file_name = options["output"].as<std::string>();

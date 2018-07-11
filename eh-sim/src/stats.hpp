@@ -4,6 +4,13 @@
 #include <chrono>
 #include <deque>
 
+extern int numberOfBackups;
+extern int numberOfRestores;
+extern int bufferWriteViolations;
+extern int bufferOverflowViolations;
+
+
+
 namespace ehsim {
 struct cpu_stats {
   /**
