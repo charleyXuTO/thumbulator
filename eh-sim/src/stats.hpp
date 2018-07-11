@@ -35,6 +35,9 @@ struct system_stats {
    */
   double energy_harvested = 0.0;
 
+  double total_energy_restore = 0.0;
+
+  double total_energy_backup = 0.0;
   /**
    * Remaining energy in battery.
    */

@@ -34,7 +34,7 @@ public:
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
       , MAX_BACKUP_ENERGY(CLANK_BACKUP_ARCH_ENERGY)
-      , progress_watchdog(WATCHDOG_PERIOD)
+      , performance_watchdog(WATCHDOG_PERIOD)
   {
     assert(READFIRST_ENTRIES >= 1);
     assert(WRITEFIRST_ENTRIES >= 0);
@@ -66,7 +66,7 @@ public:
     auto const elapsed_cycles = stats->cpu.cycle_count - last_tick;
     last_tick = stats->cpu.cycle_count;
 
-    progress_watchdog -= elapsed_cycles;
+    performance_watchdog -= elapsed_cycles;
 
     // clank's instruction energy is in Energy-per-Cycle
     auto const instruction_energy = CLANK_INSTRUCTION_ENERGY * elapsed_cycles;
@@ -91,7 +91,7 @@ public:
       return false;
     }
 
-    if(progress_watchdog <= 0) {
+    if(performance_watchdog <= 0) {
       return true;
     }
 
@@ -110,7 +110,7 @@ public:
     architectural_state = thumbulator::cpu;
 
     // reset the watchdog
-    progress_watchdog = WATCHDOG_PERIOD;
+    performance_watchdog = WATCHDOG_PERIOD;
     // clear idempotency-tracking buffers
     clear_buffers();
     // the backup has resolved the idempotancy violation and/or exception
@@ -118,13 +118,13 @@ public:
     numberOfBackups++;
     active_stats.energy_for_backups += CLANK_BACKUP_ARCH_ENERGY;
     battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
-
+    stats->system.total_energy_backup += CLANK_BACKUP_ARCH_ENERGY;
     return CLANK_BACKUP_ARCH_TIME;
   }
 
   uint64_t restore(stats_bundle *stats) override
   {
-    progress_watchdog = WATCHDOG_PERIOD;
+    performance_watchdog = WATCHDOG_PERIOD;
     last_backup_cycle = stats->cpu.cycle_count;
 
     // restore saved architectural state
@@ -133,6 +133,7 @@ public:
 
     stats->models.back().energy_for_restore = CLANK_RESTORE_ENERGY;
     battery.consume_energy(CLANK_RESTORE_ENERGY);
+    stats ->system.total_energy_restore +=CLANK_RESTORE_ENERGY;
     numberOfRestores++;
     // assume memory access latency for reads and writes is the same
     return CLANK_BACKUP_ARCH_TIME;
@@ -158,7 +159,7 @@ private:
   size_t const WRITEFIRST_ENTRIES;
   double const MAX_BACKUP_ENERGY;
 
-  int progress_watchdog;
+  int performance_watchdog;
   bool idempotent_violation = false;
 
   std::set<uint32_t> readfirst_buffer;

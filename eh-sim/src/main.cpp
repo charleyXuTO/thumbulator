@@ -107,7 +107,9 @@ int main(int argc, char *argv[])
     std::cout << "Energy harvested (J): " << stats.system.energy_harvested * 1e-9 << "\n";
     std::cout << "Energy remaining (J): " << stats.system.energy_remaining * 1e-9 << "\n";
     std::cout << "Number of Backups: "  << numberOfBackups << "\n";
+    std::cout << "Energy on Backups (J): " << stats.system.total_energy_backup *1e-9 << "\n";
     std::cout << "Number of Restores: " << numberOfRestores << "\n";
+    std::cout << "Energy on Restores (J): " << stats.system.total_energy_restore *1e-9 << "\n";
     std::cout << "Buffer overflow violations: " << bufferOverflowViolations << "\n";
     std::cout << "Buffer write violations: " << bufferWriteViolations << "\n";
     std::string output_file_name(scheme_select + ".csv");
