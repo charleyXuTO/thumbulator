@@ -88,6 +88,8 @@ constexpr auto PARAMETRIC_OMEGA_B = CLANK_OMEGA_B;
 constexpr auto PARAMETRIC_A_R = 80; // 20 32-bit registers
 constexpr auto PARAMETRIC_SIGMA_R = CLANK_SIGMA_R;
 constexpr auto PARAMETRIC_OMEGA_R = CLANK_OMEGA_R;
+int PROGRESS_CHECK;
+int PROGRESS_DIVIDER;
 }
 
 #endif //EH_SIM_DATA_SHEET_ENERGY_HPP

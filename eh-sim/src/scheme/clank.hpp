@@ -35,6 +35,9 @@ public:
       , WRITEFIRST_ENTRIES(wf_entries)
       , MAX_BACKUP_ENERGY(CLANK_BACKUP_ARCH_ENERGY)
       , performance_watchdog(WATCHDOG_PERIOD)
+      , progress_watchdog(WATCHDOG_PERIOD)
+      , progress_check(PROGRESS_CHECK)
+      , progress_divider(PROGRESS_DIVIDER)
   {
     assert(READFIRST_ENTRIES >= 1);
     assert(WRITEFIRST_ENTRIES >= 0);
@@ -67,7 +70,9 @@ public:
     last_tick = stats->cpu.cycle_count;
 
     performance_watchdog -= elapsed_cycles;
-
+    if (progress_check == 1) {
+      progress_watchdog -= elapsed_cycles;
+    }
     // clank's instruction energy is in Energy-per-Cycle
     auto const instruction_energy = CLANK_INSTRUCTION_ENERGY * elapsed_cycles;
     battery.consume_energy(instruction_energy);
@@ -90,7 +95,9 @@ public:
     if(battery.energy_stored() < MAX_BACKUP_ENERGY) {
       return false;
     }
-
+    if (progress_watchdog <= 0 ) {
+      return true;
+    }
     if(performance_watchdog <= 0) {
       return true;
     }
@@ -119,12 +126,24 @@ public:
     active_stats.energy_for_backups += CLANK_BACKUP_ARCH_ENERGY;
     battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
     stats->system.total_energy_backup += CLANK_BACKUP_ARCH_ENERGY;
+    backup_check = 0; //disabling the progress watchdog
     return CLANK_BACKUP_ARCH_TIME;
   }
 
   uint64_t restore(stats_bundle *stats) override
   {
     performance_watchdog = WATCHDOG_PERIOD;
+    if (backup_check == 0) { // resetting and disabling progress watchdog
+      progress_check = 0;
+      progress_divider = 1;
+      progress_watchdog = WATCHDOG_PERIOD;
+    }
+    else { //enabling and decreasing progress watchdog
+      progress_check = 1;
+      progress_divider = progress_divider*2;
+      progress_watchdog = WATCHDOG_PERIOD/progress_divider;
+    }
+    backup_check = 1;
     last_backup_cycle = stats->cpu.cycle_count;
 
     // restore saved architectural state
@@ -160,8 +179,11 @@ private:
   double const MAX_BACKUP_ENERGY;
 
   int performance_watchdog;
+  int progress_watchdog;
   bool idempotent_violation = false;
-
+  int progress_check;
+  int progress_divider;
+  int backup_check;
   std::set<uint32_t> readfirst_buffer;
   std::set<uint32_t> writefirst_buffer;
 
