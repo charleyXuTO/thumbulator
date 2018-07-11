@@ -33,6 +33,7 @@ public:
       , WATCHDOG_PERIOD(watchdog_period)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
+      , WRITEBACK_ENTIRES(rf_entries)
       , MAX_BACKUP_ENERGY(CLANK_BACKUP_ARCH_ENERGY)
       , performance_watchdog(WATCHDOG_PERIOD)
       , progress_watchdog(WATCHDOG_PERIOD)
@@ -127,6 +128,7 @@ public:
     battery.consume_energy(CLANK_BACKUP_ARCH_ENERGY);
     stats->system.total_energy_backup += CLANK_BACKUP_ARCH_ENERGY;
     backup_check = 0; //disabling the progress watchdog
+    progress_check  =0;
     return CLANK_BACKUP_ARCH_TIME;
   }
 
@@ -176,8 +178,10 @@ private:
   int const WATCHDOG_PERIOD;
   size_t const READFIRST_ENTRIES;
   size_t const WRITEFIRST_ENTRIES;
-  double const MAX_BACKUP_ENERGY;
+  size_t const WRITEBACK_ENTIRES;
 
+
+  double const MAX_BACKUP_ENERGY;
   int performance_watchdog;
   int progress_watchdog;
   bool idempotent_violation = false;
@@ -186,13 +190,14 @@ private:
   int backup_check;
   std::set<uint32_t> readfirst_buffer;
   std::set<uint32_t> writefirst_buffer;
-
+  std::set<uint32_t> writeback_buffer;
   enum class operation { read, write };
 
   void clear_buffers()
   {
     readfirst_buffer.clear();
     writefirst_buffer.clear();
+    writeback_buffer.clear();
   }
 
   void power_on()
@@ -246,8 +251,13 @@ private:
       }
     } else if(op == operation::write && readfirst_hit) {
       // idempotent violation - write to read-dominated address
-      idempotent_violation = true;
-      bufferWriteViolations++;
+        bool was_added = false;
+        was_added = try_insert(&writeback_buffer, address, WRITEBACK_ENTIRES);
+        if (!was_added) {
+            idempotent_violation = true;
+            bufferWriteViolations++;
+        }
+
     }
   }
 
