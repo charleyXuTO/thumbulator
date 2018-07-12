@@ -185,6 +185,7 @@ private:
   int performance_watchdog;
   int progress_watchdog;
   bool idempotent_violation = false;
+  int next_write;
   int progress_check;
   int progress_divider;
   int backup_check;
@@ -235,7 +236,12 @@ private:
 
     auto const writeback_it = writeback_buffer.find(address);
     auto const writeback_hit = writeback_it != writeback_buffer.end();
-    if(!readfirst_hit && !writefirst_hit) {
+
+    if (op==operation::write && next_write == 1) { // delay checkpoint until next write
+        idempotent_violation = true;
+        next_write = 0;
+    }
+    else if(!readfirst_hit && !writefirst_hit) {
       // the memory access is in neither buffer
 
       // add the memory access to the appropriate buffer
@@ -249,10 +255,11 @@ private:
         was_added = try_insert(&writefirst_buffer, address, WRITEFIRST_ENTRIES);
       }
 
-      if(!was_added && op == operation::read) {
-        // idempotent violation - a buffer was full
-        idempotent_violation = true;
-        bufferOverflowViolations++;
+      if(!was_added && op == operation::read) { //only if the read buffer is full
+        // idempotent violation - read buffer was full
+        //idempotent_violation = true;
+          next_write = 1; //delay checkpoint until next write so ignore all read overflows
+          bufferOverflowViolations++;
       }
     } else if(op == operation::write && readfirst_hit) {
       // idempotent violation - write to read-dominated address
@@ -263,6 +270,7 @@ private:
             bufferWriteViolations++;
         }
         readfirst_buffer.erase(address); //erasing old read address
+
     }
   }
 
