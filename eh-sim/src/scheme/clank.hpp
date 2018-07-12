@@ -255,11 +255,12 @@ private:
         address_prefix_buffer[ap_counter] = ap_address;
         buffer_address = buffer_address+ (ap_counter+1)*10000;
         ap_counter++;
+        ap_buffer_check = true;
     }
     else if (!ap_buffer_check && ap_counter >3) {
         idempotent_violation = true; //address pre-buffer overflow
     }
-
+    if (ap_buffer_check = true) {
     auto const readfirst_it = readfirst_buffer.find(buffer_address);
     auto const readfirst_hit = readfirst_it != readfirst_buffer.end();
 
@@ -303,6 +304,7 @@ private:
         }
         readfirst_buffer.erase(buffer_address); //erasing old read address
 
+    }
     }
   }
 
