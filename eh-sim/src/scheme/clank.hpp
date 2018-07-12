@@ -233,18 +233,23 @@ private:
     auto const writefirst_it = writefirst_buffer.find(address);
     auto const writefirst_hit = writefirst_it != writefirst_buffer.end();
 
+    auto const writeback_it = writeback_buffer.find(address);
+    auto const writeback_hit = writeback_it != writeback_buffer.end();
     if(!readfirst_hit && !writefirst_hit) {
       // the memory access is in neither buffer
 
       // add the memory access to the appropriate buffer
       bool was_added = false;
-      if(op == operation::read) {
+      if (op == operation::read && writeback_hit) { //if the address is already contained in the writeback_buffer
+          was_added = true;
+      }
+      else if(op == operation::read) {
         was_added = try_insert(&readfirst_buffer, address, READFIRST_ENTRIES);
       } else if(op == operation::write) {
         was_added = try_insert(&writefirst_buffer, address, WRITEFIRST_ENTRIES);
       }
 
-      if(!was_added) {
+      if(!was_added && op == operation::read) {
         // idempotent violation - a buffer was full
         idempotent_violation = true;
         bufferOverflowViolations++;
@@ -257,7 +262,7 @@ private:
             idempotent_violation = true;
             bufferWriteViolations++;
         }
-
+        readfirst_buffer.erase(address); //erasing old read address
     }
   }
 
