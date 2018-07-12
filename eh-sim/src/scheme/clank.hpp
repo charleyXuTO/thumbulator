@@ -24,16 +24,17 @@ public:
   /**
    * Construct a default clank configuration.
    */
-  clank() : clank(8, 8, 8000)
+  clank() : clank(68, 8, 4, 8000)
   {
   }
 
-  clank(size_t rf_entries, size_t wf_entries, int watchdog_period)
+  clank(size_t rf_entries, size_t wf_entries, size_t ap_entries,int watchdog_period)
       : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE, MEMENTOS_MAX_CURRENT)
       , WATCHDOG_PERIOD(watchdog_period)
       , READFIRST_ENTRIES(rf_entries)
       , WRITEFIRST_ENTRIES(wf_entries)
-      , WRITEBACK_ENTIRES(rf_entries)
+      , WRITEBACK_ENTIRES(wf_entries)
+      , ADDRESS_PREFIX_ENTRIES(ap_entries)
       , MAX_BACKUP_ENERGY(CLANK_BACKUP_ARCH_ENERGY)
       , performance_watchdog(WATCHDOG_PERIOD)
       , progress_watchdog(WATCHDOG_PERIOD)
@@ -179,7 +180,7 @@ private:
   size_t const READFIRST_ENTRIES;
   size_t const WRITEFIRST_ENTRIES;
   size_t const WRITEBACK_ENTIRES;
-
+  size_t const ADDRESS_PREFIX_ENTRIES;
 
   double const MAX_BACKUP_ENERGY;
   int performance_watchdog;
@@ -189,9 +190,14 @@ private:
   int progress_check;
   int progress_divider;
   int backup_check;
+  int ap_counter;
   std::set<uint32_t> readfirst_buffer;
   std::set<uint32_t> writefirst_buffer;
   std::set<uint32_t> writeback_buffer;
+  int address_prefix_buffer[4];
+
+
+
   enum class operation { read, write };
 
   void clear_buffers()
@@ -199,6 +205,10 @@ private:
     readfirst_buffer.clear();
     writefirst_buffer.clear();
     writeback_buffer.clear();
+    for (int i = 0 ; i<4; i++) {
+        address_prefix_buffer[i] = 0;
+    }
+    ap_counter = 0; //reset counter
   }
 
   void power_on()
@@ -228,13 +238,35 @@ private:
    */
   void detect_violation(uint32_t address, operation op, uint32_t old_value, uint32_t value)
   {
-    auto const readfirst_it = readfirst_buffer.find(address);
+    int ap_address = (address-(address%1000))/1000; //creating 24 bit address for buffer
+    int buffer_address = address%1000; //simple 4 bit info for actual buffers
+
+    //auto const ap_it = address_prefix_buffer.find(ap_address);
+    //auto const ap_hit = ap_it != address_prefix_buffer.end();
+    bool ap_buffer_check = false;
+    for (int i = 0; i<ap_counter; i++ ) {
+        if (address_prefix_buffer[i] == ap_address) { //checking for existing 24 bit address
+            ap_buffer_check = true;
+            buffer_address= buffer_address + (i+1)*10000;
+            break;
+        }
+    }
+    if (!ap_buffer_check && ap_counter <=3) { //adding new 24 bit address
+        address_prefix_buffer[ap_counter] = ap_address;
+        buffer_address = buffer_address+ (ap_counter+1)*10000;
+        ap_counter++;
+    }
+    else if (!ap_buffer_check && ap_counter >3) {
+        idempotent_violation = true; //address pre-buffer overflow
+    }
+
+    auto const readfirst_it = readfirst_buffer.find(buffer_address);
     auto const readfirst_hit = readfirst_it != readfirst_buffer.end();
 
-    auto const writefirst_it = writefirst_buffer.find(address);
+    auto const writefirst_it = writefirst_buffer.find(buffer_address);
     auto const writefirst_hit = writefirst_it != writefirst_buffer.end();
 
-    auto const writeback_it = writeback_buffer.find(address);
+    auto const writeback_it = writeback_buffer.find(buffer_address);
     auto const writeback_hit = writeback_it != writeback_buffer.end();
 
     if (op==operation::write && next_write == 1) { // delay checkpoint until next write
@@ -250,12 +282,12 @@ private:
           was_added = true;
       }
       else if(op == operation::read) {
-        was_added = try_insert(&readfirst_buffer, address, READFIRST_ENTRIES);
+        was_added = try_insert(&readfirst_buffer, buffer_address, READFIRST_ENTRIES);
       } else if(op == operation::write) {
-        was_added = try_insert(&writefirst_buffer, address, WRITEFIRST_ENTRIES);
+        was_added = try_insert(&writefirst_buffer, buffer_address, WRITEFIRST_ENTRIES);
       }
 
-      if(!was_added && op == operation::read) { //only if the read buffer is full
+      if(!was_added && op == operation::read && next_write!=1) { //only if the read buffer is full
         // idempotent violation - read buffer was full
         //idempotent_violation = true;
           next_write = 1; //delay checkpoint until next write so ignore all read overflows
@@ -264,12 +296,12 @@ private:
     } else if(op == operation::write && readfirst_hit) {
       // idempotent violation - write to read-dominated address
         bool was_added = false;
-        was_added = try_insert(&writeback_buffer, address, WRITEBACK_ENTIRES);
+        was_added = try_insert(&writeback_buffer, buffer_address, WRITEBACK_ENTIRES);
         if (!was_added) {
             idempotent_violation = true;
             bufferWriteViolations++;
         }
-        readfirst_buffer.erase(address); //erasing old read address
+        readfirst_buffer.erase(buffer_address); //erasing old read address
 
     }
   }
