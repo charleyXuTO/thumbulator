@@ -296,7 +296,12 @@ private:
       if(!was_added && op == operation::read && next_write!=1) { //only if the read buffer is full
         // idempotent violation - read buffer was full
         //idempotent_violation = true;
+        if (lc_clank_selected == true) {
           next_write = 1; //delay checkpoint until next write so ignore all read overflows
+        }
+        else {
+          idempotent_violation = true;
+        }
           bufferOverflowViolations++;
       }
     } else if(op == operation::write && readfirst_hit) {

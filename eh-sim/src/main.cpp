@@ -19,6 +19,7 @@ int read_buffer_size;
 int numberOfRestores;
 bool apb_clank_selected;
 bool rde_clank_selected;
+bool lc_clank_selected;
 void print_usage(std::ostream &stream, argagg::parser const &arguments)
 {
   argagg::fmt_ostream help(stream);
@@ -68,7 +69,8 @@ int main(int argc, char *argv[])
       {"binary", {"-b", "--binary"}, "path to application binary", 1},
       {"output", {"-o", "--output"}, "output file", 1},
       {"address-pre-buffer", {"--apb"}, "address pre buffer for clank optimization (Y/N)", 1},
-      {"remove-duplicating-entries", {"--rde"}, "remove duplicating entries for clank optimization (Y/N)",1}}};
+      {"remove-duplicating-entries", {"--rde"}, "remove duplicating entries for clank optimization (Y/N)",1},
+      {"latest-checkpoint", {"--lc"}, "latest checkpoint for clank optimization (Y/N)",1}}};
 
   try {
     auto const options = arguments.parse(argc, argv);
@@ -96,6 +98,10 @@ int main(int argc, char *argv[])
     } else if(scheme_select == "clank") {
       auto const apb_select = options["address-pre-buffer"].as<std::string>("N");
       auto const rde_select = options["remove-duplicating-entries"].as<std::string>("N");
+      auto const lc_select = options["latest-checkpoint"].as<std::string>("N");
+
+
+      lc_clank_selected = false;
       rde_clank_selected = false;
       apb_clank_selected = false;
       read_buffer_size = 8;
@@ -108,6 +114,9 @@ int main(int argc, char *argv[])
         rde_clank_selected = true;
       }
 
+      if (lc_select == "Y") {
+        lc_clank_selected = true;
+      }
 
 
       scheme = std::make_unique<ehsim::clank>();

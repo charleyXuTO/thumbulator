@@ -11,6 +11,7 @@ extern int bufferOverflowViolations;
 extern bool apb_clank_selected;
 extern int read_buffer_size;
 extern bool rde_clank_selected;
+extern bool lc_clank_selected;
 
 namespace ehsim {
 struct cpu_stats {
