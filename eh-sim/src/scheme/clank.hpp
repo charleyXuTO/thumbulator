@@ -259,8 +259,9 @@ private:
     }
     else if (!ap_buffer_check && ap_counter >3) {
         idempotent_violation = true; //address pre-buffer overflow
+        bufferOverflowViolations++;
     }
-    if (ap_buffer_check = true) {
+    if (ap_buffer_check == true) {
     auto const readfirst_it = readfirst_buffer.find(buffer_address);
     auto const readfirst_hit = readfirst_it != readfirst_buffer.end();
 
