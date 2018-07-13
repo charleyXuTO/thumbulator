@@ -282,14 +282,14 @@ private:
 
       // add the memory access to the appropriate buffer
       bool was_added = false;
-//      if (rde_clank_selected) {
+      if (rde_clank_selected) {
         if (op == operation::read && writeback_hit) { //if the address is already contained in the writeback_buffer
           was_added = true;
         }
-   //   }
-      else if(op == operation::read) {
+      }
+      if(op == operation::read && was_added == false) {
         was_added = try_insert(&readfirst_buffer, buffer_address, READFIRST_ENTRIES);
-      } else if(op == operation::write) {
+      } else if(op == operation::write && was_added == false) {
         was_added = try_insert(&writefirst_buffer, buffer_address, WRITEFIRST_ENTRIES);
       }
 
@@ -307,9 +307,9 @@ private:
             idempotent_violation = true;
             bufferWriteViolations++;
         }
-       // if (rde_clank_selected) {
+        if (rde_clank_selected) {
           readfirst_buffer.erase(buffer_address); //erasing old read address
-        //}
+        }
     }
     }
   }

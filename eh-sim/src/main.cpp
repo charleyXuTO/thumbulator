@@ -18,6 +18,7 @@ int numberOfBackups;
 int read_buffer_size;
 int numberOfRestores;
 bool apb_clank_selected;
+bool rde_clank_selected;
 void print_usage(std::ostream &stream, argagg::parser const &arguments)
 {
   argagg::fmt_ostream help(stream);
@@ -66,7 +67,8 @@ int main(int argc, char *argv[])
       {"tau_B", {"--tau-b"}, "the backup period for the parametric scheme", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1},
       {"output", {"-o", "--output"}, "output file", 1},
-      {"address-pre-buffer", {"--apb"}, "address pre buffer for clank optimization (Y/N)", 1}}};
+      {"address-pre-buffer", {"--apb"}, "address pre buffer for clank optimization (Y/N)", 1},
+      {"remove-duplicating-entries", {"--rde"}, "remove duplicating entries for clank optimization (Y/N)",1}}};
 
   try {
     auto const options = arguments.parse(argc, argv);
@@ -93,12 +95,19 @@ int main(int argc, char *argv[])
       throw std::runtime_error("Magic is no longer supported.");
     } else if(scheme_select == "clank") {
       auto const apb_select = options["address-pre-buffer"].as<std::string>("N");
+      auto const rde_select = options["remove-duplicating-entries"].as<std::string>("N");
+      rde_clank_selected = false;
       apb_clank_selected = false;
       read_buffer_size = 8;
       if (apb_select == "Y") {
          apb_clank_selected = true;
          read_buffer_size = 68;
       }
+
+      if (rde_select == "Y") {
+        rde_clank_selected = true;
+      }
+
 
 
       scheme = std::make_unique<ehsim::clank>();
