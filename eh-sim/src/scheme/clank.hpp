@@ -24,7 +24,8 @@ public:
   /**
    * Construct a default clank configuration.
    */
-  clank() : clank(68, 8, 4, 8000)
+
+  clank() : clank(read_buffer_size, 8, 4, 8000)
   {
   }
 
@@ -196,8 +197,6 @@ private:
   std::set<uint32_t> writeback_buffer;
   int address_prefix_buffer[4];
 
-
-
   enum class operation { read, write };
 
   void clear_buffers()
@@ -238,28 +237,31 @@ private:
    */
   void detect_violation(uint32_t address, operation op, uint32_t old_value, uint32_t value)
   {
-    int ap_address = (address-(address%1000))/1000; //creating 24 bit address for buffer
-    int buffer_address = address%1000; //simple 4 bit info for actual buffers
 
-    //auto const ap_it = address_prefix_buffer.find(ap_address);
-    //auto const ap_hit = ap_it != address_prefix_buffer.end();
-    bool ap_buffer_check = false;
-    for (int i = 0; i<ap_counter; i++ ) {
-        if (address_prefix_buffer[i] == ap_address) { //checking for existing 24 bit address
-            ap_buffer_check = true;
-            buffer_address= buffer_address + (i+1)*10000;
-            break;
+    int buffer_address = address;
+    bool ap_buffer_check = true;
+    if (apb_clank_selected) {
+        int ap_address = (address - (address % 1000)) / 1000; //creating 24 bit address for buffer
+        buffer_address = address % 1000; //simple 4 bit info for actual buffers
+        //auto const ap_it = address_prefix_buffer.find(ap_address);
+        //auto const ap_hit = ap_it != address_prefix_buffer.end();
+        ap_buffer_check = false;
+        for (int i = 0; i < ap_counter; i++) {
+            if (address_prefix_buffer[i] == ap_address) { //checking for existing 24 bit address
+                ap_buffer_check = true;
+                buffer_address = buffer_address + (i + 1) * 10000;
+                break;
+            }
         }
-    }
-    if (!ap_buffer_check && ap_counter <=3) { //adding new 24 bit address
-        address_prefix_buffer[ap_counter] = ap_address;
-        buffer_address = buffer_address+ (ap_counter+1)*10000;
-        ap_counter++;
-        ap_buffer_check = true;
-    }
-    else if (!ap_buffer_check && ap_counter >3) {
-        idempotent_violation = true; //address pre-buffer overflow
-        bufferOverflowViolations++;
+        if (!ap_buffer_check && ap_counter <= 3) { //adding new 24 bit address
+            address_prefix_buffer[ap_counter] = ap_address;
+            buffer_address = buffer_address + (ap_counter + 1) * 10000;
+            ap_counter++;
+            ap_buffer_check = true;
+        } else if (!ap_buffer_check && ap_counter > 3) {
+            idempotent_violation = true; //address pre-buffer overflow
+            bufferOverflowViolations++;
+        }
     }
     if (ap_buffer_check == true) {
     auto const readfirst_it = readfirst_buffer.find(buffer_address);
@@ -280,9 +282,11 @@ private:
 
       // add the memory access to the appropriate buffer
       bool was_added = false;
-      if (op == operation::read && writeback_hit) { //if the address is already contained in the writeback_buffer
+//      if (rde_clank_selected) {
+        if (op == operation::read && writeback_hit) { //if the address is already contained in the writeback_buffer
           was_added = true;
-      }
+        }
+   //   }
       else if(op == operation::read) {
         was_added = try_insert(&readfirst_buffer, buffer_address, READFIRST_ENTRIES);
       } else if(op == operation::write) {
@@ -303,8 +307,9 @@ private:
             idempotent_violation = true;
             bufferWriteViolations++;
         }
-        readfirst_buffer.erase(buffer_address); //erasing old read address
-
+       // if (rde_clank_selected) {
+          readfirst_buffer.erase(buffer_address); //erasing old read address
+        //}
     }
     }
   }

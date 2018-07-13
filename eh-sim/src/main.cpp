@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
-
+#include <string>
 #include "scheme/backup_every_cycle.hpp"
 #include "scheme/clank.hpp"
 #include "scheme/parametric.hpp"
@@ -15,7 +15,9 @@
 int bufferOverflowViolations;
 int bufferWriteViolations;
 int numberOfBackups;
+int read_buffer_size;
 int numberOfRestores;
+bool apb_clank_selected;
 void print_usage(std::ostream &stream, argagg::parser const &arguments)
 {
   argagg::fmt_ostream help(stream);
@@ -63,7 +65,8 @@ int main(int argc, char *argv[])
       {"scheme", {"--scheme"}, "the checkpointing scheme to use", 1},
       {"tau_B", {"--tau-b"}, "the backup period for the parametric scheme", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1},
-      {"output", {"-o", "--output"}, "output file", 1}}};
+      {"output", {"-o", "--output"}, "output file", 1},
+      {"address-pre-buffer", {"--apb"}, "address pre buffer for clank optimization (Y/N)", 1}}};
 
   try {
     auto const options = arguments.parse(argc, argv);
@@ -89,6 +92,15 @@ int main(int argc, char *argv[])
     } else if(scheme_select == "magic") {
       throw std::runtime_error("Magic is no longer supported.");
     } else if(scheme_select == "clank") {
+      auto const apb_select = options["address-pre-buffer"].as<std::string>("N");
+      apb_clank_selected = false;
+      read_buffer_size = 8;
+      if (apb_select == "Y") {
+         apb_clank_selected = true;
+         read_buffer_size = 68;
+      }
+
+
       scheme = std::make_unique<ehsim::clank>();
     } else if(scheme_select == "parametric") {
       auto const tau_b = options["tau_B"].as<int>(1000);
