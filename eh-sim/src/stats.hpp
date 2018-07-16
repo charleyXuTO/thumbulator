@@ -14,6 +14,7 @@ extern bool rde_clank_selected;
 extern bool lc_clank_selected;
 extern bool nwfo_clank_selected;
 extern bool wbb_clank_selected;
+
 namespace ehsim {
 struct cpu_stats {
   /**
@@ -21,6 +22,11 @@ struct cpu_stats {
    */
   uint64_t instruction_count = 0u;
 
+  uint64_t dead_instruction_count = 0u;
+
+  uint64_t dead_instruction = 0u;
+
+  int program_counter = 0;
   /**
    * Number of cycles ticked.
    */

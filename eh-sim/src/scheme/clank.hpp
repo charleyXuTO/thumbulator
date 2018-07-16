@@ -7,7 +7,7 @@
 #include "stats.hpp"
 
 #include <thumbulator/memory.hpp>
-
+#include <thumbulator/cpu.hpp>
 #include <set>
 #include <unordered_map>
 #include <thumbulator/cpu.hpp>
@@ -118,7 +118,7 @@ public:
 
     // save architectural state
     architectural_state = thumbulator::cpu;
-
+    stats->cpu.program_counter = thumbulator::cpu_get_pc();
     // reset the watchdog
     performance_watchdog = WATCHDOG_PERIOD;
     // clear idempotency-tracking buffers
@@ -131,6 +131,8 @@ public:
     stats->system.total_energy_backup += CLANK_BACKUP_ARCH_ENERGY;
     backup_check = 0; //disabling the progress watchdog
     progress_check  =0;
+    stats->cpu.dead_instruction = 0;
+    test_instructions = stats->cpu.instruction_count;
     return CLANK_BACKUP_ARCH_TIME;
   }
 
@@ -153,11 +155,18 @@ public:
     // restore saved architectural state
     thumbulator::cpu_reset();
     thumbulator::cpu = architectural_state;
-
+    if (stats->cpu.instruction_count-test_instructions != stats->cpu.dead_instruction) {
+        printf("wrong");
+    }
+    if (thumbulator::cpu_get_pc() !=stats->cpu.program_counter) {
+        printf("wrong");
+    }
     stats->models.back().energy_for_restore = CLANK_RESTORE_ENERGY;
     battery.consume_energy(CLANK_RESTORE_ENERGY);
     stats ->system.total_energy_restore +=CLANK_RESTORE_ENERGY;
     numberOfRestores++;
+    stats->cpu.dead_instruction_count= stats->cpu.dead_instruction_count + stats->cpu.dead_instruction;
+    stats->cpu.dead_instruction = 0;
     // assume memory access latency for reads and writes is the same
     return CLANK_BACKUP_ARCH_TIME;
   }
@@ -192,6 +201,8 @@ private:
   int progress_divider;
   int backup_check;
   int ap_counter;
+
+  int test_instructions;
   std::set<uint32_t> readfirst_buffer;
   std::set<uint32_t> writefirst_buffer;
   std::set<uint32_t> writeback_buffer;
@@ -315,8 +326,6 @@ private:
           bufferOverflowViolations++;
         }
       }
-
-
     } else if(op == operation::write && readfirst_hit) {
       // idempotent violation - write to read-dominated address
         if (wbb_clank_selected == true) {
@@ -330,7 +339,6 @@ private:
                 readfirst_buffer.erase(buffer_address); //erasing old read address
             }
         }
-
         else {
             idempotent_violation = true;
             bufferWriteViolations++;

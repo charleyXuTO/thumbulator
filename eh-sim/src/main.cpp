@@ -152,6 +152,7 @@ int main(int argc, char *argv[])
     std::cout << "Energy on Restores (J): " << stats.system.total_energy_restore *1e-9 << "\n";
     std::cout << "Buffer overflow violations: " << bufferOverflowViolations << "\n";
     std::cout << "Buffer write violations: " << bufferWriteViolations << "\n";
+    std::cout << "Dead instructions: " << stats.cpu.dead_instruction_count << "\n";
     std::string output_file_name(scheme_select + ".csv");
     if(options["output"].count() > 0) {
       output_file_name = options["output"].as<std::string>();
