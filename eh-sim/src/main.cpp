@@ -21,6 +21,7 @@ bool apb_clank_selected;
 bool rde_clank_selected;
 bool lc_clank_selected;
 bool nwfo_clank_selected;
+bool wbb_clank_selected;
 void print_usage(std::ostream &stream, argagg::parser const &arguments)
 {
   argagg::fmt_ostream help(stream);
@@ -72,7 +73,8 @@ int main(int argc, char *argv[])
       {"address-pre-buffer", {"--apb"}, "address pre buffer for clank optimization (Y/N)", 1},
       {"remove-duplicating-entries", {"--rde"}, "remove duplicating entries for clank optimization (Y/N)",1},
       {"latest-checkpoint", {"--lc"}, "latest checkpoint for clank optimization (Y/N)",1},
-      {"no-write-first-overflow" ,{"--nwfo"}, "no write-first overflow for clank optimization (Y/N)", 1}}};
+      {"no-write-first-overflow" ,{"--nwfo"}, "no write-first overflow for clank optimization (Y/N)", 1},
+      {"write-back-buffer" , {"--wbb"}, "write back buffer for clank optimization (Y/N)", 1}}};
 
   try {
     auto const options = arguments.parse(argc, argv);
@@ -102,11 +104,12 @@ int main(int argc, char *argv[])
       auto const rde_select = options["remove-duplicating-entries"].as<std::string>("N");
       auto const lc_select = options["latest-checkpoint"].as<std::string>("N");
       auto const nwfo_select = options["no-write-first-overflow"].as<std::string>("N");
-
+      auto const wbb_select = options["write-back-buffer"].as<std::string>("N");
       lc_clank_selected = false;
       rde_clank_selected = false;
       apb_clank_selected = false;
       nwfo_clank_selected = false;
+      wbb_clank_selected = false;
       read_buffer_size = 8;
       if (apb_select == "Y") {
          apb_clank_selected = true;
@@ -121,6 +124,10 @@ int main(int argc, char *argv[])
       if (nwfo_select == "Y") {
         nwfo_clank_selected = true;
       }
+      if (wbb_select == "Y") {
+          wbb_clank_selected = true;
+      }
+
 
       scheme = std::make_unique<ehsim::clank>();
     } else if(scheme_select == "parametric") {

@@ -319,15 +319,23 @@ private:
 
     } else if(op == operation::write && readfirst_hit) {
       // idempotent violation - write to read-dominated address
-        bool was_added = false;
-        was_added = try_insert(&writeback_buffer, buffer_address, WRITEBACK_ENTIRES);
-        if (!was_added) {
+        if (wbb_clank_selected == true) {
+            bool was_added = false;
+            was_added = try_insert(&writeback_buffer, buffer_address, WRITEBACK_ENTIRES);
+            if (!was_added) {
+                idempotent_violation = true;
+                bufferWriteViolations++;
+            }
+            else if (rde_clank_selected) {
+                readfirst_buffer.erase(buffer_address); //erasing old read address
+            }
+        }
+
+        else {
             idempotent_violation = true;
             bufferWriteViolations++;
         }
-        if (rde_clank_selected) {
-          readfirst_buffer.erase(buffer_address); //erasing old read address
-        }
+
     }
     }
   }
