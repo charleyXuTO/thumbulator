@@ -118,6 +118,8 @@ public:
 
     // save architectural state
     architectural_state = thumbulator::cpu;
+    //save SRAM variables
+    std::copy(std::begin(thumbulator::RAM), std::end(thumbulator::RAM), std::begin(backup_RAM));
     stats->cpu.program_counter = thumbulator::cpu_get_pc();
     // reset the watchdog
     performance_watchdog = WATCHDOG_PERIOD;
@@ -155,12 +157,17 @@ public:
     // restore saved architectural state
     thumbulator::cpu_reset();
     thumbulator::cpu = architectural_state;
+    //restore SRAM variables from last backup
+    std::copy(std::begin(backup_RAM), std::end(backup_RAM), std::begin(thumbulator::RAM));
+    /*
     if (stats->cpu.instruction_count-test_instructions != stats->cpu.dead_instruction) {
         printf("wrong");
     }
+    
     if (thumbulator::cpu_get_pc() !=stats->cpu.program_counter) {
         printf("wrong");
     }
+     */
     stats->models.back().energy_for_restore = CLANK_RESTORE_ENERGY;
     battery.consume_energy(CLANK_RESTORE_ENERGY);
     stats ->system.total_energy_restore +=CLANK_RESTORE_ENERGY;
@@ -184,6 +191,7 @@ private:
   uint64_t last_tick = 0u;
 
   thumbulator::cpu_state architectural_state{};
+  uint32_t backup_RAM[RAM_SIZE_BYTES >> 2];
   bool active = false;
 
   int const WATCHDOG_PERIOD;
