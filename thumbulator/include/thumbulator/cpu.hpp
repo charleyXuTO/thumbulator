@@ -7,7 +7,8 @@
 
 namespace thumbulator {
 
-constexpr auto CPU_FREQ = 24000000; //TODO
+// TODO: what to use here??
+constexpr auto CPU_FREQ = 1000000; // use 1 MHz default for MSP430AFE253 for now
 
 /**
  * The state of an MSP430 CPU.
@@ -30,6 +31,7 @@ struct cpu_state {
    */
   //uint32_t ipsr;
 
+  // TODO: figure out interrupt, interrupt vectors??
   /**
    * Exception program status register.
    *
@@ -110,35 +112,35 @@ extern cpu_state cpu;
 #define cpu_set_cg2(x) cpu_set_gpr(GPR_CG2, (x))
 
 
-//TODO: what is this?!?!?
-struct system_tick {
-  uint32_t control;
-  uint32_t reload;
-  uint32_t value;
-  uint32_t calib;
-};
-
-extern system_tick SYSTICK;
+//TODO: what is this?!?!? system timer?!?!
+//struct system_tick {
+//  uint32_t control;
+//  uint32_t reload;
+//  uint32_t value;
+//  uint32_t calib;
+//};
+//
+//extern system_tick SYSTICK;
 
 /**
  * Cycles taken for branch instructions.
  */
-#define TIMING_BRANCH 2
+//#define TIMING_BRANCH 2
 
 /**
  * Cycles taken for the branch with link instruction.
  */
-#define TIMING_BRANCH_LINK 3
+//#define TIMING_BRANCH_LINK 3
 
 /**
  * Cycles taken for instructions that update the program counter.
  */
-#define TIMING_PC_UPDATE 2
+//#define TIMING_PC_UPDATE 2
 
 /**
  * Cycles taken for memory instructions.
  */
-#define TIMING_MEM 2
+//#define TIMING_MEM 2
 
 /**
  * Perform the execute, mem, and write-back stages.

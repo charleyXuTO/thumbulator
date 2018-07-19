@@ -15,13 +15,13 @@ add_library(
   src/decode.cpp
   src/exit.hpp
   src/cpu.cpp
-  src/exmemwb_arith.cpp
+  src/exmemwb_double.cpp
+  src/exmemwb_single.cpp
   src/exmemwb_branch.cpp
-  src/exmemwb_logic.cpp
-  src/exmemwb_mem.cpp
-  src/exmemwb_misc.cpp
   src/memory.cpp
   src/trace.hpp
+  src/utils.hpp
+  src/utils.cpp
 )
 
 target_include_directories(

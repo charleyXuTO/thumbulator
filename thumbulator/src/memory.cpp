@@ -7,16 +7,18 @@
 
 namespace thumbulator {
 
-uint32_t RAM[RAM_SIZE_BYTES >> 2];
+uint16_t RESET_VECTOR;
 
-std::function<uint32_t(uint32_t, uint32_t)> ram_load_hook;
-std::function<uint32_t(uint32_t, uint32_t, uint32_t)> ram_store_hook;
+uint16_t RAM[RAM_SIZE_BYTES >> 1];
 
-uint32_t FLASH_MEMORY[FLASH_SIZE_BYTES >> 2];
+std::function<uint16_t(uint32_t, uint16_t)> ram_load_hook;
+std::function<uint16_t(uint32_t, uint16_t, uint16_t)> ram_store_hook;
 
-uint32_t ram_load(uint32_t address, bool false_read)
+uint16_t FLASH_MEMORY[FLASH_SIZE_BYTES >> 1];
+
+uint16_t ram_load(uint32_t address, bool false_read)
 {
-  auto data = RAM[(address & RAM_ADDRESS_MASK) >> 2];
+  auto data = RAM[(address & RAM_ADDRESS_MASK) >> 1];
 
   if(!false_read && ram_load_hook != nullptr) {
     data = ram_load_hook(address, data);
@@ -25,7 +27,7 @@ uint32_t ram_load(uint32_t address, bool false_read)
   return data;
 }
 
-void ram_store(uint32_t address, uint32_t value)
+void ram_store(uint32_t address, uint16_t value)
 {
   if(ram_store_hook != nullptr) {
     auto const old_value = ram_load(address, true);
@@ -33,114 +35,95 @@ void ram_store(uint32_t address, uint32_t value)
     value = ram_store_hook(address, old_value, value);
   }
 
-  RAM[(address & RAM_ADDRESS_MASK) >> 2] = value;
+  RAM[(address & RAM_ADDRESS_MASK) >> 1] = value;
 }
 
+//TODO: is the below true for MSP430??
 // Memory access functions assume that RAM has a higher address than Flash
 void fetch_instruction(uint32_t address, uint16_t *value)
 {
-  uint32_t fromMem;
+  uint16_t fromMem;
+  uint32_t idx;
 
-  if(address >= RAM_START) {
-    if(address >= (RAM_START + RAM_SIZE_BYTES)) {
+  if(address >= FLASH_START) {
+    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
       fprintf(
+        stderr, "Error: ILF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+      terminate_simulation(1);
+    }
+
+    idx = FLASH_ADDRESS_MASK(address);
+    fromMem = FLASH_MEMORY[idx];
+  }
+  else{
+    if(address >= RAM_START) {
+      if(address >= (RAM_START + RAM_SIZE_BYTES)) {
+        fprintf(
           stderr, "Error: ILR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      terminate_simulation(1);
-    }
+        terminate_simulation(1);
+      }
 
-    fromMem = ram_load(address, false);
-  } else {
-    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
-      fprintf(
-          stderr, "Error: ILF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      terminate_simulation(1);
+      fromMem = ram_load(address, false);
     }
-
-    fromMem = FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 2];
   }
 
-  // Data 32-bits, but instruction 16-bits
-  *value = ((address & 0x2) != 0) ? (uint16_t)(fromMem >> 16) : (uint16_t)fromMem;
+  *value = fromMem;
+
 }
 
-void load(uint32_t address, uint32_t *value, uint32_t false_read)
+void load(uint32_t address, uint16_t *value, uint16_t false_read)
 {
-  if(address >= RAM_START) {
-    if(address >= (RAM_START + RAM_SIZE_BYTES)) {
-      // Check for UART
-      if(address == 0xE0000000) {
-        *value = 0;
+  //TODO: support byte level load
+  if(address >= FLASH_START) {
+    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
+      if(address == RESET_VECTOR_START) {
+        *value = RESET_VECTOR;
         return;
       }
-
-      // Check for SYSTICK
-      if((address >> 4) == 0xE000E01) {
-        assert(0 & "SYSTICK?!?!");
-        *value = ((uint32_t *)&SYSTICK)[(address >> 2) & 0x3];
-        if(address == 0xE000E010)
-          SYSTICK.control &= 0x00010000;
-
-        return;
-      }
-
       fprintf(
+        stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+      terminate_simulation(1);
+    }
+
+    //*value = FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 1];
+    *value = FLASH_MEMORY[FLASH_ADDRESS_MASK(address)];
+  }
+  else{
+    if(address >= RAM_START) {
+      if(address >= (RAM_START + RAM_SIZE_BYTES)) {
+        fprintf(
           stderr, "Error: DLR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      terminate_simulation(1);
-    }
+        terminate_simulation(1);
+      }
 
-    *value = ram_load(address, false_read == 1);
-  } else {
-    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
-      fprintf(
-          stderr, "Error: DLF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      terminate_simulation(1);
+      *value = ram_load(address, false_read == 1);
     }
-
-    *value = FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 2];
   }
 }
 
-void store(uint32_t address, uint32_t value)
+void store(uint32_t address, uint16_t value)
+  //TODO: support byte level store
 {
-  if(address >= RAM_START) {
+  if(address >= FLASH_START) {
+    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
+      if(address == RESET_VECTOR_START) {
+        RESET_VECTOR = value;
+        return;
+      }
+      fprintf(
+        stderr, "Error: DSF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+      terminate_simulation(1);
+    }
+
+    FLASH_MEMORY[FLASH_ADDRESS_MASK(address)] = value;
+  } else {
     if(address >= (RAM_START + RAM_SIZE_BYTES)) {
-      // Check for UART
-      if(address == 0xE0000000) {
-        return;
-      }
-
-      // Check for SYSTICK
-      if((address >> 4) == 0xE000E01 && address != 0xE000E01C) {
-        if(address == 0xE000E010) {
-          SYSTICK.control = (value & 0x1FFFD) | 0x4; // No external tick source, no interrupt
-
-          if(value & 0x2) {
-            fprintf(stderr, "Warning: SYSTICK interrupts not implemented, ignoring\n");
-          }
-        } else if(address == 0xE000E014) {
-          SYSTICK.reload = value & 0xFFFFFF;
-        } else if(address == 0xE000E018) {
-          // Reads clears current value
-          SYSTICK.value = 0;
-        }
-
-        return;
-      }
-
       fprintf(
           stderr, "Error: DSR Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
       terminate_simulation(1);
     }
 
     ram_store(address, value);
-  } else {
-    if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
-      fprintf(
-          stderr, "Error: DSF Memory access out of range: 0x%8.8X, pc=%x\n", address, cpu_get_pc());
-      terminate_simulation(1);
-    }
-
-    FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 2] = value;
   }
 }
 }

@@ -5,34 +5,31 @@
 
 namespace thumbulator {
 
-
-
 /**
  * Enums for instruction type
- * TODO: decide whether to use rel or abs
  */
 enum DoubleOpInsn {
-  MOV = 0x4,
-  ADD = 0x5,
-  ADDC = 0x6,
-  SUBC = 0x7,
-  SUB = 0x8,
-  CMP = 0x9,
-  DADD = 0xA,
-  BIT = 0xB,
-  BIC = 0xC,
-  BIS = 0xD,
-  XOR = 0xE,
-  AND = 0xF
+  MOV  = 0x4000,
+  ADD  = 0x5000,
+  ADDC = 0x6000,
+  SUBC = 0x7000,
+  SUB  = 0x8000,
+  CMP  = 0x9000,
+  DADD = 0xA000,
+  BIT  = 0xB000,
+  BIC  = 0xC000,
+  BIS  = 0xD000,
+  XOR  = 0xE000,
+  AND  = 0xF000
 };
-enum SingleOpInsn { // rel
-  RRC  = 0x1000,    // 0x020,
-  SWPB = 0x1080,    // 0x021,
-  RRA  = 0x1100,    // 0x022,
-  SXT  = 0x1180,    // 0x023,
-  PUSH = 0x1200,    // 0x024,
-  CALL = 0x1280,    // 0x025,
-  RETI = 0x1300     // 0x026
+enum SingleOpInsn {
+  RRC  = 0x1000,
+  SWPB = 0x1080,
+  RRA  = 0x1100,
+  SXT  = 0x1180,
+  PUSH = 0x1200,
+  CALL = 0x1280,
+  RETI = 0x1300
 };
 enum JumpInsn {
   JNE = 0x2000,
@@ -61,14 +58,21 @@ struct decode_result {
    */
   uint8_t Rs;
 
-
+  // addressing modes
   uint8_t As;
   uint8_t Ad;
+
+  // immediate or offset
   uint16_t srcWord;
   uint16_t dstWord;
+
+  // distinguish between word and byte instructions
   bool isByte;
+  bool isAddrWord;
+
   uint16_t opcode;
-  uint16_t offset;
+  int16_t offset;
+
 
 };
 

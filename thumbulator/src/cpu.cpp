@@ -20,103 +20,46 @@ void cpu_reset()
   memset(cpu.gpr, 0, sizeof(cpu.gpr));
 
   // For MSP430, user sets SP at beginning of their program
-  ////load(0, &cpu.sp_main, 0);
-  ////cpu.sp_main &= 0xFFFFFFFC;
-  ////cpu.sp_process = 0;
-  ////cpu_set_sp(cpu.sp_main);
 
-  //// Set the program counter to the address of the reset exception vector
-  //uint32_t startAddr;
-  //load(0x4, &startAddr, 0);
-  //cpu_set_pc(startAddr);
-
-  //// No pending exceptions
-  //cpu.exceptmask = 0;
-
-  //// Check for attempts to go to ARM mode
-  //if((cpu_get_pc() & 0x1) == 0) {
-  //  printf("Error: Reset PC to an ARM address 0x%08X\n", cpu_get_pc());
-  //  terminate_simulation(1);
-  //}
-
-  //TODO: what is this?!?! change it to match MSP430???
-  // Reset the SYSTICK unit
-  SYSTICK.control = 0x4;
-  SYSTICK.reload = 0x0;
-  SYSTICK.value = 0x0;
-  SYSTICK.calib = CPU_FREQ / 100 | 0x80000000;
+  // Set the program counter to the address at the reset vector location (0FFFEh).
+  uint16_t startAddr;
+  // TODO: any other way to do this??
+  //RESET_VECTOR = FLASH_MEMORY[12]; // observed from hexdump
+  load(0xFFFE, &startAddr, 0);
+  cpu_set_pc(startAddr);
 }
 
 cpu_state cpu;
-system_tick SYSTICK;
 
-uint32_t adcs(decode_result const *);
-uint32_t adds_i3(decode_result const *);
-uint32_t adds_i8(decode_result const *);
-uint32_t adds_r(decode_result const *);
-uint32_t add_r(decode_result const *);
-uint32_t add_sp(decode_result const *);
-uint32_t adr(decode_result const *);
-uint32_t subs_i3(decode_result const *);
-uint32_t subs_i8(decode_result const *);
-uint32_t subs(decode_result const *);
-uint32_t sub_sp(decode_result const *);
-uint32_t sbcs(decode_result const *);
-uint32_t rsbs(decode_result const *);
-uint32_t muls(decode_result const *);
-uint32_t cmn(decode_result const *);
-uint32_t cmp_i(decode_result const *);
-uint32_t cmp_r(decode_result const *);
-uint32_t tst(decode_result const *);
-uint32_t b(decode_result const *);
-uint32_t b_c(decode_result const *);
-uint32_t blx(decode_result const *);
-uint32_t bx(decode_result const *);
-uint32_t bl(decode_result const *);
-uint32_t ands(decode_result const *);
-uint32_t bics(decode_result const *);
-uint32_t eors(decode_result const *);
-uint32_t orrs(decode_result const *);
-uint32_t mvns(decode_result const *);
-uint32_t asrs_i(decode_result const *);
-uint32_t asrs_r(decode_result const *);
-uint32_t lsls_i(decode_result const *);
-uint32_t lsrs_i(decode_result const *);
-uint32_t lsls_r(decode_result const *);
-uint32_t lsrs_r(decode_result const *);
-uint32_t rors(decode_result const *);
-uint32_t ldm(decode_result const *);
-uint32_t stm(decode_result const *);
-uint32_t pop(decode_result const *);
+uint32_t mov(decode_result const *);
+uint32_t add(decode_result const *);
+uint32_t addc(decode_result const *);
+uint32_t subc(decode_result const *);
+uint32_t sub(decode_result const *);
+uint32_t cmp(decode_result const *);
+uint32_t dadd(decode_result const *);
+uint32_t bit(decode_result const *);
+uint32_t bic(decode_result const *);
+uint32_t bis(decode_result const *);
+uint32_t xorOp(decode_result const *);
+uint32_t andOp(decode_result const *);
+
+uint32_t rrc(decode_result const *);
+uint32_t swpb(decode_result const *);
+uint32_t rra(decode_result const *);
+uint32_t sxt(decode_result const *);
 uint32_t push(decode_result const *);
-uint32_t ldr_i(decode_result const *);
-uint32_t ldr_sp(decode_result const *);
-uint32_t ldr_lit(decode_result const *);
-uint32_t ldr_r(decode_result const *);
-uint32_t ldrb_i(decode_result const *);
-uint32_t ldrb_r(decode_result const *);
-uint32_t ldrh_i(decode_result const *);
-uint32_t ldrh_r(decode_result const *);
-uint32_t ldrsb_r(decode_result const *);
-uint32_t ldrsh_r(decode_result const *);
-uint32_t str_i(decode_result const *);
-uint32_t str_sp(decode_result const *);
-uint32_t str_r(decode_result const *);
-uint32_t strb_i(decode_result const *);
-uint32_t strb_r(decode_result const *);
-uint32_t strh_i(decode_result const *);
-uint32_t strh_r(decode_result const *);
-uint32_t movs_i(decode_result const *);
-uint32_t mov_r(decode_result const *);
-uint32_t movs_r(decode_result const *);
-uint32_t sxtb(decode_result const *);
-uint32_t sxth(decode_result const *);
-uint32_t uxtb(decode_result const *);
-uint32_t uxth(decode_result const *);
-uint32_t rev(decode_result const *);
-uint32_t rev16(decode_result const *);
-uint32_t revsh(decode_result const *);
-uint32_t breakpoint(decode_result const *);
+uint32_t call(decode_result const *);
+uint32_t reti(decode_result const *);
+
+uint32_t jne(decode_result const *);
+uint32_t jeq(decode_result const *);
+uint32_t jnc(decode_result const *);
+uint32_t jc(decode_result const *);
+uint32_t jn(decode_result const *);
+uint32_t jge(decode_result const *);
+uint32_t jl(decode_result const *);
+uint32_t jmp(decode_result const *);
 
 uint32_t exmemwb_error(decode_result const *decoded)
 {
@@ -132,168 +75,118 @@ uint32_t exmemwb_exit_simulation(decode_result const *decoded)
   return 0;
 }
 
-// Execute functions that require more opcode bits than the first 6
-uint32_t (*executeJumpTable6[2])(decode_result const *) = {
-    adds_r, /* 060 - 067 */
-    subs    /* 068 - 06F */
+uint32_t (*executeJumpTableSingleOp[8])(decode_result const *) = {
+    rrc,
+    swpb,
+    rra,
+    sxt,
+    push,
+    call,
+    reti,
+    exmemwb_error
 };
 
-uint32_t entry6(decode_result const *decoded)
+uint32_t singleOpEntry(decode_result const *decoded)
 {
-  return executeJumpTable6[(insn >> 9) & 0x1](decoded);
+  return executeJumpTableSingleOp[(insn >> 7) & 0x7](decoded);
 }
 
-uint32_t (*executeJumpTable7[2])(decode_result const *) = {
-    adds_i3, /* (070 - 077) */
-    subs_i3  /* (078 - 07F) */
+uint32_t (*executeJumpTableJumpOp[8])(decode_result const *) = {
+    jne,
+    jeq,
+    jnc,
+    jc,
+    jn,
+    jge,
+    jl,
+    jmp
 };
 
-uint32_t entry7(decode_result const *decoded)
+uint32_t jumpEntry(decode_result const *decoded)
 {
-  return executeJumpTable7[(insn >> 9) & 0x1](decoded);
+  return executeJumpTableJumpOp[(insn >> 10) & 0x7](decoded);
 }
 
-uint32_t (*executeJumpTable16[16])(decode_result const *) = {ands, eors, lsls_r, lsrs_r, asrs_r,
-    adcs, sbcs, rors, tst, rsbs, cmp_r, exmemwb_error, orrs, muls, bics, mvns};
-
-uint32_t entry16(decode_result const *decoded)
-{
-  return executeJumpTable16[(insn >> 6) & 0xF](decoded);
-}
-
-uint32_t (*executeJumpTable17[8])(decode_result const *) = {
-    add_r,        /* (110 - 113) */
-    add_r, cmp_r, /* (114 - 117) */
-    cmp_r, mov_r, /* (118 - 11B) */
-    mov_r, bx,    /* (11C - 11D) */
-    blx           /* (11E - 11F) */
+uint32_t (*executeJumpTable[16])(decode_result const *) = {
+    exmemwb_error,
+    singleOpEntry,
+    jumpEntry,
+    jumpEntry,
+    mov,
+    add,
+    addc,
+    subc,
+    sub,
+    cmp,
+    dadd,
+    bit,
+    bic,
+    bis,
+    xorOp,
+    andOp
 };
-
-uint32_t entry17(decode_result const *decoded)
-{
-  return executeJumpTable17[(insn >> 7) & 0x7](decoded);
-}
-
-uint32_t (*executeJumpTable20[2])(decode_result const *) = {
-    str_r, /* (140 - 147) */
-    strh_r /* (148 - 14F) */
-};
-
-uint32_t entry20(decode_result const *decoded)
-{
-  return executeJumpTable20[(insn >> 9) & 0x1](decoded);
-}
-
-uint32_t (*executeJumpTable21[2])(decode_result const *) = {
-    strb_r, /* (150 - 157) */
-    ldrsb_r /* (158 - 15F) */
-};
-
-uint32_t entry21(decode_result const *decoded)
-{
-  return executeJumpTable21[(insn >> 9) & 0x1](decoded);
-}
-
-uint32_t (*executeJumpTable22[2])(decode_result const *) = {
-    ldr_r, /* (160 - 167) */
-    ldrh_r /* (168 - 16F) */
-};
-
-uint32_t entry22(decode_result const *decoded)
-{
-  return executeJumpTable22[(insn >> 9) & 0x1](decoded);
-}
-
-uint32_t (*executeJumpTable23[2])(decode_result const *) = {
-    ldrb_r, /* (170 - 177) */
-    ldrsh_r /* (178 - 17F) */
-};
-
-uint32_t entry23(decode_result const *decoded)
-{
-  return executeJumpTable23[(insn >> 9) & 0x1](decoded);
-}
-
-uint32_t (*executeJumpTable44[16])(decode_result const *) = {add_sp, /* (2C0 - 2C1) */
-    add_sp, sub_sp,                                                  /* (2C2 - 2C3) */
-    sub_sp, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, sxth, sxtb, uxth, uxtb,
-    exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error};
-
-uint32_t entry44(decode_result const *decoded)
-{
-  return executeJumpTable44[(insn >> 6) & 0xF](decoded);
-}
-
-uint32_t (*executeJumpTable46[16])(decode_result const *) = {exmemwb_error, exmemwb_error,
-    exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, rev,
-    rev16, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error, exmemwb_error,
-    exmemwb_error};
-
-uint32_t entry46(decode_result const *decoded)
-{
-  return executeJumpTable46[(insn >> 6) & 0xF](decoded);
-}
-
-uint32_t (*executeJumpTable47[2])(decode_result const *) = {
-    pop,       /* (2F0 - 2F7) */
-    breakpoint /* (2F8 - 2FB) */
-};
-
-uint32_t entry47(decode_result const *decoded)
-{
-  return executeJumpTable47[(insn >> 9) & 0x1](decoded);
-}
-
-uint32_t entry55(decode_result const *decoded)
-{
-  if((insn & 0x0300) != 0x0300) {
-    return b_c(decoded);
-  }
-
-  if(insn == 0xDF01) {
-    return exmemwb_exit_simulation(decoded);
-  }
-
-  return exmemwb_error(decoded);
-}
-
-uint32_t (*executeJumpTable[64])(decode_result const *) = {lsls_i, lsls_i, lsrs_i, lsrs_i, asrs_i,
-    asrs_i, entry6,                                                            /* 6 */
-    entry7,                                                                    /* 7 */
-    movs_i, movs_i, cmp_i, cmp_i, adds_i8, adds_i8, subs_i8, subs_i8, entry16, /* 16 */
-    entry17,                                                                   /* 17 */
-    ldr_lit, ldr_lit, entry20,                                                 /* 20 */
-    entry21,                                                                   /* 21 */
-    entry22,                                                                   /* 22 */
-    entry23,                                                                   /* 23 */
-    str_i, str_i, ldr_i, ldr_i, strb_i, strb_i, ldrb_i, ldrb_i, strh_i, strh_i, ldrh_i, ldrh_i,
-    str_sp, str_sp, ldr_sp, ldr_sp, adr, adr, add_sp, add_sp, entry44, /* 44 */
-    push, entry46,                                                     /* 46 */
-    entry47,                                                           /* 47 */
-    stm, stm, ldm, ldm, b_c, b_c, b_c, entry55,                        /* 55 */
-    b, b, exmemwb_error, exmemwb_error, bl,                            /* 60 ignore mrs */
-    bl,                                                                /* 61 ignore udef */
-    exmemwb_error, exmemwb_error};
 
 uint32_t exmemwb(uint16_t instruction, decode_result const *decoded)
 {
   insn = instruction;
-
-  uint32_t insnTicks = executeJumpTable[instruction >> 10](decoded);
-
-  // Update the SYSTICK unit and look for resets
-  if(SYSTICK.control & 0x1) {
-    assert(0 & "SYSTICK 2?!?!?!");
-    if(insnTicks >= SYSTICK.value) {
-      // Ignore resets due to reads
-      if(SYSTICK.value > 0)
-        SYSTICK.control |= 0x00010000;
-
-      SYSTICK.value = SYSTICK.reload - insnTicks + SYSTICK.value;
-    } else
-      SYSTICK.value -= insnTicks;
+#if 1
+  uint32_t insnTicks = executeJumpTable[instruction >> 12](decoded);
+#else
+  uint32_t insnTicks = 0;
+  if(decoded.opcode > 0x3000) { // double operand
+    DoubleOpInsn op = decoded.opcode;
+    switch(op){
+      case MOV:  insnTicks = mov(decoded); break;
+      case ADD:  insnTicks = add(decoded); break;
+      case ADDC: insnTicks = addc(decoded); break;
+      case SUBC: insnTicks = subc(decoded); break;
+      case SUB:  insnTicks = sub(decoded); break;
+      case CMP:  insnTicks = cmp(decoded); break;
+      case DADD: insnTicks = dadd(decoded); break;
+      case BIT:  insnTicks = bit(decoded); break;
+      case BIC:  insnTicks = bic(decoded); break;
+      case BIS:  insnTicks = bis(decoded); break;
+      case XOR:  insnTicks = xorOp(decoded); break;
+      case AND:  insnTicks = andOp(decoded); break;
+      default:
+        assert(0 && "unknown double operand instruction!");
+    }
   }
+  else if ((insn>>12) == 0x1) { // single operand
+    SingleOpInsn op = decoded.opcode;
+    switch(op){
+      case RRC:  insnTicks = rrc(decoded); break;
+      case SWPB: insnTicks = swpb(decoded); break;
+      case RRA:  insnTicks = rra(decoded); break;
+      case SXT:  insnTicks = sxt(decoded); break;
+      case PUSH: insnTicks = push(decoded); break;
+      case CALL: insnTicks = call(decoded); break;
+      case RETI: insnTicks = reti(decoded); break;
+      default:
+        assert(0 && "unknown single operand instruction!");
+    }
+  }
+  else if ((insn>>12) > 0x1) { // jump
+    JumpInsn op = decoded.opcode;
+    switch(op){
+      case JNE: insnTicks = jne(decoded); break;
+      case JEQ: insnTicks = jeq(decoded); break;
+      case JNC: insnTicks = jnc(decoded); break;
+      case JC:  insnTicks = jc(decoded); break;
+      case JN:  insnTicks = jn(decoded); break;
+      case JGE: insnTicks = jge(decoded); break;
+      case JL:  insnTicks = jl(decoded); break;
+      case JMP: insnTicks = jmp(decoded); break;
+      default:
+        assert(0 && "unknown jump instruction!");
+    }
+  }
+  else {
+      assert(0 && "unknown instruction?");
+  }
+#endif
 
   return insnTicks;
 }
+
 }

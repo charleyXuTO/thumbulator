@@ -20,8 +20,35 @@ void load_program(char const *file_name)
     throw std::runtime_error("Could not open binary file.\n");
   }
 
+#ifdef ARM
   std::fread(&thumbulator::FLASH_MEMORY, sizeof(uint16_t),
       sizeof(thumbulator::FLASH_MEMORY) / sizeof(uint16_t), fd);
+#else
+  // [1] read in content of reset vector
+  std::fseek(fd, 0x18, SEEK_SET);
+  std::fread(&(thumbulator::RESET_VECTOR), sizeof(uint16_t), 1, fd);
+
+  // [2] find beginning of .data section in binary
+  uint16_t dataStart;
+  std::fseek(fd, 0x78, SEEK_SET);
+  std::fread(&dataStart, sizeof(uint16_t), 1, fd);
+  uint32_t textSizeBytes = dataStart - 0xD4;
+
+  // [3] read in .rodata and .text
+  // .rodata always starts from 0xC000, followed by .text, followed by .data
+  uint32_t offsetBytes = 0xC000 - FLASH_START;
+  uint32_t readSizeBytes = std::min(textSizeBytes, (FLASH_SIZE_BYTES - offsetBytes));
+
+  std::fseek(fd, 0xD4, SEEK_SET);
+  uint32_t idx = (offsetBytes >> 1);
+  std::fread(&(thumbulator::FLASH_MEMORY[idx]), sizeof(uint16_t),
+      readSizeBytes>>1, fd);
+
+  // [4] read in content of RAM
+  std::fseek(fd, 0x98, SEEK_SET);
+  std::fread(&(thumbulator::RAM), sizeof(uint16_t), RAM_SIZE_ELEMENTS, fd);
+
+#endif
   std::fclose(fd);
 }
 
@@ -48,7 +75,7 @@ uint32_t step_cpu()
 {
   thumbulator::BRANCH_WAS_TAKEN = false;
 
-  if((thumbulator::cpu_get_pc() & 0x1) == 0) {
+  if((thumbulator::cpu_get_pc() & 0x1) == 1) {
     printf("Address need to be word (16-bits) aligned!! Current PC: 0x%08X\n",
            thumbulator::cpu.gpr[0]);
     throw std::runtime_error("PC not aligned to 16-bits.");
@@ -56,7 +83,7 @@ uint32_t step_cpu()
 
   // fetch
   uint16_t instruction;
-  thumbulator::fetch_instruction(thumbulator::cpu_get_pc() - 0x4, &instruction);
+  thumbulator::fetch_instruction(thumbulator::cpu_get_pc() - 0x2, &instruction);
   // decode
   auto const decoded = thumbulator::decode(instruction);
   // execute, memory, and write-back
@@ -66,7 +93,7 @@ uint32_t step_cpu()
   if(!thumbulator::BRANCH_WAS_TAKEN) {
     thumbulator::cpu_set_pc(thumbulator::cpu_get_pc() + 0x2);
   } else {
-    thumbulator::cpu_set_pc(thumbulator::cpu_get_pc() + 0x4);
+    thumbulator::cpu_set_pc(thumbulator::cpu_get_pc() + 0x4); //TODO: why 4??
   }
 
   return instruction_ticks;

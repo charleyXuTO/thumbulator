@@ -8,7 +8,7 @@
 
 namespace thumbulator {
 
-bool isIndirectAutoIncrement(uint16_t As, uint16_t Rsrc) {
+bool isIndirectAutoIncrement(uint8_t As, uint8_t Rsrc) {
   // indirect autoincrement uses @Rn+, immediate uses @PC+ (both As==3)
   return (As==0x3 && (Rsrc!=GPR_PC));
 }
@@ -34,6 +34,7 @@ decode_result decode_double(const uint16_t pInsn)
   uint8_t As = (pInsn >> 4) & 0x3;
   uint8_t Ad = (pInsn >> 7) & 0x1;
   bool isByte = (pInsn & 0x40)==1;
+  bool isAddrWord = false;
   uint16_t srcWord = 0;
   uint16_t dstWord = 0;
 
@@ -41,15 +42,15 @@ decode_result decode_double(const uint16_t pInsn)
   if(As & 0x1) { // indexed, symbolic, absolute, indirect autoincrement, immediate
     // indirect autoincrement doesn't need next word
     if(!isIndirectAutoIncrement(As, Rsrc)) {
+        fetch_instruction(cpu_get_pc(), &srcWord);
         cpu_set_pc(cpu_get_pc() + 0x2);
-        fetch_instruction(cpu_get_pc() - 0x2, &srcWord);
     }
   }
 
   // [2] fetch any extra word needed for dst
   if (Ad==0x1) { // indexed, symbolic, absolute
+    fetch_instruction(cpu_get_pc(), &dstWord);
     cpu_set_pc(cpu_get_pc() + 0x2);
-    fetch_instruction(cpu_get_pc() - 0x2, &dstWord);
   }
 
   // [3] set decode structure
@@ -58,6 +59,8 @@ decode_result decode_double(const uint16_t pInsn)
   decoded.Rs = Rsrc;
   decoded.As = As;
   decoded.Ad = Ad;
+  decoded.isByte = isByte;
+  decoded.isAddrWord = isAddrWord;
   decoded.srcWord = srcWord;
   decoded.dstWord = dstWord;
 
@@ -79,15 +82,16 @@ decode_result decode_single(const uint16_t pInsn)
   uint16_t opcode = (pInsn & 0xFF80);
   uint8_t Rdst = pInsn & 0xF;
   uint8_t Ad = (pInsn >> 4) & 0x3;
-  bool isByte = (pInsn & 0x40)==1;
+  bool isByte = (pInsn & 0x40)==0x40;
+  bool isAddrWord = false;
   uint16_t dstWord = 0;
 
   // [1] fetch any extra word needed (indexed, symbolic, absolute, immediate)
   if(Ad & 0x1) { // indexed, symbolic, absolute, indirect autoincrement, immediate
     // indirect autoincrement doesn't need next word
     if(!isIndirectAutoIncrement(Ad, Rdst)) {
+        fetch_instruction(cpu_get_pc(), &dstWord);
         cpu_set_pc(cpu_get_pc() + 0x2);
-        fetch_instruction(cpu_get_pc() - 0x2, &dstWord);
     }
   }
 
@@ -95,6 +99,8 @@ decode_result decode_single(const uint16_t pInsn)
   decoded.opcode = opcode;
   decoded.Rd = Rdst;
   decoded.Ad = Ad;
+  decoded.isByte = isByte;
+  decoded.isAddrWord = isAddrWord;
   decoded.dstWord = dstWord;
 
   return decoded;
@@ -105,14 +111,16 @@ decode_result decode_single(const uint16_t pInsn)
 // |---------------------------------------|
 // | opcode | Cond  | S | signed PC offset |
 // |---------------------------------------|
-decode_result decode_double(const uint16_t pInsn)
+decode_result decode_jump(const uint16_t pInsn)
 {
   decode_result decoded;
 
   uint16_t opcode = (pInsn & 0xFC00);
-  uint16_t offset = (pInsn & 0x03FF);
+  int16_t offset = (pInsn & 0x03FF);
+  bool isNeg = (pInsn & 0x200);
+
   decoded.opcode = opcode;
-  decoded.offset = offset;
+  decoded.offset = (isNeg)?(0xFC00 | offset):(offset); // sign-extend
 
   return decoded;
 }
@@ -127,8 +135,6 @@ decode_result decode_error(const uint16_t pInsn)
 
 // Use a table of function pointers indexed by the instruction
 // to make decoding fast
-// Indices 16, 17, 44, 47, 60, and 62 have multiple conflicting
-// decodings that need to be resolved outside the jump table
 decode_result (*decodeJumpTable[16])(const uint16_t pInsn) = {
   decode_error,     // 0
   decode_single,    // 1
