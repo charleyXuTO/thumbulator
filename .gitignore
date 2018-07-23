@@ -39,3 +39,20 @@ cmake-build*
 
 # Data files
 *.csv
+
+# Cmake files
+../CMakeCache.txt
+../CMakeFiles/
+../Makefile
+../cmake_install.cmake
+../external/CMakeFiles/
+../external/Makefile
+../external/argagg/CMakeFiles/
+../external/argagg/Makefile
+../external/argagg/cmake_install.cmake
+../external/cmake_install.cmake
+../thumbulator/CMakeFiles/
+../thumbulator/Makefile
+../thumbulator/cmake_install.cmake
+
+

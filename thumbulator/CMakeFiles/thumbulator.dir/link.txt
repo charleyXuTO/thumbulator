@@ -1,0 +1,2 @@
+/usr/bin/ar qc libthumbulator.a  CMakeFiles/thumbulator.dir/src/decode.cpp.o CMakeFiles/thumbulator.dir/src/cpu.cpp.o CMakeFiles/thumbulator.dir/src/exmemwb_arith.cpp.o CMakeFiles/thumbulator.dir/src/exmemwb_branch.cpp.o CMakeFiles/thumbulator.dir/src/exmemwb_logic.cpp.o CMakeFiles/thumbulator.dir/src/exmemwb_mem.cpp.o CMakeFiles/thumbulator.dir/src/exmemwb_misc.cpp.o CMakeFiles/thumbulator.dir/src/memory.cpp.o
+/usr/bin/ranlib libthumbulator.a
