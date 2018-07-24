@@ -32,11 +32,19 @@ namespace thumbulator {
 #define cpu_set_flag_c(x) cpu_set_sr((((x)&0x1) << FLAG_C_INDEX) | (cpu_get_sr() & ~FLAG_C_MASK))
 #define cpu_set_flag_v(x) cpu_set_sr((((x)&0x1) << FLAG_V_INDEX) | (cpu_get_sr() & ~FLAG_V_MASK))
 
-#define do_zflag(x) cpu_set_flag_z(((x) == 0) ? 1 : 0)
+#define do_zflag(x) cpu_set_flag_z(((x) == 0) ? 1 : 0)  //TODO adjust for 20 bit results for flags
 #define do_nflag(x) cpu_set_flag_n((x) >> 15)
 #define do_vflag(a, b, r) \
   cpu_set_flag_v(         \
       (((a) >> 15) & ((b) >> 15) & ~((r) >> 15)) | (~((a) >> 15) & ~((b) >> 15) & ((r) >> 15)))
+
+#define do_zflagx(x) cpu_set_flag_z(((x) == 0) ? 1 : 0) // for 20 bit instructions
+#define do_nflagx(x) cpu_set_flag_n((x) >> 19)
+#define do_vflagx(a, b, r) \
+  cpu_set_flag_v(          \
+    (((a) >> 19) & ((b) >> 19) & ~ ((r) >> 19)) | (~((a) >> 19) & ~((b) >> 19) & ((r) >> 19)))
+
+
 
 static void do_cflag(uint16_t a, uint16_t b, uint16_t carry)
 {
@@ -45,6 +53,15 @@ static void do_cflag(uint16_t a, uint16_t b, uint16_t carry)
   result = (a & 0x7FFF) + (b & 0x7FFF) + carry; //carry in
   result = (result >> 15) + (a >> 15) + (b >> 15);      //carry out
   cpu_set_flag_c(result >> 1);
+}
+
+static void do_cflagx(uint32_t a, uint32_t b, uint32_t carry) // for 20 bit instructions
+{
+    uint32_t result;
+
+    result = (a & 0x7FFFF) + (b & 0x7FFFF) + carry;
+    result = (result >> 19) + (a >> 19) + (b >> 19);
+    cpu_set_flag_c(result >> 1);
 }
 
 // TODO: do we need this??

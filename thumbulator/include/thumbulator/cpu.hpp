@@ -17,8 +17,8 @@ struct cpu_state {
   /**
    * General-purpose register including PC, SP, SR, and GC.
    */
-  uint32_t gpr[16];
-
+  uint32_t gpr[16]; // general purpose register should be 20 bit in size
+  // PC 20 bits, SP 20 bits, SR 16 bits
   /**
    * Application program status register.
    */

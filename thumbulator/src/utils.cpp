@@ -43,7 +43,7 @@ AddrMode getAddrMode(uint8_t addrMode, uint8_t reg) {
   return mode;
 }
 
-uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint16_t nextWord) {
+uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) {
   uint32_t retVal = 0;
   AddrMode mode = getAddrMode(addrMode, reg);
   switch(mode) {
@@ -91,8 +91,8 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint16_t nextWord) 
   return retVal;
 }
 
-uint16_t getValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte) {
-  uint16_t val = 0;
+uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte) {
+  uint32_t val = 0;
   AddrMode mode = getAddrMode(addrMode, reg);
   if(mode==REGISTER) {
     val = cpu_get_gpr(reg);
@@ -110,9 +110,9 @@ uint16_t getValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte)
   return val;
 }
 
-void setValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte, uint16_t val) {
+void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, uint32_t val) {
   AddrMode mode = getAddrMode(addrMode, reg);
-  if(mode==REGISTER) { 
+  if(mode==REGISTER) {
     if(isByte) {
       val &= 0xFF;
     }
@@ -124,8 +124,8 @@ void setValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte, uin
   else {
     uint32_t addr = getAddressBaseOnMode(addrMode, reg, nextWord);
     if(isByte) {
-      //TODO: this would effect load count?? doublt check false_read
-      uint16_t oldVal;
+      //TODO: this would effect load count?? double check false_read
+      uint32_t oldVal;
       load(addr, &oldVal, 1);
       val = (val & 0xFF) | (oldVal & 0xFF00);
     }

@@ -75,7 +75,7 @@ void fetch_instruction(uint32_t address, uint16_t *value);
  * @param value The data in memory at that address.
  * @param false_read true if this is a read due to anything other than the program.
  */
-void load(uint32_t address, uint16_t *value, uint16_t false_read);
+void load(uint32_t address, uint32_t *value, uint16_t false_read);
 
 /**
  * Store data into memory.

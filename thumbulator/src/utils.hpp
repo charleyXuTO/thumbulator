@@ -8,16 +8,16 @@ namespace thumbulator {
 
 //----- addressing modes
 AddrMode getAddrMode(uint8_t addrMode, uint8_t reg);
-uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint16_t nextWord);
-uint16_t getValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte);
-void setValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte, uint16_t val);
+uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord);
+uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte);
+void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, uint32_t val);
 void updateAutoIncrementReg(uint8_t addrMode, uint8_t reg, bool isAddrWord, bool isByte);
 
 //----- cycle time
 
-// implements table 4-10 in SLAU367O
+// implements table 4-10 in SLAU367o
 // Table[src_addr_mode][dst_addr_mode/PC]
-const uint32_t doubleOpCycleCountTable[7][5] = {
+const uint32_t doubleOpCycleCountTable[7][5] = { // TODO: WHY IS THIS +1 of the number i see in the document
   {2, 4, 5, 5, 5}, // Rn
   {4, 6, 7, 7, 7}, // x(Rn)
   {4, 6, 7, 7, 7}, // EDE

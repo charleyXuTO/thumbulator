@@ -6,6 +6,8 @@
 #include "cpu_flags.hpp"
 #include "exit.hpp"
 
+bool extendedInstruction;
+
 namespace thumbulator {
 
 bool isIndirectAutoIncrement(uint8_t As, uint8_t Rsrc) {
@@ -15,7 +17,7 @@ bool isIndirectAutoIncrement(uint8_t As, uint8_t Rsrc) {
 
 // Various decodings
 
-// Double operand (format I)
+// Double operand (format I) for regulator cpu instructions
 // |15    12|11    8| 7  |  6  |5  4|3     0|
 // |----------------------------------------|
 // | opcode | R_src | Ad | B/W | As | R_dst |
@@ -24,33 +26,58 @@ bool isIndirectAutoIncrement(uint8_t As, uint8_t Rsrc) {
 // |----------------------------------------|
 // | dst                                    |
 // |----------------------------------------|
+
+
+
+
 decode_result decode_double(const uint16_t pInsn)
 {
   decode_result decoded;
-
-  uint16_t opcode = (pInsn & 0xF000);
+  uint16_t opcode = (pInsn & 0xF000); //
   uint8_t Rsrc = (pInsn >> 8) & 0xF;
   uint8_t Rdst = pInsn & 0xF;
   uint8_t As = (pInsn >> 4) & 0x3;
   uint8_t Ad = (pInsn >> 7) & 0x1;
-  bool isByte = (pInsn & 0x40)==1;
+  uint16_t extended;
+
+  bool isByte = (pInsn & 0x40)==0x40;
   bool isAddrWord = false;
-  uint16_t srcWord = 0;
-  uint16_t dstWord = 0;
+  uint16_t srcWord150 = 0;
+  uint16_t dstWord150 = 0;
+  uint16_t srcWord1916 = 0;
+  uint16_t dstWord1916 = 0;
+  uint32_t srcWord = 0;
+  uint32_t dstWord = 0;
+  if (extendedInstruction) {
+    fetch_instruction(cpu_get_pc()- 0x2, &extended);
+    bool al = (extended &0x40) == 0x40;
+    if (al == false && isByte == true) {
+      isAddrWord = true;
+      isByte = false;
+    }
+  }
 
   // [1] fetch any extra word needed for src
   if(As & 0x1) { // indexed, symbolic, absolute, indirect autoincrement, immediate
     // indirect autoincrement doesn't need next word
     if(!isIndirectAutoIncrement(As, Rsrc)) {
-        fetch_instruction(cpu_get_pc(), &srcWord);
-        cpu_set_pc(cpu_get_pc() + 0x2);
+      if (isAddrWord) {
+        srcWord1916 = (extended >> 7) & 0xF;
+      }
+      fetch_instruction(cpu_get_pc(), &srcWord150);
+      cpu_set_pc(cpu_get_pc() + 0x2);
+      srcWord = srcWord1916<<16 ^ srcWord150;
     }
   }
 
   // [2] fetch any extra word needed for dst
   if (Ad==0x1) { // indexed, symbolic, absolute
-    fetch_instruction(cpu_get_pc(), &dstWord);
+    if (isAddrWord) {
+      dstWord1916 = (extended & 0xF);
+    }
+    fetch_instruction(cpu_get_pc(), &dstWord150);
     cpu_set_pc(cpu_get_pc() + 0x2);
+    dstWord = dstWord1916<<16 ^ dstWord150;
   }
 
   // [3] set decode structure
@@ -61,6 +88,7 @@ decode_result decode_double(const uint16_t pInsn)
   decoded.Ad = Ad;
   decoded.isByte = isByte;
   decoded.isAddrWord = isAddrWord;
+
   decoded.srcWord = srcWord;
   decoded.dstWord = dstWord;
 
@@ -84,14 +112,32 @@ decode_result decode_single(const uint16_t pInsn)
   uint8_t Ad = (pInsn >> 4) & 0x3;
   bool isByte = (pInsn & 0x40)==0x40;
   bool isAddrWord = false;
-  uint16_t dstWord = 0;
+  uint32_t dstWord = 0;
+  uint16_t dstWord1916 = 0;
+  uint16_t dstWord150 = 0;
+  uint16_t extended;
+
+  if (extendedInstruction) {
+    fetch_instruction(cpu_get_pc()- 0x2, &extended);
+    bool al = (extended &0x40) == 0x40;
+    if (al == false && isByte == true) {
+      isAddrWord = true;
+      isByte = false;
+    }
+  }
+
 
   // [1] fetch any extra word needed (indexed, symbolic, absolute, immediate)
   if(Ad & 0x1) { // indexed, symbolic, absolute, indirect autoincrement, immediate
     // indirect autoincrement doesn't need next word
+
     if(!isIndirectAutoIncrement(Ad, Rdst)) {
-        fetch_instruction(cpu_get_pc(), &dstWord);
-        cpu_set_pc(cpu_get_pc() + 0x2);
+      if (isAddrWord) {
+        dstWord1916 = extended & 0xF;
+      }
+      fetch_instruction(cpu_get_pc(), &dstWord150);
+      cpu_set_pc(cpu_get_pc() + 0x2);
+      dstWord = dstWord1916<<16 ^ dstWord150;
     }
   }
 
@@ -154,12 +200,44 @@ decode_result (*decodeJumpTable[16])(const uint16_t pInsn) = {
   decode_double     // F
   };
 
-// Decoding is a matter of indexing the decode jump tabel
+// Decoding is a matter of indexing the decode jump table
 // using the first 4 instruction opcode bits and then
 // executing the function pointed to
 // The decode functions update the global decode structure
-decode_result decode(const uint16_t instruction)
+decode_result decode(uint16_t instruction)
 {
+
+  extendedInstruction = false;
+
+  if (instruction >= 0x1800 && instruction <= 0x1C00) {
+
+    // | 15  9 |  8  |  7  |  6  | 5  4 | 3    0 |
+    // |-----------------------------------------|
+    // |       | ZC  |  #  | A/L |      |(n-1)/Rn|
+    // |-----------------------------------------|
+
+    // |15  11 | 10      7 |  6  | 5  4 | 3       0 |
+    // |--------------------------------------------|
+    // |       | Src 19:16 | A/L |      | Dst 19:16 |
+    // |--------------------------------------------|
+
+    // | 15  7 |  6  | 5  4 | 3       0 |
+    // |--------------------------------|
+    // |       | A/L |      | Dst 19:16 |
+    // |--------------------------------|
+
+    // |15  11 | 10      7 |  6  | 5  0 |
+    // |--------------------------------|
+    // |       | Src 19:16 | A/L |      |
+    // |--------------------------------|
+
+    extendedInstruction = true;
+
+    fetch_instruction(cpu_get_pc(), &instruction); //fetch new instruction
+
+    cpu_set_pc(cpu_get_pc() + 0x2);
+
+  }
   return decodeJumpTable[instruction >> 12](instruction);
 }
 }

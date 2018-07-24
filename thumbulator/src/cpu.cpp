@@ -22,7 +22,7 @@ void cpu_reset()
   // For MSP430, user sets SP at beginning of their program
 
   // Set the program counter to the address at the reset vector location (0FFFEh).
-  uint16_t startAddr;
+  uint32_t startAddr;
   // TODO: any other way to do this??
   //RESET_VECTOR = FLASH_MEMORY[12]; // observed from hexdump
   load(0xFFFE, &startAddr, 0);
@@ -60,6 +60,12 @@ uint32_t jn(decode_result const *);
 uint32_t jge(decode_result const *);
 uint32_t jl(decode_result const *);
 uint32_t jmp(decode_result const *);
+
+
+
+
+
+
 
 uint32_t exmemwb_error(decode_result const *decoded)
 {

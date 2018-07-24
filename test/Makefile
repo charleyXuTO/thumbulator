@@ -9,7 +9,7 @@
 # generic devices: msp430 or msp430x
 # MSP430afe253 -- msp430, 16KB flash, 512B RAM
 DEVICE:=msp430afe253
-
+EXAMPLE:=test
 # Require DEVICE to be specified
 ifndef DEVICE
 $(info Please specify a device, e.g. DEVICE=MSP430F5529)
@@ -31,7 +31,7 @@ ifeq ($(OS),Windows_NT)
 ################### Linux or Mac OS ####################
 else
 	################## GCC Root Variable ###################
-	GCC_DIR     ?= /home/julieh/msp430-gcc-6.4.0.32_linux64
+	GCC_DIR     ?= /home/d/Downloads/msp430-gcc-6.4.0.32_linux64
 	GCC_MSP_INC_DIR ?= $(GCC_DIR)/include
 	LDDIR       := $(GCC_MSP_INC_DIR)/$(shell echo $(DEVICE) | tr A-Z a-z)
 	RM          := rm -rf

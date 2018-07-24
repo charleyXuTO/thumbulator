@@ -45,26 +45,26 @@ enum JumpInsn {
 /**
  * Registers that hold the results of instruction decoding.
  *
- * Passed to exectue, memory access, and write-back stage in decoded variable.
+ * Passed to execute, memory access, and write-back stage in decoded variable.
  */
 struct decode_result {
   /**
    * Destination register-index.
    */
-  uint8_t Rd;
+  uint8_t Rd; // rdst
 
   /**
    * Source register-index.
    */
-  uint8_t Rs;
+  uint8_t Rs; //rsrc
 
   // addressing modes
   uint8_t As;
   uint8_t Ad;
 
   // immediate or offset
-  uint16_t srcWord;
-  uint16_t dstWord;
+  uint32_t srcWord;
+  uint32_t dstWord;
 
   // distinguish between word and byte instructions
   bool isByte;

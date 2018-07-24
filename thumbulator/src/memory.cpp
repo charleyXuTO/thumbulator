@@ -71,7 +71,7 @@ void fetch_instruction(uint32_t address, uint16_t *value)
 
 }
 
-void load(uint32_t address, uint16_t *value, uint16_t false_read)
+void load(uint32_t address, uint32_t *value, uint16_t false_read)
 {
   //TODO: support byte level load
   if(address >= FLASH_START) {
@@ -103,6 +103,7 @@ void load(uint32_t address, uint16_t *value, uint16_t false_read)
 
 void store(uint32_t address, uint16_t value)
   //TODO: support byte level store
+// TODO: support 20 bit stores
 {
   if(address >= FLASH_START) {
     if(address >= (FLASH_START + FLASH_SIZE_BYTES)) {
