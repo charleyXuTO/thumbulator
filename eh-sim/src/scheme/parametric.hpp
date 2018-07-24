@@ -157,7 +157,7 @@ private:
     auto const count = stores.size();
 
     for(auto const &store : stores) {
-      thumbulator::RAM[(store.first & RAM_ADDRESS_MASK) >> 2] = store.second;
+      thumbulator::RAM[RAM_ADDRESS_MASK(store.first)] = store.second;
     }
     stores.clear();
 

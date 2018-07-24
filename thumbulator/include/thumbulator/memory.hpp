@@ -12,12 +12,19 @@ namespace thumbulator {
 #define RESET_VECTOR_START 0xFFFE
 extern uint16_t RESET_VECTOR;
 
+// interrupt vector table, not including the reset vector
+#define INTERRUPT_VECTOR_START 0xFFE0
+#define INTERRUPT_VECTOR_SIZE_ELEMENTS 15
+#define INTERRUPT_VECTOR_ADDRESS_MASK(x) ((x - INTERRUPT_VECTOR_START)>>1)
+extern uint16_t INTERRUPT_VECTOR_TABLE[INTERRUPT_VECTOR_SIZE_ELEMENTS];
+
 // RAM starts from 0x00200
 // use 0.5 KB for MSP430AFE253 for now
 #define RAM_START 0x00200
 #define RAM_SIZE_BYTES (1 << 9)
 #define RAM_SIZE_ELEMENTS (RAM_SIZE_BYTES >> 1)
-#define RAM_ADDRESS_MASK (((~0) << 9) ^ (~0))
+//#define RAM_ADDRESS_MASK (((~0) << 9) ^ (~0))
+#define RAM_ADDRESS_MASK(x) ((x - RAM_START)>>1)
 
 /**
  * Random-Access Memory, like SRAM.
@@ -47,6 +54,7 @@ extern std::function<uint16_t(uint32_t, uint16_t, uint16_t)> ram_store_hook;
 
 // FLASH/ROM ends at 0x0FFDF
 // use 16 KB for MSP430AFE253 for now
+#define FLASH_END 0x0FFDF
 #define FLASH_START 0x0BFE0
 #define FLASH_SIZE_BYTES (1 << 14)
 #define FLASH_SIZE_ELEMENTS (FLASH_SIZE_BYTES >> 1)
@@ -83,7 +91,7 @@ void load(uint32_t address, uint16_t *value, uint16_t false_read);
  * @param address The address to store the data to.
  * @param value The data to store at that address.
  */
-void store(uint32_t address, uint16_t value);
+void store(uint32_t address, uint16_t value, bool isByte);
 }
 
 #endif

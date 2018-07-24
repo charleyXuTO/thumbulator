@@ -11,7 +11,7 @@ uint32_t rrc(decode_result const *decoded)
   TRACE_INSTRUCTION("rrc %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint16_t carry = cpu_get_flag_c();
   uint16_t lsb = opA & 0x1;
   int16_t result = opA >> 1;
@@ -36,7 +36,7 @@ uint32_t swpb(decode_result const *decoded)
   TRACE_INSTRUCTION("swpb %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint16_t result = (opA >> 8) | ((opA & 0xFF)<<8);
 
   // update result
@@ -54,7 +54,7 @@ uint32_t rra(decode_result const *decoded)
   TRACE_INSTRUCTION("rra %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint16_t lsb = opA & 0x1;
   int16_t result = (opA >> 1) | (opA & 0x8000);
   cpu_set_flag_c(lsb);
@@ -77,7 +77,7 @@ uint32_t sxt(decode_result const *decoded)
   TRACE_INSTRUCTION("sxt %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = (opA & 0x80)?(0xFF00 | opA):(0xFF & opA);
 
   // update result
@@ -95,19 +95,18 @@ uint32_t push(decode_result const *decoded)
   TRACE_INSTRUCTION("push %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint32_t sp = cpu_get_sp() -2;
   cpu_set_sp(sp);
 
   // update result
-  if(decoded->isByte) {
-    //TODO: this would effect load count?? doublt check false_read
-    uint16_t oldVal;
-    uint16_t false_read = 1;
-    load(sp, &oldVal, false_read);
-    opA = (opA & 0xFF) | (oldVal & 0xFF00);
-  }
-  store(sp, opA);
+  //if(decoded->isByte) {
+  //  uint16_t oldVal;
+  //  uint16_t false_read = 1;
+  //  load(sp, &oldVal, false_read);
+  //  opA = (opA & 0xFF) | (oldVal & 0xFF00);
+  //}
+  store(sp, opA, decoded->isByte);
 
   ////// update Rs if it's in autoincrement mode
   ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
@@ -121,11 +120,11 @@ uint32_t call(decode_result const *decoded)
   TRACE_INSTRUCTION("call %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint32_t sp = cpu_get_sp() -2;
   cpu_set_sp(sp);
   uint32_t pc = cpu_get_pc();
-  store(sp, pc);
+  store(sp, pc, false);
 
   // update result
   cpu_set_pc(opA);

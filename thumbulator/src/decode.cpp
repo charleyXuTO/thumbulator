@@ -33,13 +33,26 @@ decode_result decode_double(const uint16_t pInsn)
   uint8_t Rdst = pInsn & 0xF;
   uint8_t As = (pInsn >> 4) & 0x3;
   uint8_t Ad = (pInsn >> 7) & 0x1;
-  bool isByte = (pInsn & 0x40)==1;
+  bool isByte = (pInsn & 0x40)==0x40;
   bool isAddrWord = false;
   uint16_t srcWord = 0;
   uint16_t dstWord = 0;
 
+  // [0] check if using CG1 or CG2
+  bool useCG = (GPR_CG2 == Rsrc) || ((GPR_CG1 == Rsrc) && (As & 0x2));
+  if(GPR_CG1 == Rsrc) {
+    if(0x2 == As) srcWord = 0x4;
+    else if(0x3 == As) srcWord = 0x8;
+  }
+  if(GPR_CG2 == Rsrc) {
+    if(0x0 == As) srcWord = 0x0;
+    else if(0x1 == As) srcWord = 0x1;
+    else if(0x2 == As) srcWord = 0x2;
+    else if(0x3 == As) srcWord = 0xFFFF;
+  }
+
   // [1] fetch any extra word needed for src
-  if(As & 0x1) { // indexed, symbolic, absolute, indirect autoincrement, immediate
+  if(!useCG && (As & 0x1)) { // indexed, symbolic, absolute, indirect autoincrement, immediate
     // indirect autoincrement doesn't need next word
     if(!isIndirectAutoIncrement(As, Rsrc)) {
         fetch_instruction(cpu_get_pc(), &srcWord);

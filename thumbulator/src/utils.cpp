@@ -10,7 +10,7 @@ std::string addrModeString[7] = {
   "REG", "IDX", "SYM", "ABS", "IDREG", "IDAUTO+", "IMM"
 };
 
-AddrMode getAddrMode(uint8_t addrMode, uint8_t reg) {
+AddrMode getAddrMode(uint8_t addrMode, uint8_t reg, bool isSource) {
   AddrMode mode;
   switch(addrMode) {
     case 0: { // register
@@ -40,12 +40,16 @@ AddrMode getAddrMode(uint8_t addrMode, uint8_t reg) {
     default:
       assert(0 && "getAddrMode: unknown addressing mode!");
   }
+  // using CG1 or CG2
+  if(isSource && ((GPR_CG2 == reg) || ((GPR_CG1 == reg) && (addrMode & 0x2)))) {
+    mode = IMMEDIATE;
+  }
   return mode;
 }
 
 uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint16_t nextWord) {
   uint32_t retVal = 0;
-  AddrMode mode = getAddrMode(addrMode, reg);
+  AddrMode mode = getAddrMode(addrMode, reg, false); // false since this shouldn't be called if CG was used
   switch(mode) {
     case REGISTER: {
       assert(0 && "should not call getAddressBaseOnMode in register mode");
@@ -91,9 +95,9 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint16_t nextWord) 
   return retVal;
 }
 
-uint16_t getValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte) {
+uint16_t getValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte, bool isSource) {
   uint16_t val = 0;
-  AddrMode mode = getAddrMode(addrMode, reg);
+  AddrMode mode = getAddrMode(addrMode, reg, isSource);
   if(mode==REGISTER) {
     val = cpu_get_gpr(reg);
   }
@@ -111,7 +115,7 @@ uint16_t getValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte)
 }
 
 void setValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte, uint16_t val) {
-  AddrMode mode = getAddrMode(addrMode, reg);
+  AddrMode mode = getAddrMode(addrMode, reg, false);
   if(mode==REGISTER) { 
     if(isByte) {
       val &= 0xFF;
@@ -123,19 +127,19 @@ void setValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte, uin
   //}
   else {
     uint32_t addr = getAddressBaseOnMode(addrMode, reg, nextWord);
-    if(isByte) {
-      //TODO: this would effect load count?? doublt check false_read
-      uint16_t oldVal;
-      load(addr, &oldVal, 1);
-      val = (val & 0xFF) | (oldVal & 0xFF00);
-    }
-    store(addr, val);
+    //if(isByte) {
+    //  //TODO: this would effect load count?? doublt check false_read
+    //  uint16_t oldVal;
+    //  load(addr, &oldVal, 1);
+    //  val = (val & 0xFF) | (oldVal & 0xFF00);
+    //}
+    store(addr, val, isByte);
   }
   return;
 }
 
 void updateAutoIncrementReg(uint8_t addrMode, uint8_t reg, bool isAddrWord, bool isByte) {
-  AddrMode mode = getAddrMode(addrMode, reg);
+  AddrMode mode = getAddrMode(addrMode, reg, false); // false since this shouldn't be called if CG was used
   if(mode==INDIRECT_AUTOINCREMENT) {
     uint32_t addr = cpu_get_gpr(reg);
     uint32_t newAddr = (isAddrWord)?(addr+4):((isByte)?(addr+1):(addr+2));
@@ -188,8 +192,8 @@ uint32_t getDoubleOpColumnIdx(AddrMode dstMode, uint16_t Rd) {
 // implements table 4-10 in SLAU367O
 uint32_t getDoubleOperandCycleCount(decode_result const *decoded) {
   uint32_t cycles = 0;
-  AddrMode srcMode = getAddrMode(decoded->As, decoded->Rs);
-  AddrMode dstMode = getAddrMode(decoded->Ad, decoded->Rd);
+  AddrMode srcMode = getAddrMode(decoded->As, decoded->Rs, true);
+  AddrMode dstMode = getAddrMode(decoded->Ad, decoded->Rd, false);
   uint32_t srcIdx = srcMode;
   uint32_t dstIdx = getDoubleOpColumnIdx(dstMode, decoded->Rd);
   cycles = doubleOpCycleCountTable[srcIdx][dstIdx];
@@ -225,7 +229,7 @@ uint32_t getSingleOpColumnIdx(uint16_t opcode) {
 // implements table 4-9 in SLAU367O
 uint32_t getSingleOperandCycleCount(decode_result const *decoded) {
   uint32_t cycles = 0;
-  AddrMode dstMode = getAddrMode(decoded->Ad, decoded->Rd);
+  AddrMode dstMode = getAddrMode(decoded->Ad, decoded->Rd, false);
   uint32_t rowIdx = dstMode;
   uint32_t columnIdx = getSingleOpColumnIdx(decoded->opcode);
   cycles = singleOpCycleCountTable[rowIdx][columnIdx];

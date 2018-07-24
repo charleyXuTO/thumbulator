@@ -13,9 +13,16 @@ uint32_t mov(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
-  int16_t result = opA;
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  uint16_t result = opA;
+
+  // hack to identify exit
+  if(0==decoded->Rd) {
+    if(cpu_get_pc()==(result + 4)) {
+      EXIT_INSTRUCTION_ENCOUNTERED = true;
+    }
+  }
 
   // update result & flags
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, result);
@@ -26,6 +33,7 @@ uint32_t mov(decode_result const *decoded)
 
   // update Rs if it's in autoincrement mode
   updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
+
 
   return getDoubleOperandCycleCount(decoded);
 }
@@ -39,8 +47,8 @@ uint32_t add(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = opA + opB;
 
   // update result & flags
@@ -62,8 +70,8 @@ uint32_t addc(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  uint16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  uint16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  uint16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint16_t carry = cpu_get_flag_c();
   uint16_t result = opA + opB + carry;
 
@@ -86,8 +94,8 @@ uint32_t dadd(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  uint16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  uint16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  uint16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint16_t carry = cpu_get_flag_c();
   uint16_t result = (opA & 0xFF) + ((opA & 0xFF00)>>8)*10 +
                     (opB & 0xFF) + ((opB & 0xFF00)>>8)*10 +
@@ -119,9 +127,9 @@ uint32_t sub(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
   opA = ~(opA);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = opA + opB + 1;
 
   // update result & flags
@@ -144,9 +152,9 @@ uint32_t subc(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
   opA = ~(opA);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint16_t carry = cpu_get_flag_c();
   int16_t result = opA + opB + carry;
 
@@ -172,9 +180,9 @@ uint32_t cmp(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
   opA = ~(opA);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = opA + opB + 1;
 
   // update flags
@@ -199,8 +207,8 @@ uint32_t bit(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = opA & opB;
 
   // update result & flags
@@ -224,8 +232,8 @@ uint32_t bic(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = ~opA & opB;
 
   // update result & flags not affected
@@ -245,8 +253,8 @@ uint32_t bis(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = opA | opB;
 
   // update result & flags not affected
@@ -265,8 +273,8 @@ uint32_t xorOp(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = opA ^ opB;
 
   // update result & flags
@@ -289,8 +297,8 @@ uint32_t andOp(decode_result const *decoded)
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte);
-  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte);
+  int16_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, true);
+  int16_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   int16_t result = opA & opB;
 
   // update result & flags
