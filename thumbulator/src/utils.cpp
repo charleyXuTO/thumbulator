@@ -57,21 +57,21 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) 
       break;
     }
     case INDEXED: {
-      int16_t x = nextWord;
+      int32_t x = nextWord;
       uint32_t Rn = cpu_get_gpr(reg);
       int32_t addr = Rn + x;
       retVal = addr;
       break;
     }
     case SYMBOLIC: {
-      int16_t x = nextWord;
+      int32_t x = nextWord;
       uint32_t Rn = cpu_get_gpr(reg); // this is PC
       int32_t addr = Rn + x;
       retVal = addr;
       break;
     }
     case ABSOLUTE: {
-      int16_t x = nextWord;
+      int32_t x = nextWord;
       retVal = x;
       break;
     }
