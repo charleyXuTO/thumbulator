@@ -95,8 +95,8 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) 
   return retVal;
 }
 
-uint16_t getValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte, bool isSource) {
-  uint16_t val = 0;
+uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isSource) {
+  uint32_t val = 0;
   AddrMode mode = getAddrMode(addrMode, reg, isSource);
   if(mode==REGISTER) {
     val = cpu_get_gpr(reg);
@@ -114,7 +114,7 @@ uint16_t getValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte,
   return val;
 }
 
-void setValue(uint8_t addrMode, uint8_t reg, uint16_t nextWord, bool isByte, uint16_t val) {
+void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, uint32_t val) {
   AddrMode mode = getAddrMode(addrMode, reg, false);
   if(mode==REGISTER) { 
     if(isByte) {

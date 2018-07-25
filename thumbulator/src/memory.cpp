@@ -52,7 +52,7 @@ void ram_store(uint32_t address, uint16_t value, bool isByte)
 
 void fetch_instruction(uint32_t address, uint16_t *value)
 {
-  uint16_t fromMem;
+  uint32_t fromMem;
   uint32_t idx;
 
   if(address >= FLASH_START) {

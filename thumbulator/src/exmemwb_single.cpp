@@ -11,9 +11,9 @@ uint32_t rrc(decode_result const *decoded)
   TRACE_INSTRUCTION("rrc %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
-  uint16_t carry = cpu_get_flag_c();
-  uint32_t lsb = opA & 0x1;
+  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  uint32_t carry = cpu_get_flag_c();
+  uint16_t lsb = opA & 0x1;
   int32_t result = opA >> 1;
   if (!decoded->isAddrWord) {
     result |= (carry << 15);
@@ -51,10 +51,9 @@ uint32_t swpb(decode_result const *decoded)
   TRACE_INSTRUCTION("swpb %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
-  uint16_t result = (opA >> 8) | ((opA & 0xFF)<<8);
-
+  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint32_t result;
+
   if (!decoded->isAddrWord) {
     result = (opA >> 8) | ((opA & 0xFF) << 8);
   }
@@ -77,9 +76,9 @@ uint32_t rra(decode_result const *decoded)
   TRACE_INSTRUCTION("rra %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
   uint16_t lsb = opA & 0x1;
-  int16_t result = (opA >> 1) | (opA & 0x8000);
+  int32_t result = (opA >> 1) | (opA & 0x8000);
   cpu_set_flag_c(lsb);
 
   // update result & flags
@@ -107,8 +106,8 @@ uint32_t sxt(decode_result const *decoded) // TODO: Needs to re-read the documen
   TRACE_INSTRUCTION("sxt %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
-  int16_t result = (opA & 0x80)?(0xFF00 | opA):(0xFF & opA);
+  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  int32_t result = (opA & 0x80)?(0xFF00 | opA):(0xFF & opA);
 
   // update result
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, result);
@@ -125,9 +124,22 @@ uint32_t push(decode_result const *decoded)
   TRACE_INSTRUCTION("push %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
-  uint32_t sp = cpu_get_sp() -2;
-  cpu_set_sp(sp);
+  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  uint32_t sp;
+
+  if (!decoded->isAddrWord) {
+    sp = cpu_get_sp() - 2;
+    cpu_set_sp(sp);
+    store(sp, opA, decoded->isByte);
+  }
+  else {
+    sp = cpu_get_sp() -2;
+    cpu_set_sp(sp);
+    store(sp, (opA >> 16) , decoded->isByte);
+    sp = cpu_get_sp() - 2;
+    cpu_set_sp(sp);
+    store(sp, (opA & 0xFFFF), decoded->isByte);
+  }
 
   // update result
   //if(decoded->isByte) {
@@ -136,7 +148,7 @@ uint32_t push(decode_result const *decoded)
   //  load(sp, &oldVal, false_read);
   //  opA = (opA & 0xFF) | (oldVal & 0xFF00);
   //}
-  store(sp, opA, decoded->isByte);
+
 
   ////// update Rs if it's in autoincrement mode
   ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
@@ -150,11 +162,24 @@ uint32_t call(decode_result const *decoded)
   TRACE_INSTRUCTION("call %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint16_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
-  uint32_t sp = cpu_get_sp() -2;
-  cpu_set_sp(sp);
-  uint32_t pc = cpu_get_pc();
-  store(sp, pc, false);
+  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  uint32_t sp;
+  uint32_t pc;
+  if (!decoded->isAddrWord) {
+    sp = cpu_get_sp() - 2;
+    cpu_set_sp(sp);
+    uint32_t pc = cpu_get_pc();
+    store(sp, pc, false);
+  }
+  else {
+    sp = cpu_get_sp() - 2;
+    cpu_set_sp(sp);
+    uint32_t pc = cpu_get_pc();
+    store(sp, pc >> 16, false);
+    sp =  cpu_get_sp() -2;
+    cpu_set_sp(sp);
+    store(sp, (pc & 0xFFFF), false);
+  }
 
   // update result
   cpu_set_pc(opA);

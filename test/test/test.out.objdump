@@ -114,7 +114,7 @@ Disassembly of section .rodata:
     c0f2:	6c 6c       	addc.b	@r12,	r12	;
     c0f4:	69 73       	subc.b	#2,	r9	;r3 As==10
     c0f6:	69 6f       	addc.b	@r15,	r9	;
-    c0f8:	6e 0a 00 b3 	Address 0x000000000000c0fa is out of bounds.
+    c0f8:	6e 0a 00 b4 	Address 0x000000000000c0fa is out of bounds.
 mova	r10,	&983039	; 0xeffff
 
 Disassembly of section .rodata2:
