@@ -11,7 +11,7 @@ uint32_t rrc(decode_result const *decoded)
   TRACE_INSTRUCTION("rrc %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint32_t carry = cpu_get_flag_c();
   uint16_t lsb = opA & 0x1;
   int32_t result = opA >> 1;
@@ -24,7 +24,7 @@ uint32_t rrc(decode_result const *decoded)
   cpu_set_flag_c(lsb);
 
   // update result & flags
-  setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, result);
+  setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
 
   if (!decoded->isAddrWord) {
       do_nflag(result);
@@ -51,7 +51,7 @@ uint32_t swpb(decode_result const *decoded)
   TRACE_INSTRUCTION("swpb %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint32_t result;
 
   if (!decoded->isAddrWord) {
@@ -62,7 +62,7 @@ uint32_t swpb(decode_result const *decoded)
   }
 
   // update resultSWPB
-  setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, result);
+  setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
 
   ////// update Rs if it's in autoincrement mode
   ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
@@ -76,13 +76,13 @@ uint32_t rra(decode_result const *decoded)
   TRACE_INSTRUCTION("rra %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint16_t lsb = opA & 0x1;
   int32_t result = (opA >> 1) | (opA & 0x8000);
   cpu_set_flag_c(lsb);
 
   // update result & flags
-  setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, result);
+  setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
   if (!decoded->isAddrWord) {
     do_nflag(result);
     do_zflag(result);
@@ -106,11 +106,11 @@ uint32_t sxt(decode_result const *decoded) // TODO: Needs to re-read the documen
   TRACE_INSTRUCTION("sxt %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   int32_t result = (opA & 0x80)?(0xFF00 | opA):(0xFF & opA);
 
   // update result
-  setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, result);
+  setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
 
   ////// update Rs if it's in autoincrement mode
   ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
@@ -124,7 +124,7 @@ uint32_t push(decode_result const *decoded)
   TRACE_INSTRUCTION("push %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint32_t sp;
 
   if (!decoded->isAddrWord) {
@@ -162,7 +162,7 @@ uint32_t call(decode_result const *decoded)
   TRACE_INSTRUCTION("call %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
-  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, false);
+  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint32_t sp;
   uint32_t pc;
   if (!decoded->isAddrWord) {

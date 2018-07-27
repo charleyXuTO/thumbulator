@@ -95,7 +95,7 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) 
   return retVal;
 }
 
-uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isSource) {
+uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isAddrWord, bool isSource) {
   uint32_t val = 0;
   AddrMode mode = getAddrMode(addrMode, reg, isSource);
   if(mode==REGISTER) {
@@ -106,7 +106,16 @@ uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte,
   }
   else {
     uint32_t addr = getAddressBaseOnMode(addrMode, reg, nextWord);
-    load(addr, &val, 0);
+    if (!isAddrWord) {
+        load(addr, &val, 0);
+    }
+    else {
+        uint32_t val1916 = 0;
+        uint32_t val150 = 0;
+        load(addr-2, &val1916,0);
+        load(addr, &val150,0); // TODO: figure out what value you should increase the addr by
+        val = ((val1916 & 0xF) << 16) ^  val150;
+    }
   }
   // adjust value based on type
   if(isByte)
@@ -114,7 +123,7 @@ uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte,
   return val;
 }
 
-void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, uint32_t val) {
+void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isAddrWord, uint32_t val) {
   AddrMode mode = getAddrMode(addrMode, reg, false);
   if(mode==REGISTER) { 
     if(isByte) {
@@ -133,7 +142,13 @@ void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, uin
     //  load(addr, &oldVal, 1);
     //  val = (val & 0xFF) | (oldVal & 0xFF00);
     //}
-    store(addr, val, isByte);
+    if (!isAddrWord) {
+      store(addr, val, isByte);
+    }
+    else {
+      store(addr-2, val >> 16, false);
+      store(addr, val & 0xFFFF, false); //TODO: figure out what value you should increase the addr by
+    }
   }
   return;
 }

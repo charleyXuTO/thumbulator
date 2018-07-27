@@ -9,8 +9,8 @@ namespace thumbulator {
 //----- addressing modes
 AddrMode getAddrMode(uint8_t addrMode, uint8_t reg, bool isSource);
 uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord);
-uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isSource);
-void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, uint32_t val);
+uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isAddrWord, bool isSource);
+void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isAddrWord, uint32_t val);
 void updateAutoIncrementReg(uint8_t addrMode, uint8_t reg, bool isAddrWord, bool isByte);
 
 //----- cycle time

@@ -16,7 +16,9 @@ static int testzero(int hm)
 
 static void testSimple() {
   int a,b,c, r;
+  int a1[3] = {1,2,3};
   a = 1; b = 2; c = 4; r = 0;
+  
   printf("Arithmetic Operations:\n");
 
   if((a << b) == 4) {
@@ -31,6 +33,11 @@ static void testSimple() {
   if((a>b)==0) {
       r++;
   }
+  //if(a1[1] > b) {
+    //  r++; 
+  //}
+
+  
 
   assertFalse(testzero(0));
 }

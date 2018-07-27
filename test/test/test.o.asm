@@ -40,54 +40,57 @@ testzero:
 testSimple:
 ; start of function
 ; framesize_regs:     0
-; framesize_locals:   8
+; framesize_locals:   14
 ; framesize_outgoing: 6
-; framesize:          14
+; framesize:          20
 ; elim ap -> fp       2
-; elim fp -> sp       14
+; elim fp -> sp       20
 ; saved regs:(none)
 	; start of prologue
-	SUB.W	#14, R1
+	SUB.W	#20, R1
 	; end of prologue
-	MOV.W	#1, 10(R1)
+	MOV.W	#1, 6(R1)
 	MOV.W	#2, 8(R1)
-	MOV.W	#4, 6(R1)
-	MOV.W	#0, 12(R1)
+	MOV.W	#3, 10(R1)
+	MOV.W	#1, 16(R1)
+	MOV.W	#2, 14(R1)
+	MOV.W	#4, 12(R1)
+	MOV.W	#0, 18(R1)
 	MOV.W	#.LC0, @R1
 	CALL	#printf
-	MOV.W	10(R1), R12
-	MOV.W	8(R1), R13
+	MOV.W	16(R1), R12
+	MOV.W	14(R1), R13
 	CALL	#__mspabi_slli
 	CMP.W	#4, R12 { JNE	.L5
-	ADD.W	#1, 12(R1)
+	ADD.W	#1, 18(R1)
 .L5:
-	MOV.W	6(R1), R12
-	MOV.W	10(R1), R13
+	MOV.W	12(R1), R12
+	MOV.W	16(R1), R13
 	CALL	#__mspabi_srai
 	CMP.W	#2, R12 { JNE	.L10
-	ADD.W	#1, 12(R1)
+	ADD.W	#1, 18(R1)
 .L10:
-	ADD.W	#1, 12(R1)
-	CMP.W	10(R1), 8(R1) { JL	.L7
-	ADD.W	#1, 12(R1)
+	ADD.W	#1, 18(R1)
+	CMP.W	16(R1), 14(R1) { JL	.L7
+	ADD.W	#1, 18(R1)
 .L7:
 	MOV.B	#0, R12
 	CALL	#testzero
 	CMP.W	#0, R12 { JNE	.L8
-	MOV.W	#35, 4(R1)
+	MOV.W	#42, 4(R1)
 	MOV.W	#.LC1, 2(R1)
 	MOV.W	#.LC2, @R1
 	CALL	#printf
 	BR	#.L11
 .L8:
-	MOV.W	#35, 4(R1)
+	MOV.W	#42, 4(R1)
 	MOV.W	#.LC1, 2(R1)
 	MOV.W	#.LC3, @R1
 	CALL	#printf
 .L11:
 	NOP
 	; start of epilogue
-	ADD.W	#14, R1
+	ADD.W	#20, R1
 	RET
 	.size	testSimple, .-testSimple
 	.section	.rodata

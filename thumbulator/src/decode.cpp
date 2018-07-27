@@ -79,7 +79,7 @@ decode_result decode_double(const uint16_t pInsn)
       }
       fetch_instruction(cpu_get_pc(), &srcWord150);
       cpu_set_pc(cpu_get_pc() + 0x2);
-      srcWord = srcWord1916<<16 ^ srcWord150;
+      srcWord = (srcWord1916 & 0xF) <<16 ^ srcWord150;
     }
   }
 
@@ -90,7 +90,7 @@ decode_result decode_double(const uint16_t pInsn)
     }
     fetch_instruction(cpu_get_pc(), &dstWord150);
     cpu_set_pc(cpu_get_pc() + 0x2);
-    dstWord = dstWord1916<<16 ^ dstWord150;
+    dstWord = (dstWord1916 & 0xF) <<16 ^ dstWord150;
   }
 
   // [3] set decode structure
@@ -150,7 +150,7 @@ decode_result decode_single(const uint16_t pInsn)
       }
       fetch_instruction(cpu_get_pc(), &dstWord150);
       cpu_set_pc(cpu_get_pc() + 0x2);
-      dstWord = dstWord1916<<16 ^ dstWord150;
+      dstWord = (dstWord1916 & 0xF) <<16 ^ dstWord150;
     }
   }
 
