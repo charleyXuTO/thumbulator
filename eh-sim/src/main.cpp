@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     auto const stats = ehsim::simulate(path_to_binary, power, scheme.get(), always_harvest);
 
     std::cout << "CPU instructions executed: " << stats.cpu.instruction_count << "\n";
-    std::cout << "CPU time (cycles): " << stats.cpu.cycle_count << "\n";
+    std::cout << "CPU time (cycles): " << stats.cpu.cycle_count << "\n";    
     std::cout << "Total time (ns): " << stats.system.time.count() << "\n";
     std::cout << "Energy harvested (J): " << stats.system.energy_harvested * 1e-9 << "\n";
     std::cout << "Energy remaining (J): " << stats.system.energy_remaining * 1e-9 << "\n";
@@ -153,6 +153,7 @@ int main(int argc, char *argv[])
     std::cout << "Buffer overflow violations: " << bufferOverflowViolations << "\n";
     std::cout << "Buffer write violations: " << bufferWriteViolations << "\n";
     std::cout << "Dead instructions: " << stats.cpu.dead_instruction_count << "\n";
+    
     std::string output_file_name(scheme_select + ".csv");
     if(options["output"].count() > 0) {
       output_file_name = options["output"].as<std::string>();

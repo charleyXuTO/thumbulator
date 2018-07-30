@@ -21,6 +21,7 @@ uint32_t cmn(decode_result const *decoded)
   do_cflag(opA, opB, 0);
   do_vflag(opA, opB, result);
 
+  cycle_count ++;
   return 1;
 }
 
@@ -37,6 +38,7 @@ uint32_t cmp_i(decode_result const *decoded)
   do_cflag(opA, opB, 1);
   do_vflag(opA, opB, result);
 
+  cycle_count ++;
   return 1;
 }
 
@@ -53,6 +55,7 @@ uint32_t cmp_r(decode_result const *decoded)
   do_cflag(opA, opB, 1);
   do_vflag(opA, opB, result);
 
+  cycle_count ++;
   return 1;
 }
 
@@ -68,6 +71,7 @@ uint32_t tst(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count ++;
   return 1;
 }
 
@@ -84,6 +88,7 @@ uint32_t b(decode_result const *decoded)
   cpu_set_pc(result);
   BRANCH_WAS_TAKEN = 1;
 
+  cycle_count += TIMING_BRANCH;
   return TIMING_BRANCH;
 }
 
@@ -170,6 +175,7 @@ uint32_t b_c(decode_result const *decoded)
   }
 
   if(taken == 0) {
+    cycle_count ++;
     return 1;
   }
 
@@ -179,6 +185,7 @@ uint32_t b_c(decode_result const *decoded)
   cpu_set_pc(result);
   BRANCH_WAS_TAKEN = 1;
 
+  cycle_count += TIMING_BRANCH;
   return TIMING_BRANCH;
 }
 
@@ -198,6 +205,7 @@ uint32_t blx(decode_result const *decoded)
   cpu_set_pc(address);
   BRANCH_WAS_TAKEN = 1;
 
+  cycle_count += TIMING_BRANCH;
   return TIMING_BRANCH;
 }
 
@@ -222,6 +230,7 @@ uint32_t bx(decode_result const *decoded)
 
   BRANCH_WAS_TAKEN = 1;
 
+  cycle_count += TIMING_BRANCH;
   return TIMING_BRANCH;
 }
 
@@ -239,6 +248,7 @@ uint32_t bl(decode_result const *decoded)
   cpu_set_pc(result);
   BRANCH_WAS_TAKEN = 1;
 
+  cycle_count += TIMING_BRANCH;
   return TIMING_BRANCH_LINK;
 }
 }

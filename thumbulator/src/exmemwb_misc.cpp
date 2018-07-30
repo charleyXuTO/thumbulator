@@ -23,6 +23,7 @@ uint32_t movs_i(decode_result const *decoded)
   do_nflag(opA);
   do_zflag(opA);
 
+  cycle_count++;
   return 1;
 }
 
@@ -38,6 +39,7 @@ uint32_t mov_r(decode_result const *decoded)
   else
     cpu_set_gpr(decoded->Rd, opA);
 
+  cycle_count++;
   return 1;
 }
 
@@ -52,6 +54,7 @@ uint32_t movs_r(decode_result const *decoded)
   do_nflag(opA);
   do_zflag(opA);
 
+  cycle_count++;
   return 1;
 }
 
@@ -67,6 +70,7 @@ uint32_t sxtb(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -80,6 +84,7 @@ uint32_t sxth(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -91,6 +96,7 @@ uint32_t uxtb(decode_result const *decoded)
   uint32_t result = 0xFF & cpu_get_gpr(decoded->Rm);
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -102,6 +108,7 @@ uint32_t uxth(decode_result const *decoded)
   uint32_t result = 0xFFFF & cpu_get_gpr(decoded->Rm);
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -118,6 +125,7 @@ uint32_t rev(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -133,7 +141,8 @@ uint32_t rev16(decode_result const *decoded)
   result |= (opA >> 8) & 0xFF;
 
   cpu_set_gpr(decoded->Rd, result);
-
+  
+  cycle_count++;
   return 1;
 }
 
@@ -149,6 +158,7 @@ uint32_t revsh(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count++;
   return 1;
 }
 }

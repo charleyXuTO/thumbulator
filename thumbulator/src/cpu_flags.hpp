@@ -5,6 +5,9 @@
 
 namespace thumbulator {
 
+extern uint16_t redPrecMul;
+extern unsigned long long int cycle_count;
+
 // Define bit fields of APSR
 #define FLAG_N_INDEX 31
 #define FLAG_Z_INDEX 30

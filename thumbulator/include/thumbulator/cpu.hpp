@@ -60,6 +60,12 @@ extern bool BRANCH_WAS_TAKEN;
 extern bool EXIT_INSTRUCTION_ENCOUNTERED;
 
 /**
+ * Whether or not a skim point has been seen already.
+ * Assume that first skim point is acceptable.
+ */
+extern bool SKIM_POINT_SEEN;
+
+/**
  * Resets the CPU according to the specification.
  */
 void cpu_reset();

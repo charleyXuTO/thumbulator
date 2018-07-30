@@ -9,7 +9,11 @@
 namespace thumbulator {
 
 uint16_t insn;
+uint16_t redPrecMul = 0; // keep track of an upcoming reduced precision multiply
+unsigned long long int cycle_count = 0;
+unsigned long long int startOfROI = 0;
 
+bool SKIM_POINT_SEEN = false;
 bool BRANCH_WAS_TAKEN = false;
 bool EXIT_INSTRUCTION_ENCOUNTERED = false;
 
@@ -267,6 +271,39 @@ uint32_t entry55(decode_result const *decoded)
 
   if(insn == 0xDF01) {
     return exmemwb_exit_simulation(decoded);
+  }
+
+  // Custom instruction to start end of ROI. 
+  if(insn == 0xDF02)
+  {      
+    //if (PRINT_INST) { fprintf(stderr, "%08X:\t", cpu_get_pc() - 0x5); fprintf(stderr, "svc 3"); }    
+    startOfROI = cycle_count;
+    return 0; 
+  }
+
+  // Custom instruction to indicate end of ROI. 
+  if (insn == 0xDF03)
+  {
+    printf("ROI length = %llu\n",((long long unsigned)(cycle_count-startOfROI)));              
+    //printf("totalMuls = %u, zeroMuls = %u\n",totalMuls,zeroMuls);
+    //if (PRINT_INST) { fprintf(stderr, "%08X:\t", cpu_get_pc() - 0x5); fprintf(stderr, "svc 4"); }        
+    return 0; 
+  }
+
+  // Location of SKIM point
+  if (insn == 0xDF04)
+  {      
+    //if (PRINT_INST) { fprintf(stderr, "%08X:\t", cpu_get_pc() - 0x5); fprintf(stderr, "svc 5");  }   
+    SKIM_POINT_SEEN = true;
+    return 0; 
+  }   
+
+  // special instructions to indicate custom muls    
+  if (insn >= 0xDF05)
+  {
+    //if (PRINT_INST) { fprintf(stderr, "%08X:\t", cpu_get_pc() - 0x5); fprintf(stderr, "svc mul"); }     
+    redPrecMul++;
+    return 0; 
   }
 
   return exmemwb_error(decoded);

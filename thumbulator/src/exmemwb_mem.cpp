@@ -31,6 +31,7 @@ uint32_t ldm(decode_result const *decoded)
   if(rNWritten == 0)
     cpu_set_gpr(decoded->Rn, address);
 
+  cycle_count += (1+numLoaded);
   return 1 + numLoaded;
 }
 
@@ -59,6 +60,7 @@ uint32_t stm(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rn, address);
 
+  cycle_count += (1+numStored);
   return 1 + numStored;
 }
 
@@ -91,6 +93,7 @@ uint32_t pop(decode_result const *decoded)
 
   cpu_set_sp(address);
 
+  cycle_count += (1 + numLoaded + (BRANCH_WAS_TAKEN ? TIMING_PC_UPDATE : 0));
   return 1 + numLoaded + BRANCH_WAS_TAKEN ? TIMING_PC_UPDATE : 0;
 }
 
@@ -118,6 +121,7 @@ uint32_t push(decode_result const *decoded)
 
   cpu_set_sp(address);
 
+  cycle_count += (1+numStored);
   return 1 + numStored;
 }
 
@@ -137,6 +141,7 @@ uint32_t ldr_i(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -154,6 +159,7 @@ uint32_t ldr_sp(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -171,6 +177,7 @@ uint32_t ldr_lit(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -188,6 +195,7 @@ uint32_t ldr_r(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -222,6 +230,7 @@ uint32_t ldrb_i(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -256,6 +265,7 @@ uint32_t ldrb_r(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -285,6 +295,7 @@ uint32_t ldrh_i(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -314,6 +325,7 @@ uint32_t ldrh_r(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -348,6 +360,7 @@ uint32_t ldrsb_r(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -376,6 +389,7 @@ uint32_t ldrsh_r(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -392,6 +406,7 @@ uint32_t str_i(decode_result const *decoded)
 
   store(effectiveAddress, cpu_get_gpr(decoded->Rd));
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -406,6 +421,7 @@ uint32_t str_sp(decode_result const *decoded)
 
   store(effectiveAddress, cpu_get_gpr(decoded->Rd));
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -420,6 +436,7 @@ uint32_t str_r(decode_result const *decoded)
 
   store(effectiveAddress, cpu_get_gpr(decoded->Rd));
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -454,6 +471,7 @@ uint32_t strb_i(decode_result const *decoded)
 
   store(effectiveAddressWordAligned, orig);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -488,6 +506,7 @@ uint32_t strb_r(decode_result const *decoded)
 
   store(effectiveAddressWordAligned, orig);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -516,6 +535,7 @@ uint32_t strh_i(decode_result const *decoded)
 
   store(effectiveAddressWordAligned, orig);
 
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 
@@ -543,7 +563,8 @@ uint32_t strh_r(decode_result const *decoded)
   }
 
   store(effectiveAddressWordAligned, orig);
-
+  
+  cycle_count += TIMING_MEM;
   return TIMING_MEM;
 }
 }

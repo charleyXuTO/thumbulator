@@ -24,6 +24,7 @@ uint32_t adcs(decode_result const *decoded)
   do_cflag(opA, opB, cpu_get_flag_c());
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -43,6 +44,7 @@ uint32_t adds_i3(decode_result const *decoded)
   do_cflag(opA, opB, 0);
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -62,6 +64,7 @@ uint32_t adds_i8(decode_result const *decoded)
   do_cflag(opA, opB, 0);
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -81,6 +84,7 @@ uint32_t adds_r(decode_result const *decoded)
   do_cflag(opA, opB, 0);
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -107,6 +111,7 @@ uint32_t add_r(decode_result const *decoded)
     cpu_set_gpr(decoded->Rd, result);
 
   // Instruction takes two cycles when PC is the destination
+  cycle_count += ((decoded->Rd == GPR_PC) ? 2 : 1);
   return (decoded->Rd == GPR_PC) ? 2 : 1;
 }
 
@@ -121,6 +126,7 @@ uint32_t add_sp(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -137,6 +143,7 @@ uint32_t adr(decode_result const *decoded)
 
   cpu_set_gpr(decoded->Rd, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -157,6 +164,7 @@ uint32_t subs_i3(decode_result const *decoded)
   do_cflag(opA, opB, 1);
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -175,6 +183,7 @@ uint32_t subs_i8(decode_result const *decoded)
   do_cflag(opA, opB, 1);
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -193,6 +202,7 @@ uint32_t subs(decode_result const *decoded)
   do_cflag(opA, opB, 1);
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -206,6 +216,7 @@ uint32_t sub_sp(decode_result const *decoded)
 
   cpu_set_sp(result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -224,6 +235,7 @@ uint32_t sbcs(decode_result const *decoded)
   do_cflag(opA, opB, cpu_get_flag_c());
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -242,6 +254,7 @@ uint32_t rsbs(decode_result const *decoded)
   do_cflag(opA, opB, 1);
   do_vflag(opA, opB, result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -262,6 +275,14 @@ uint32_t muls(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
-  return 32;
+  if (redPrecMul >0 )
+  {   
+      redPrecMul--;                   
+      cycle_count += 4;
+      return 4;
+  }  
+  
+  cycle_count += 16;  
+  return 16;
 }
 }

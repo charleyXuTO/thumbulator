@@ -178,6 +178,9 @@ stats_bundle simulate(char const *binary_file,
   uint64_t active_start = 0u;
   int no_progress_counter = 0;
 
+  //Set skim_point_seen to false before we start. 
+  thumbulator::SKIM_POINT_SEEN = false;
+
   // Execute the program
   // Simulation will terminate when it executes insn == 0xBFAA
   while(!thumbulator::EXIT_INSTRUCTION_ENCOUNTERED) {
@@ -201,6 +204,11 @@ stats_bundle simulate(char const *binary_file,
           elapsed_cycles += restore_time;
 
           stats.models.back().time_for_restores += restore_time;
+
+          // Upon a restore, check if the skim point was already set. 
+          // if it is, 'jump' to the restore point (i.e., the end of the simulation).
+          if (thumbulator::SKIM_POINT_SEEN == true)
+            thumbulator::EXIT_INSTRUCTION_ENCOUNTERED = true;
         }
       }
 

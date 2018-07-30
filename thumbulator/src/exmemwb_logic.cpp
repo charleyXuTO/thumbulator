@@ -21,6 +21,7 @@ uint32_t ands(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -39,6 +40,7 @@ uint32_t bics(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -56,6 +58,7 @@ uint32_t eors(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -73,6 +76,7 @@ uint32_t orrs(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -89,6 +93,7 @@ uint32_t mvns(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -122,6 +127,7 @@ uint32_t asrs_i(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -154,6 +160,7 @@ uint32_t asrs_r(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count++;
   return 1;
 }
 
@@ -174,6 +181,7 @@ uint32_t lsls_i(decode_result const *decoded)
   do_zflag(result);
   cpu_set_flag_c((opB == 0) ? cpu_get_flag_c() : (opA << (opB - 1)) >> 31);
 
+  cycle_count++;
   return 1;
 }
 
@@ -192,6 +200,7 @@ uint32_t lsrs_i(decode_result const *decoded)
   do_zflag(result);
   cpu_set_flag_c((opB == 0) ? 0 : (opA >> (opB - 1)) & 0x1);
 
+  cycle_count++;
   return 1;
 }
 
@@ -209,6 +218,7 @@ uint32_t lsls_r(decode_result const *decoded)
   do_zflag(result);
   cpu_set_flag_c((opB == 0) ? cpu_get_flag_c() : (opB > 32) ? 0 : (opA << (opB - 1)) >> 31);
 
+  cycle_count++;
   return 1;
 }
 
@@ -226,6 +236,7 @@ uint32_t lsrs_r(decode_result const *decoded)
   do_zflag(result);
   cpu_set_flag_c((opB == 0) ? cpu_get_flag_c() : (opB > 32) ? 0 : (opA >> (opB - 1)) & 0x1);
 
+  cycle_count++;
   return 1;
 }
 
@@ -247,6 +258,7 @@ uint32_t rors(decode_result const *decoded)
   do_nflag(result);
   do_zflag(result);
 
+  cycle_count++;
   return 1;
 }
 }
