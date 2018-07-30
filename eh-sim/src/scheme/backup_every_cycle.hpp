@@ -75,9 +75,11 @@ public:
 
     active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
     battery.consume_energy(NVP_BEC_BACKUP_ENERGY);
+    stats->system.total_energy_backup += NVP_BEC_BACKUP_ENERGY;
     numberOfBackups++;
     stats->cpu.cycle_count+=2;
     return NVP_BEC_BACKUP_TIME;
+
   }
 
   uint64_t restore(stats_bundle *stats) override
@@ -89,6 +91,7 @@ public:
     stats->models.back().energy_for_restore = NVP_BEC_RESTORE_ENERGY;
     battery.consume_energy(NVP_BEC_RESTORE_ENERGY);
     numberOfRestores++;
+    stats->system.total_energy_restore+=NVP_BEC_RESTORE_ENERGY;
     stats->cpu.cycle_count+= 1;
     return NVP_BEC_RESTORE_TIME;
   }
