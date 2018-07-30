@@ -134,6 +134,7 @@ public:
     backup_check = 0; //disabling the progress watchdog
     progress_check  =0;
     stats->cpu.dead_instruction = 0;
+    stats->cpu.cycle_count = stats->cpu.cycle_count + 40;
     test_instructions = stats->cpu.instruction_count;
     return CLANK_BACKUP_ARCH_TIME;
   }
@@ -172,6 +173,7 @@ public:
     battery.consume_energy(CLANK_RESTORE_ENERGY);
     stats ->system.total_energy_restore +=CLANK_RESTORE_ENERGY;
     numberOfRestores++;
+    stats->cpu.cycle_count += 40;
     stats->cpu.dead_instruction_count= stats->cpu.dead_instruction_count + stats->cpu.dead_instruction;
     stats->cpu.dead_instruction = 0;
     // assume memory access latency for reads and writes is the same

@@ -75,7 +75,8 @@ public:
 
     active_stats.energy_for_backups += NVP_BEC_BACKUP_ENERGY;
     battery.consume_energy(NVP_BEC_BACKUP_ENERGY);
-
+    numberOfBackups++;
+    stats->cpu.cycle_count+=2;
     return NVP_BEC_BACKUP_TIME;
   }
 
@@ -87,7 +88,8 @@ public:
 
     stats->models.back().energy_for_restore = NVP_BEC_RESTORE_ENERGY;
     battery.consume_energy(NVP_BEC_RESTORE_ENERGY);
-
+    numberOfRestores++;
+    stats->cpu.cycle_count+= 1;
     return NVP_BEC_RESTORE_TIME;
   }
 
