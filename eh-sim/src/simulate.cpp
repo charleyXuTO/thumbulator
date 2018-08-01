@@ -24,28 +24,36 @@ void load_program(char const *file_name)
   std::fread(&thumbulator::FLASH_MEMORY, sizeof(uint16_t),
       sizeof(thumbulator::FLASH_MEMORY) / sizeof(uint16_t), fd);
 #else
+
   // [1] read in content of reset vector
   std::fseek(fd, 0x18, SEEK_SET);
   std::fread(&(thumbulator::RESET_VECTOR), sizeof(uint16_t), 1, fd);
 
   // [2] find beginning of .data section in binary
   uint16_t dataStart;
-  std::fseek(fd, 0x78, SEEK_SET);
+  std::fseek(fd, 0x3C, SEEK_SET);
   std::fread(&dataStart, sizeof(uint16_t), 1, fd);
-  uint32_t textSizeBytes = dataStart - 0xD4;
+  uint32_t textSizeBytes = dataStart - 0x114;
 
   // [3] read in .rodata and .text
   // .rodata always starts from 0xC000, followed by .text, followed by .data
-  uint32_t offsetBytes = 0xC000 - FLASH_START;
-  uint32_t readSizeBytes = std::min(textSizeBytes, (FLASH_SIZE_BYTES - offsetBytes));
+  //uint32_t offsetBytes = 0x4000 - FLASH_START;
+  //uint32_t readSizeBytes = std::min(textSizeBytes, (FLASH_SIZE_BYTES - offsetBytes));
 
-  std::fseek(fd, 0xD4, SEEK_SET);
-  uint32_t idx = (offsetBytes >> 1);
+  std::fseek(fd, 0x114, SEEK_SET);
+  //  uint32_t idx = (offsetBytes >> 1);
+  uint32_t idx = 0;
+
+  uint32_t readSizeBytes = FLASH_SIZE_BYTES;
   std::fread(&(thumbulator::FLASH_MEMORY[idx]), sizeof(uint16_t),
-      readSizeBytes>>1, fd);
+             readSizeBytes>>1, fd);
+
+  std::fseek(fd, 0x354, SEEK_SET);
+  std::fread(&(thumbulator::FLASH_MEMORY[(0x423C-FLASH_START) >> 1]),sizeof(uint16_t),(readSizeBytes-((0x423C-FLASH_START)>>1)),fd);
+
 
   // [4] read in content of RAM
-  std::fseek(fd, 0x98, SEEK_SET);
+  std::fseek(fd, 0xF8, SEEK_SET);
   std::fread(&(thumbulator::RAM), sizeof(uint16_t), RAM_SIZE_ELEMENTS, fd);
 
 #endif

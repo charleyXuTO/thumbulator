@@ -9,7 +9,7 @@
 # generic devices: msp430 or msp430x
 # MSP430afe253 -- msp430, 16KB flash, 512B RAM
 # MSP430FR5994 -- msp430, 256KB flash, 512000B RAM
-DEVICE:=MSP430afe253
+DEVICE:=MSP430FR5994
 EXAMPLE:=test
 # Require DEVICE to be specified
 ifndef DEVICE
@@ -73,9 +73,8 @@ $(EXOUTPUT): $(EXAMPLE) $(EXOBJECT)
 	@echo ============================================
 	@echo Linking objects and generating output binary
 	$(CC) $(LDFLAGS) $(EXOBJECT) -o $@
-	$(OBJDUMP) --source -D $@ > $@.objdump
-	hexdump -e '16/1 "%02x " "\n"' -s 144 -n 10 -v $@ > $@.hexdump
-
+	$(OBJDUMP) --source -D -g -S -x -z -a $@ > $@.objdump
+	hexdump -e '16/1 "%02x " "\n"' -v -s 852 $@ > $@.hexdump
 debug: all
 	$(GDB) $(EXAMPLE)/$(EXAMPLE).out
 

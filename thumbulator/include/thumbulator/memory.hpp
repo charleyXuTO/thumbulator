@@ -13,15 +13,16 @@ namespace thumbulator {
 extern uint16_t RESET_VECTOR;
 
 // interrupt vector table, not including the reset vector
-#define INTERRUPT_VECTOR_START 0xFFE0
-#define INTERRUPT_VECTOR_SIZE_ELEMENTS 15
+#define INTERRUPT_VECTOR_START 0xFFB4
+#define INTERRUPT_VECTOR_SIZE_ELEMENTS 37
 #define INTERRUPT_VECTOR_ADDRESS_MASK(x) ((x - INTERRUPT_VECTOR_START)>>1)
 extern uint16_t INTERRUPT_VECTOR_TABLE[INTERRUPT_VECTOR_SIZE_ELEMENTS];
 
 // RAM starts from 0x00200
 // use 0.5 KB for MSP430AFE253 for now
-#define RAM_START 0x00200
-#define RAM_SIZE_BYTES (1 << 9)
+// use 8 KB for MSP430FR5994
+#define RAM_START 0x01C00
+#define RAM_SIZE_BYTES (1 << 13)
 #define RAM_SIZE_ELEMENTS (RAM_SIZE_BYTES >> 1)
 //#define RAM_ADDRESS_MASK (((~0) << 9) ^ (~0))
 #define RAM_ADDRESS_MASK(x) ((x - RAM_START)>>1)
@@ -55,8 +56,10 @@ extern std::function<uint16_t(uint32_t, uint16_t, uint16_t)> ram_store_hook;
 // FLASH/ROM ends at 0x0FFDF
 // use 16 KB for MSP430AFE253 for now
 #define FLASH_END 0x0FFDF
-#define FLASH_START 0x0BFE0
-#define FLASH_SIZE_BYTES (1 << 14)
+
+//#define FLASH_START 0xC000
+#define FLASH_START 0x04000
+#define FLASH_SIZE_BYTES (1 << 18)
 #define FLASH_SIZE_ELEMENTS (FLASH_SIZE_BYTES >> 1)
 #define FLASH_ADDRESS_MASK(x) ((x - FLASH_START)>>1)
 //(((~0) << 14) ^ (~0))

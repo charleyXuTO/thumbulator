@@ -15,8 +15,11 @@ static int testzero(int hm)
 }
 
 static void testSimple() {
+//#pragma PERSISTENT(x);
+//unsigned int x = 23000;
+
   int a,b,c, r;
-  int a1[3] = {1,2,3};
+  int a1[10] = {1,2,3,5,6,7,8,9};
   a = 1; b = 2; c = 4; r = 0;
   
   printf("Arithmetic Operations:\n");

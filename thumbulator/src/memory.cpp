@@ -101,8 +101,16 @@ void load(uint32_t address, uint32_t *value, uint16_t false_read)
       terminate_simulation(1);
     }
 
-    //*value = FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 1];
-    *value = FLASH_MEMORY[FLASH_ADDRESS_MASK(address)];
+
+    if (address==RESET_VECTOR_START) {
+        *value = RESET_VECTOR;
+    }
+    else {
+
+
+        //*value = FLASH_MEMORY[(address & FLASH_ADDRESS_MASK) >> 1];
+        *value = FLASH_MEMORY[FLASH_ADDRESS_MASK(address)];
+    }
   }
   else if (address >= RAM_START) {
     if(address >= RAM_START) {
