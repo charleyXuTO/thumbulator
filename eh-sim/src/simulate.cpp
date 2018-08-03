@@ -40,7 +40,8 @@ void load_program(char const *file_name)
   //uint32_t offsetBytes = 0x4000 - FLASH_START;
   //uint32_t readSizeBytes = std::min(textSizeBytes, (FLASH_SIZE_BYTES - offsetBytes));
 
-  std::fseek(fd, 0x114, SEEK_SET);
+  //std::fseek(fd, 0x114, SEEK_SET);
+  std::fseek(fd, 0xf4, SEEK_SET);
   //  uint32_t idx = (offsetBytes >> 1);
   uint32_t idx = 0;
 
@@ -48,12 +49,16 @@ void load_program(char const *file_name)
   std::fread(&(thumbulator::FLASH_MEMORY[idx]), sizeof(uint16_t),
              readSizeBytes>>1, fd);
 
-  std::fseek(fd, 0x354, SEEK_SET);
-  std::fread(&(thumbulator::FLASH_MEMORY[(0x423C-FLASH_START) >> 1]),sizeof(uint16_t),(readSizeBytes-((0x423C-FLASH_START)>>1)),fd);
+  //std::fseek(fd, 0x354, SEEK_SET);
+  std::fseek(fd, 0x108, SEEK_SET);
+  //std::fseek(fd, 0x300, SEEK_SET);
+  std::fread(&(thumbulator::FLASH_MEMORY[(0x4010-FLASH_START) >> 1]),sizeof(uint16_t),(readSizeBytes-((0x4010-FLASH_START)>>1)),fd);
 
 
   // [4] read in content of RAM
-  std::fseek(fd, 0xF8, SEEK_SET);
+  //std::fseek(fd, 0x260, SEEK_SET);
+  //std::fseek(fd, 0x20C, SEEK_SET);
+  std::fseek(fd, 0x100, SEEK_SET);
   std::fread(&(thumbulator::RAM), sizeof(uint16_t), RAM_SIZE_ELEMENTS, fd);
 
 #endif
@@ -93,7 +98,7 @@ uint32_t step_cpu()
   uint16_t instruction;
   thumbulator::fetch_instruction(thumbulator::cpu_get_pc() - 0x2, &instruction);
   // decode
-  auto const decoded = thumbulator::decode(instruction);
+  auto const decoded = thumbulator::decode(&instruction);
   // execute, memory, and write-back
   uint32_t const instruction_ticks = thumbulator::exmemwb(instruction, &decoded);
 

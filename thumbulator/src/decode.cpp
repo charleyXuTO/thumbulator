@@ -39,7 +39,7 @@ decode_result decode_double(const uint16_t pInsn)
   uint8_t As = (pInsn >> 4) & 0x3;
   uint8_t Ad = (pInsn >> 7) & 0x1;
   uint16_t extended;
-
+  uint8_t n =0;
   bool isByte = (pInsn & 0x40)==0x40;
   bool isAddrWord = false;
   uint16_t srcWord150 = 0;
@@ -49,8 +49,9 @@ decode_result decode_double(const uint16_t pInsn)
   uint32_t srcWord = 0;
   uint32_t dstWord = 0;
   if (extendedInstruction) {
-    fetch_instruction(cpu_get_pc()- 0x2, &extended);
+    fetch_instruction(cpu_get_pc()- 0x4, &extended);
     bool al = (extended &0x40) == 0x40;
+    n = (extended &0xF) + 1;
     if (al == false && isByte == true) {
       isAddrWord = true;
       isByte = false;
@@ -101,10 +102,10 @@ decode_result decode_double(const uint16_t pInsn)
   decoded.Ad = Ad;
   decoded.isByte = isByte;
   decoded.isAddrWord = isAddrWord;
-
+  decoded.n = n;
   decoded.srcWord = srcWord;
   decoded.dstWord = dstWord;
-
+  decoded.extended = extendedInstruction;
   return decoded;
 }
 
@@ -119,41 +120,62 @@ decode_result decode_double(const uint16_t pInsn)
 decode_result decode_single(const uint16_t pInsn)
 {
   decode_result decoded;
-
-  uint16_t opcode = (pInsn & 0xFF80);
-  uint8_t Rdst = pInsn & 0xF;
-  uint8_t Ad = (pInsn >> 4) & 0x3;
-  bool isByte = (pInsn & 0x40)==0x40;
-  bool isAddrWord = false;
+  uint16_t opcode;
+  uint8_t Rdst;
+  uint8_t Ad;
+  bool isByte;
+  bool isAddrWord;
   uint32_t dstWord = 0;
   uint16_t dstWord1916 = 0;
   uint16_t dstWord150 = 0;
   uint16_t extended;
+  uint8_t n = 0;
 
-  if (extendedInstruction) {
-    fetch_instruction(cpu_get_pc()- 0x2, &extended);
-    bool al = (extended &0x40) == 0x40;
-    if (al == false && isByte == true) {
-      isAddrWord = true;
+  if ((pInsn >> 10 & 0x1) == 0x1) { // for pushm and popm
       isByte = false;
-    }
-  }
-
-
-  // [1] fetch any extra word needed (indexed, symbolic, absolute, immediate)
-  if(Ad & 0x1) { // indexed, symbolic, absolute, indirect autoincrement, immediate
-    // indirect autoincrement doesn't need next word
-
-    if(!isIndirectAutoIncrement(Ad, Rdst)) {
-      if (isAddrWord) {
-        dstWord1916 = extended & 0xF;
+      isAddrWord = (pInsn>>8 & 0x1) != 0x1;
+      dstWord = pInsn >> 4 & 0xF;
+      if ((pInsn >> 9 & 0x1) == 0x1 ) {
+          Rdst = (pInsn & 0xF);
       }
-      fetch_instruction(cpu_get_pc(), &dstWord150);
-      cpu_set_pc(cpu_get_pc() + 0x2);
-      dstWord = (dstWord1916 & 0xF) <<16 ^ dstWord150;
-    }
+      else {
+          Rdst = (pInsn & 0xF);
+      }
+      dstWord = dstWord + 0x1;
   }
+  else {
+      opcode = (pInsn & 0xFF80);
+      Rdst = pInsn & 0xF;
+      Ad = (pInsn >> 4) & 0x3;
+      isByte = (pInsn & 0x40) == 0x40;
+      isAddrWord = false;
+      dstWord = 0;
+      dstWord1916 = 0;
+      dstWord150 = 0;
 
+      if (extendedInstruction) {
+          fetch_instruction(cpu_get_pc() - 0x4, &extended);
+          bool al = (extended & 0x40) == 0x40;
+          n = (extended & 0xF) +1;
+          if (al == false && isByte == true) {
+              isAddrWord = true;
+              isByte = false;
+          }
+      }
+      // [1] fetch any extra word needed (indexed, symbolic, absolute, immediate)
+      if (Ad & 0x1) { // indexed, symbolic, absolute, indirect autoincrement, immediate
+          // indirect autoincrement doesn't need next word
+
+          if (!isIndirectAutoIncrement(Ad, Rdst)) {
+              if (isAddrWord) {
+                  dstWord1916 = extended & 0xF;
+              }
+              fetch_instruction(cpu_get_pc(), &dstWord150);
+              cpu_set_pc(cpu_get_pc() + 0x2);
+              dstWord = (dstWord1916 & 0xF) << 16 ^ dstWord150;
+          }
+      }
+  }
   // [3] set decode structure
   decoded.opcode = opcode;
   decoded.Rd = Rdst;
@@ -161,7 +183,8 @@ decode_result decode_single(const uint16_t pInsn)
   decoded.isByte = isByte;
   decoded.isAddrWord = isAddrWord;
   decoded.dstWord = dstWord;
-
+  decoded.extended = extendedInstruction;
+  decoded.n = n;
   return decoded;
 }
 
@@ -175,13 +198,30 @@ decode_result decode_jump(const uint16_t pInsn)
   decode_result decoded;
 
   uint16_t opcode = (pInsn & 0xFC00);
-  int16_t offset = (pInsn & 0x03FF);
+  int16_t offset = (pInsn & 0x3FF);
   bool isNeg = (pInsn & 0x200);
 
   decoded.opcode = opcode;
   decoded.offset = (isNeg)?(0xFC00 | offset):(offset); // sign-extend
 
   return decoded;
+}
+decode_result decode_extended(const uint16_t pInsn)
+{
+    decode_result decoded;
+
+    uint16_t opcode = (pInsn>>4 & 0x3F);
+    bool isAddrWord = (opcode & 0x01 != 0x01);
+    uint8_t Rdst = (pInsn & 0xF);
+    uint8_t n = (pInsn >> 10 & 0x11) + 1;
+
+
+    decoded.opcode = opcode;
+    decoded.isAddrWord = isAddrWord;
+    decoded.Rd = Rdst;
+    decoded.dstWord = n;
+
+    return decoded;
 }
 
 // Stop simulation if we cannot decode the instruction
@@ -195,7 +235,7 @@ decode_result decode_error(const uint16_t pInsn)
 // Use a table of function pointers indexed by the instruction
 // to make decoding fast
 decode_result (*decodeJumpTable[16])(const uint16_t pInsn) = {
-  decode_error,     // 0
+  decode_extended,     // 0
   decode_single,    // 1
   decode_jump,      // 2
   decode_jump,      // 3
@@ -217,12 +257,12 @@ decode_result (*decodeJumpTable[16])(const uint16_t pInsn) = {
 // using the first 4 instruction opcode bits and then
 // executing the function pointed to
 // The decode functions update the global decode structure
-decode_result decode(uint16_t instruction)
+decode_result decode(uint16_t* instruction)
 {
 
   extendedInstruction = false;
 
-  if (instruction >= 0x1800 && instruction <= 0x1C00) {
+  if (*instruction >= 0x1800 && *instruction <= 0x2000) {
 
     // | 15  9 |  8  |  7  |  6  | 5  4 | 3    0 |
     // |-----------------------------------------|
@@ -246,11 +286,12 @@ decode_result decode(uint16_t instruction)
 
     extendedInstruction = true;
 
-    fetch_instruction(cpu_get_pc(), &instruction); //fetch new instruction
+    fetch_instruction(cpu_get_pc(), instruction); //fetch new instruction
 
     cpu_set_pc(cpu_get_pc() + 0x2);
 
   }
-  return decodeJumpTable[instruction >> 12](instruction);
+  return decodeJumpTable[*instruction >> 12](*instruction);
 }
 }
+;

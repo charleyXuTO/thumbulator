@@ -69,9 +69,11 @@ struct decode_result {
   // distinguish between word and byte instructions
   bool isByte;
   bool isAddrWord;
-
+  bool extended;
   uint16_t opcode;
   int16_t offset;
+
+  uint8_t n;
 
 
 };
@@ -82,7 +84,7 @@ struct decode_result {
  * @param instruction The instruction to decode.
  * @return The decode stage registers based upon the passed instruction.
  */
-decode_result decode(uint16_t instruction);
+decode_result decode(uint16_t* instruction);
 }
 
 #endif

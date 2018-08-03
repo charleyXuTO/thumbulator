@@ -9,12 +9,20 @@ namespace thumbulator {
 uint32_t rrc(decode_result const *decoded)
 {
   TRACE_INSTRUCTION("rrc %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
-
+  int result;
   // compute
   uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint32_t carry = cpu_get_flag_c();
   uint16_t lsb = opA & 0x1;
-  int32_t result = opA >> 1;
+  if (!decoded->extended) {
+      result = opA >> 1;
+  }
+  else {
+      result = opA >> decoded->n;
+  }
+
+
+
   if (!decoded->isAddrWord) {
     result |= (carry << 15);
   }
@@ -76,9 +84,15 @@ uint32_t rra(decode_result const *decoded)
   TRACE_INSTRUCTION("rra %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
 
   // compute
+  int32_t result;
   int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint16_t lsb = opA & 0x1;
-  int32_t result = (opA >> 1) | (opA & 0x8000);
+  if (!decoded->extended) {
+     result = (opA >> 1) | (opA & 0x8000);
+  }
+  else {
+      result = (opA >> decoded->n) | (opA & 0x8000);
+  }
   cpu_set_flag_c(lsb);
 
   // update result & flags

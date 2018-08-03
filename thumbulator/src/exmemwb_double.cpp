@@ -54,11 +54,22 @@ uint32_t add(decode_result const *decoded)
 {
   TRACE_INSTRUCTION("add %s%u, %s%u\n", addrModeString[decoded->As].c_str(), decoded->Rs,
                                         addrModeString[decoded->Ad].c_str(), decoded->Rd);
-
+  int32_t opA;
+  int32_t opB;
+  int32_t result = 0;
   // compute
-  int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
-  int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord,false);
-  int32_t result = opA + opB;
+  if (decoded->extended) {
+      for (int n = 0 ; n < decoded->n; n++) {
+          opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
+          opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+          result = result + opA + opB;
+      }
+  }
+  else {
+      opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
+      opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+      result = opA + opB;
+  }
 
   // update result & flags
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
@@ -175,13 +186,13 @@ uint32_t sub(decode_result const *decoded)
     do_nflag(result);
     do_zflag(result);
     do_cflag(opA, opB, 1);
-    do_vflag(opA, opB, result);
+    do_vflag((opA), opB, result);
   }
   else {
     do_nflagx(result);
     do_zflagx(result);
     do_cflagx(opA, opB, 1);
-    do_vflagx(opA, opB, result);
+    do_vflagx((opA), opB, result);
   }
 
   // update Rs if it's in autoincrement mode

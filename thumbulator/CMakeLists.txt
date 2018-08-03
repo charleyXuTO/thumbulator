@@ -22,7 +22,7 @@ add_library(
   src/trace.hpp
   src/utils.hpp
   src/utils.cpp
-)
+        src/exmemwb_extended.cpp)
 
 target_include_directories(
   ${PROJECT_NAME}

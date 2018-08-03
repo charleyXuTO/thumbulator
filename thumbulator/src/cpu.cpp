@@ -61,10 +61,9 @@ uint32_t jge(decode_result const *);
 uint32_t jl(decode_result const *);
 uint32_t jmp(decode_result const *);
 
-
-
-
-
+uint32_t rrum(decode_result const *);
+uint32_t pushm(decode_result const *);
+uint32_t popm(decode_result const *);
 
 
 uint32_t exmemwb_error(decode_result const *decoded)
@@ -92,9 +91,29 @@ uint32_t (*executeJumpTableSingleOp[8])(decode_result const *) = {
     exmemwb_error
 };
 
+uint32_t singleOpEntry2(decode_result const *decoded)
+{
+    return executeJumpTableSingleOp[(insn >> 7) & 0x7](decoded);
+}
+
+uint32_t (*executeJumpTableSingleOp2[2])(decode_result const *) = {
+      pushm, // pushm
+      popm // popm
+};
+
+uint32_t singleOpEntry3(decode_result const *decoded) {
+   return executeJumpTableSingleOp2[(insn >> 9) & 0x1](decoded);
+}
+
+uint32_t (*executeJumpTableSingleOpFirst[2])(decode_result const *) = {
+    singleOpEntry2, // regular single op entires
+    singleOpEntry3 // popm, pushm
+};
+
+
 uint32_t singleOpEntry(decode_result const *decoded)
 {
-  return executeJumpTableSingleOp[(insn >> 7) & 0x7](decoded);
+  return executeJumpTableSingleOpFirst[(insn >> 10) & 0x1](decoded);
 }
 
 uint32_t (*executeJumpTableJumpOp[8])(decode_result const *) = {
@@ -112,9 +131,44 @@ uint32_t jumpEntry(decode_result const *decoded)
 {
   return executeJumpTableJumpOp[(insn >> 10) & 0x7](decoded);
 }
+uint32_t (*executeExtendedTableOp2[4]) (decode_result const *) = {
+    exmemwb_error, //rrcm 0
+    exmemwb_error, //rram 1
+    exmemwb_error, //rlam 2
+    rrum  //rrum 3
+};
+uint32_t extended2(decode_result const *decoded)
+{
+    return executeExtendedTableOp2[(insn >> 8) & 0x3](decoded);
+}
+
+
+uint32_t (*executeExtendedTableOp[16])(decode_result const *) = {
+    exmemwb_error, // mova 0
+    exmemwb_error, // mova 1
+    exmemwb_error, // mova 2
+    exmemwb_error, // mova 3
+    extended2,     // RR.. A 4
+    extended2,     // RR.. W 5
+    exmemwb_error, // mova 6
+    exmemwb_error, // mova 7
+    exmemwb_error, // mova 8
+    exmemwb_error, // cmpa 9
+    exmemwb_error, // adda 10
+    exmemwb_error, // suba 11
+    exmemwb_error, // mova 12
+    exmemwb_error, // cmpa 13
+    exmemwb_error, // adda 14
+    exmemwb_error // suba 15
+};
+
+uint32_t extended(decode_result const* decoded)
+{
+    return executeExtendedTableOp[(insn>>4) & 0xF](decoded);
+}
 
 uint32_t (*executeJumpTable[16])(decode_result const *) = {
-    exmemwb_error,
+    extended,
     singleOpEntry,
     jumpEntry,
     jumpEntry,
