@@ -245,8 +245,21 @@ uint32_t cmp(decode_result const *decoded)
 
   // compute
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
-  opA = ~(opA);
   int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+
+  if (!decoded->isAddrWord) {
+    if (opA >> 16 > 0) {
+      opA = (int16_t)opA;
+    }
+    if (opB >> 16 >0 ) {
+      opB = (int16_t)opB;
+    }
+  }
+  else {
+    printf("needs to finish"); //TODO: needs to do the negative version of that
+  }
+
+  opA = ~(opA);
   int32_t result = opA + opB + 1;
 
   // update flags

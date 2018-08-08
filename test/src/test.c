@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-
+/*
 #define TEST(...) if(__VA_ARGS__) {					 \
                     printf("OK: " #__VA_ARGS__ " passed at %s:%d\n", __FILE__,__LINE__); \
                   } else {						 \
@@ -15,7 +15,7 @@ static int testzero(int hm)
 {
   return hm > 0;
 }
-
+*/
 
 static void testSimple() {
 //#pragma PERSISTENT(x);
@@ -32,9 +32,12 @@ static void testSimple() {
   if((a << b) == 4) {
       r++;
   }
+
   if((c >> a) == 2) {
       r++;
   }
+
+
   if((0>0)==0) {
       r++;
   }
@@ -48,7 +51,7 @@ static void testSimple() {
 
   
 
-  assertFalse(testzero(0));
+  //assertFalse(testzero(0));
 }
 
 int main(void)
