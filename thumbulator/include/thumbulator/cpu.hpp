@@ -4,7 +4,10 @@
 #include <cstdint>
 
 #include "thumbulator/decode.hpp"
-
+extern int rodataOff;
+extern int textOff;
+extern int dataOff;
+extern int textAddr;
 namespace thumbulator {
 
 // TODO: what to use here??

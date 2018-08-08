@@ -9,7 +9,7 @@
 # generic devices: msp430 or msp430x
 # MSP430afe253 -- msp430, 16KB flash, 512B RAM
 # MSP430FR5994 -- msp430, 256KB flash, 512000B RAM
-DEVICE:=MSP430afe253
+DEVICE:=MSP430FR5994
 EXAMPLE:=test
 # Require DEVICE to be specified
 ifndef DEVICE

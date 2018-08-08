@@ -23,12 +23,12 @@ static void testSimple() {
 
 
   int a,b,c, r;
- // int a1[10] = {1,2,3,5,6,7,8,9};
+  //int a1[10] = {1,2,3,5,6,7,8,9};
   a = 1; b = 2; c = 4; r = 0;
   
   printf("Arithmetic Operations:\n");
 
-/*
+
   if((a << b) == 4) {
       r++;
   }
@@ -41,7 +41,7 @@ static void testSimple() {
   if((a>b)==0) {
       r++;
   }
-*/
+
   //if(a1[1] > b) {
     //  r++; 
   //}

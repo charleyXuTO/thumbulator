@@ -63,8 +63,8 @@ struct decode_result {
   uint8_t Ad;
 
   // immediate or offset
-  uint32_t srcWord;
-  uint32_t dstWord;
+  int32_t srcWord;
+  int32_t dstWord;
 
   // distinguish between word and byte instructions
   bool isByte;

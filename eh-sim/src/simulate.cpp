@@ -1,5 +1,5 @@
 #include "simulate.hpp"
-
+#include <elfio/elfio.hpp>
 #include <thumbulator/cpu.hpp>
 #include <thumbulator/memory.hpp>
 
@@ -7,10 +7,15 @@
 #include "capacitor.hpp"
 #include "stats.hpp"
 #include "voltage_trace.hpp"
-
+#include "thumbulator/load_elf.hpp"
+#include "thumbulator/cpu.hpp"
 #include <cstring>
 #include <iostream>
 
+int rodataOff;
+int textOff;
+int textAddr;
+int dataOff;
 namespace ehsim {
 
 void load_program(char const *file_name)
@@ -24,7 +29,7 @@ void load_program(char const *file_name)
   std::fread(&thumbulator::FLASH_MEMORY, sizeof(uint16_t),
       sizeof(thumbulator::FLASH_MEMORY) / sizeof(uint16_t), fd);
 #else
-
+  elf_load(2 , file_name);
   // [1] read in content of reset vector
   std::fseek(fd, 0x18, SEEK_SET);
   std::fread(&(thumbulator::RESET_VECTOR), sizeof(uint16_t), 1, fd);
@@ -41,7 +46,7 @@ void load_program(char const *file_name)
   //uint32_t readSizeBytes = std::min(textSizeBytes, (FLASH_SIZE_BYTES - offsetBytes));
 
   //std::fseek(fd, 0x114, SEEK_SET);
-  std::fseek(fd, 0xf4, SEEK_SET);
+  std::fseek(fd, rodataOff, SEEK_SET);
   //  uint32_t idx = (offsetBytes >> 1);
   uint32_t idx = 0;
 
@@ -50,15 +55,15 @@ void load_program(char const *file_name)
              readSizeBytes>>1, fd);
 
   //std::fseek(fd, 0x354, SEEK_SET);
-  std::fseek(fd, 0x108, SEEK_SET);
+  std::fseek(fd, textOff, SEEK_SET);
   //std::fseek(fd, 0x300, SEEK_SET);
-  std::fread(&(thumbulator::FLASH_MEMORY[(0x4010-FLASH_START) >> 1]),sizeof(uint16_t),(readSizeBytes-((0x4010-FLASH_START)>>1)),fd);
+  std::fread(&(thumbulator::FLASH_MEMORY[(textAddr-FLASH_START) >> 1]),sizeof(uint16_t),(readSizeBytes-((textAddr-FLASH_START)>>1)),fd);
 
 
   // [4] read in content of RAM
   //std::fseek(fd, 0x260, SEEK_SET);
   //std::fseek(fd, 0x20C, SEEK_SET);
-  std::fseek(fd, 0x100, SEEK_SET);
+  std::fseek(fd, dataOff, SEEK_SET);
   std::fread(&(thumbulator::RAM), sizeof(uint16_t), RAM_SIZE_ELEMENTS, fd);
 
 #endif

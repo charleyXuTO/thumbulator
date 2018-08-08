@@ -40,6 +40,7 @@ decode_result decode_double(const uint16_t pInsn)
   uint8_t Ad = (pInsn >> 7) & 0x1;
   uint16_t extended;
   uint8_t n =0;
+
   bool isByte = (pInsn & 0x40)==0x40;
   bool isAddrWord = false;
   uint16_t srcWord150 = 0;
@@ -81,8 +82,10 @@ decode_result decode_double(const uint16_t pInsn)
       fetch_instruction(cpu_get_pc(), &srcWord150);
       cpu_set_pc(cpu_get_pc() + 0x2);
       srcWord = (srcWord1916 & 0xF) <<16 ^ srcWord150;
+
     }
   }
+
 
   // [2] fetch any extra word needed for dst
   if (Ad==0x1) { // indexed, symbolic, absolute
@@ -169,10 +172,12 @@ decode_result decode_single(const uint16_t pInsn)
           if (!isIndirectAutoIncrement(Ad, Rdst)) {
               if (isAddrWord) {
                   dstWord1916 = extended & 0xF;
+
               }
               fetch_instruction(cpu_get_pc(), &dstWord150);
               cpu_set_pc(cpu_get_pc() + 0x2);
               dstWord = (dstWord1916 & 0xF) << 16 ^ dstWord150;
+
           }
       }
   }

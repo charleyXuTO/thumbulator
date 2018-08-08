@@ -137,7 +137,7 @@ void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, boo
   else {
     uint32_t addr = getAddressBaseOnMode(addrMode, reg, nextWord);
     //if(isByte) {
-    //  //TODO: this would effect load count?? doublt check false_read
+    //  //TODO: this would effect load count?? double check false_read
     //  uint16_t oldVal;
     //  load(addr, &oldVal, 1);
     //  val = (val & 0xFF) | (oldVal & 0xFF00);
