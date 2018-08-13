@@ -11,6 +11,7 @@ add_library(
   include/thumbulator/cpu.hpp
   include/thumbulator/decode.hpp
   include/thumbulator/memory.hpp
+  include/thumbulator/peripheral.hpp
   src/cpu_flags.hpp
   src/decode.cpp
   src/exit.hpp
@@ -22,7 +23,8 @@ add_library(
   src/trace.hpp
   src/utils.hpp
   src/utils.cpp
-        src/exmemwb_extended.cpp src/load_elf.cpp src/peripheral.hpp)
+  src/peripheral.cpp
+        src/exmemwb_extended.cpp src/load_elf.cpp)
 
 target_include_directories(
   ${PROJECT_NAME}

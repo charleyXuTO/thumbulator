@@ -21,8 +21,6 @@ uint32_t rrc(decode_result const *decoded)
       result = opA >> decoded->n;
   }
 
-
-
   if (!decoded->isAddrWord) {
     result |= (carry << 15);
   }
