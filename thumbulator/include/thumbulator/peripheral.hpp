@@ -31,11 +31,18 @@ namespace thumbulator {
         MACS32H = 0x1E,
         OP2L = 0x20,
         OP2H = 0x22,
-        RESO = 0x24,
+        RES0 = 0x24,
         RES1 = 0x26,
         RES2 = 0x28,
         RES3 = 0x2A,
         MPY32CTl0 = 0x2C,
+    };
+
+    enum HWoperations {
+        unsignedmultiply = 0,
+        signedmultiply = 1,
+        unsignedmultiplyaccummulate=2,
+        signedmultiplyaccumulate = 3,
     };
 
 

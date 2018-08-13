@@ -1,19 +1,20 @@
 	.file	"test.c"
 	.global	__mulhi2_f5
+	.global	__mulsi2_f5
 	.section	.text.testSimple,"ax",@progbits
 	.balign 2
 	.type	testSimple, @function
 testSimple:
 ; start of function
 ; framesize_regs:     0
-; framesize_locals:   30
+; framesize_locals:   46
 ; framesize_outgoing: 0
-; framesize:          30
+; framesize:          46
 ; elim ap -> fp       2
-; elim fp -> sp       30
+; elim fp -> sp       46
 ; saved regs:(none)
 	; start of prologue
-	SUB.W	#30, R1
+	SUB.W	#46, R1
 	; end of prologue
 	MOV.W	#0, @R1
 	MOV.W	#0, 2(R1)
@@ -33,46 +34,68 @@ testSimple:
 	MOV.W	#7, 10(R1)
 	MOV.W	#8, 12(R1)
 	MOV.W	#9, 14(R1)
-	MOV.W	#1, 26(R1)
-	MOV.W	#2, 24(R1)
-	MOV.W	#4, 22(R1)
-	MOV.W	#0, 28(R1)
-	MOV.W	26(R1), R12
-	MOV.W	24(R1), R13
+	MOV.W	#1, 42(R1)
+	MOV.W	#2, 40(R1)
+	MOV.W	#4, 38(R1)
+	MOV.W	#0, 44(R1)
+	MOV.W	42(R1), R12
+	MOV.W	40(R1), R13
 	CALL	#__mspabi_slli
 	CMP.W	#4, R12 { JNE	.L2
-	ADD.W	#1, 28(R1)
+	ADD.W	#1, 44(R1)
 .L2:
-	MOV.W	22(R1), R12
-	MOV.W	26(R1), R13
+	MOV.W	38(R1), R12
+	MOV.W	42(R1), R13
 	CALL	#__mspabi_srai
 	CMP.W	#2, R12 { JNE	.L8
-	ADD.W	#1, 28(R1)
+	ADD.W	#1, 44(R1)
 .L8:
-	ADD.W	#1, 28(R1)
-	CMP.W	26(R1), 24(R1) { JL	.L4
-	ADD.W	#1, 28(R1)
+	ADD.W	#1, 44(R1)
+	CMP.W	42(R1), 40(R1) { JL	.L4
+	ADD.W	#1, 44(R1)
 .L4:
-	MOV.W	#1, 26(R1)
-	MOV.W	#2, 24(R1)
-	MOV.W	#4, 22(R1)
-	MOV.W	22(R1), R13
-	MOV.W	24(R1), R12
+	MOV.W	#1, 42(R1)
+	MOV.W	#2, 40(R1)
+	MOV.W	#-4, 38(R1)
+	MOV.W	40(R1), R13
+	MOV.W	38(R1), R12
 	CALL	#__mulhi2_f5
-	ADD.W	R12, 26(R1)
-	CMP.W	#4, 28(R1) { JNE	.L5
-	CMP.W	#9, 26(R1) { JEQ	.L9
+	ADD.W	R12, 42(R1)
+	MOV.W	#0, 30(R1)
+	MOV.W	#0, 32(R1)
+	MOV.W	#0, 34(R1)
+	MOV.W	#0, 36(R1)
+	MOV.W	#-27430, 26(R1)
+	MOV.W	#69, 28(R1)
+	MOV.W	#-24848, 22(R1)
+	MOV.W	#92, 24(R1)
+	MOV.W	22(R1), R14
+	MOV.W	24(R1), R15
+	MOV.W	26(R1), R12
+	MOV.W	28(R1), R13
+	CALL	#__mulsi2_f5
+	MOV.W	R12, 30(R1)
+	MOV.W	R13, 32(R1)
+	MOV.W	R13, R12
+	rpt	#15 { rrax.w	R12
+	MOV.W	R12, 34(R1)
+	MOV.W	R12, 36(R1)
+	CMP.W	#4, 44(R1) { JNE	.L5
+	CMP.W	#-28672, 30(R1) { JNE	.L5
+	CMP.W	#31181, 32(R1) { JNE	.L5
+	CMP.W	#2095, 34(R1) { JNE	.L5
+	CMP.W	#0, 36(R1) { JEQ	.L9
 .L5:
 	MOV.W	#5, 20(R1)
 	BR	#.L5
 .L9:
 	MOV.W	2(R1), R12
-	CMP.W	R12, 24(R1) { JGE	.L10
-	ADD.W	#1, 28(R1)
+	CMP.W	R12, 40(R1) { JGE	.L10
+	ADD.W	#1, 44(R1)
 .L10:
 	NOP
 	; start of epilogue
-	ADD.W	#30, R1
+	ADD.W	#46, R1
 	RET
 	.size	testSimple, .-testSimple
 	.section	.text.main,"ax",@progbits

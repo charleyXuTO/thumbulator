@@ -46,10 +46,16 @@ static void testSimple() {
   }
 a =1;
 b =2;
-c =4;
-a = a + b*c;
+c =-4;
+a = a + c*b;
+int64_t w = 0;
 
-  if (r == 4 && a == 9) {
+int32_t z = 3000000;
+int32_t f = 3000000;
+
+w = z*f;
+
+  if (r == 4 && w == 9000000000000) {
   }
   else { 
    while (1) {
