@@ -124,7 +124,7 @@ uint32_t jmp(decode_result const *decoded)
   cpu_set_pc(result);
   BRANCH_WAS_TAKEN = 1;
   // hack to detect exit
-  if(0==(abs(offset)-2)) {
+  if(0==((offset)+2)) {
     EXIT_INSTRUCTION_ENCOUNTERED = true;
   }
 

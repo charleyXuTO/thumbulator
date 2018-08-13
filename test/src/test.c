@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <string.h>
 
@@ -23,10 +24,10 @@ static void testSimple() {
 
 
   int a,b,c, r;
-  //int a1[10] = {1,2,3,5,6,7,8,9};
+  int a1[10] = {1,2,3,5,6,7,8,9};
   a = 1; b = 2; c = 4; r = 0;
   
-  printf("Arithmetic Operations:\n");
+  //printf("Arithmetic Operations:\n");
 
 
   if((a << b) == 4) {
@@ -37,17 +38,28 @@ static void testSimple() {
       r++;
   }
 
-
   if((0>0)==0) {
       r++;
   }
   if((a>b)==0) {
       r++;
   }
-
-  //if(a1[1] > b) {
-    //  r++; 
-  //}
+a =1;
+b =2;
+c =4;
+a = a + b*c;
+/*
+  if (r == 4 && a == 9) {
+  }
+  else { 
+   while (1) {
+    int k = 5;
+   }
+  }
+*/
+  if(a1[1] > b) {
+      r++; 
+  }
 
   
 
@@ -57,7 +69,7 @@ static void testSimple() {
 int main(void)
 {
   testSimple();
-  printf("EXIT\n");
+ // printf("EXIT\n");
   return 0;
 }
 

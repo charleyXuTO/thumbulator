@@ -43,17 +43,21 @@ uint32_t pushm (decode_result const* decoded ) {
     for (int n = 0 ; n<decoded->dstWord; n++) {
         opA = getValue(0, (decoded->Rd-n), decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
         if (!decoded->isAddrWord) {
+            opA = opA & 0xFFFF;
             sp = cpu_get_sp()-2;
             cpu_set_sp(sp);
             store(sp, opA, decoded->isByte);
+
         }
         else {
+            opA = opA & 0xFFFFF;
             sp= cpu_get_sp()-2;
             cpu_set_sp(sp);
-            store(sp, (opA>>16), decoded->isByte);
+            store(sp, ((opA>>16) & 0xF), decoded->isByte);
             sp = cpu_get_sp()-2;
             cpu_set_sp(sp);
             store(sp, (opA & 0xFFFF), decoded->isByte);
+
         }
 
     }
@@ -72,7 +76,7 @@ uint32_t popm (decode_result const* decoded) {
             sp= cpu_get_sp()+2;
             cpu_set_sp(sp);
             load(sp, &opA150,0);
-            opA = ((opA1916 << 16) & 0xF) ^ opA150;
+            opA = ((opA1916 & 0xF) << 16 ) ^ opA150;
             setValue (0, (decoded->Rd+n), decoded->dstWord, decoded->isByte, decoded->isAddrWord, opA);
             sp = cpu_get_sp()+2;
             cpu_set_sp(sp);

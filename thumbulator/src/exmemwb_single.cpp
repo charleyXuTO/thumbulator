@@ -91,8 +91,13 @@ uint32_t rra(decode_result const *decoded)
      result = (opA >> 1) | (opA & 0x8000);
   }
   else {
-      result = (opA >> decoded->n) | (opA & 0x8000);
+      for (int i = 0; i<decoded->n; i++ ) {
+          opA = getValue (decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+          result = (opA >> 1) | (opA & 0x8000);
+          setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
+      }
   }
+
   cpu_set_flag_c(lsb);
 
   // update result & flags
@@ -182,13 +187,13 @@ uint32_t call(decode_result const *decoded)
   if (!decoded->isAddrWord) {
     sp = cpu_get_sp() - 2;
     cpu_set_sp(sp);
-    uint32_t pc = cpu_get_pc();
+    pc = cpu_get_pc();
     store(sp, pc, false);
   }
   else {
     sp = cpu_get_sp() - 2;
     cpu_set_sp(sp);
-    uint32_t pc = cpu_get_pc();
+    pc = cpu_get_pc();
     store(sp, pc >> 16, false);
     sp =  cpu_get_sp() -2;
     cpu_set_sp(sp);

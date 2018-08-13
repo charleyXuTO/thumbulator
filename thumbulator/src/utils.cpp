@@ -125,6 +125,13 @@ uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte,
 
 void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isAddrWord, uint32_t val) {
   AddrMode mode = getAddrMode(addrMode, reg, false);
+  if (isAddrWord) {
+      val = val & 0xFFFFF;
+  }
+  else {
+      val = val & 0xFFFF;
+  }
+
   if(mode==REGISTER) { 
     if(isByte) {
       val &= 0xFF;
@@ -146,7 +153,7 @@ void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, boo
       store(addr, val, isByte);
     }
     else {
-      store(addr-2, val >> 16, false);
+      store(addr-2, (val >> 16) & 0xF, false);
       store(addr, val & 0xFFFF, false); //TODO: figure out what value you should increase the addr by
     }
   }
@@ -245,6 +252,9 @@ uint32_t getSingleOpColumnIdx(uint16_t opcode) {
 uint32_t getSingleOperandCycleCount(decode_result const *decoded) {
   uint32_t cycles = 0;
   AddrMode dstMode = getAddrMode(decoded->Ad, decoded->Rd, false);
+  if (decoded->opcode == RETI) {
+      return 5; // cycles returning from interrupt
+  }
   uint32_t rowIdx = dstMode;
   uint32_t columnIdx = getSingleOpColumnIdx(decoded->opcode);
   cycles = singleOpCycleCountTable[rowIdx][columnIdx];

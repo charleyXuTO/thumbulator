@@ -59,8 +59,8 @@ static void do_cflagx(uint32_t a, uint32_t b, uint32_t carry) // for 20 bit inst
 {
     uint32_t result;
 
-    result = (a & 0x7FFFF) + (b & 0x7FFFF) + carry;
-    result = (result >> 19) + (a >> 19) + (b >> 19);
+    result = (a & 0x7FFFF) + (b & 0x7FFFF) + carry; //carry in
+    result = (result >> 19) + (a >> 19) + (b >> 19); //carry out
     cpu_set_flag_c(result >> 1);
 }
 

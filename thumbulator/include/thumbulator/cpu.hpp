@@ -8,6 +8,8 @@ extern int rodataOff;
 extern int textOff;
 extern int dataOff;
 extern int textAddr;
+extern int bssOff;
+extern int bssAddr;
 namespace thumbulator {
 
 // TODO: what to use here??

@@ -22,7 +22,7 @@ add_library(
   src/trace.hpp
   src/utils.hpp
   src/utils.cpp
-        src/exmemwb_extended.cpp src/load_elf.cpp)
+        src/exmemwb_extended.cpp src/load_elf.cpp src/peripheral.hpp)
 
 target_include_directories(
   ${PROJECT_NAME}

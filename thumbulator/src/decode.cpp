@@ -296,7 +296,7 @@ decode_result decode(uint16_t* instruction)
     cpu_set_pc(cpu_get_pc() + 0x2);
 
   }
-  return decodeJumpTable[*instruction >> 12](*instruction);
+   return decodeJumpTable[*instruction >> 12](*instruction);
 }
 }
 ;

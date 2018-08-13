@@ -387,8 +387,9 @@ class elfio
         }
         for (Elf_Half i =0; i<num ;++i ) {
             section *sec = sections_.at(i);
-            if (sections[i]->get_name() == ".rodata") {
-                // rodataOff = sec->get_offset();
+            if (sections[i]->get_name() == ".bss") {
+                bssOff = sec->get_offset();
+                bssAddr = sec->get_address();
             }
             else if (sections[i]->get_name() == ".data") {
                 dataOff = sec->get_offset();

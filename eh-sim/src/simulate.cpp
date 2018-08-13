@@ -16,6 +16,8 @@ int rodataOff;
 int textOff;
 int textAddr;
 int dataOff;
+int bssOff;
+int bssAddr;
 namespace ehsim {
 
 void load_program(char const *file_name)
@@ -51,20 +53,25 @@ void load_program(char const *file_name)
   uint32_t idx = 0;
 
   uint32_t readSizeBytes = FLASH_SIZE_BYTES;
-  std::fread(&(thumbulator::FLASH_MEMORY[idx]), sizeof(uint16_t),
+  std::fread(&(thumbulator::FLASH_MEMORY), sizeof(uint16_t),
              readSizeBytes>>1, fd);
 
   //std::fseek(fd, 0x354, SEEK_SET);
   std::fseek(fd, textOff, SEEK_SET);
   //std::fseek(fd, 0x300, SEEK_SET);
-  std::fread(&(thumbulator::FLASH_MEMORY[(textAddr-FLASH_START) >> 1]),sizeof(uint16_t),(readSizeBytes-((textAddr-FLASH_START)>>1)),fd);
+  std::fread(&(thumbulator::FLASH_MEMORY[(textAddr-FLASH_START) >> 1]),sizeof(uint16_t),((readSizeBytes-(textAddr-FLASH_START))>>1),fd);
 
 
   // [4] read in content of RAM
   //std::fseek(fd, 0x260, SEEK_SET);
   //std::fseek(fd, 0x20C, SEEK_SET);
-  std::fseek(fd, dataOff, SEEK_SET);
+  std::fseek(fd, dataOff, SEEK_SET); //load in data section
   std::fread(&(thumbulator::RAM), sizeof(uint16_t), RAM_SIZE_ELEMENTS, fd);
+
+  std::fseek(fd, bssOff, SEEK_SET); // load in bss section
+  std::fread(&(thumbulator::RAM[(bssAddr-RAM_START) >> 1]),sizeof(uint16_t),((RAM_SIZE_BYTES - (bssAddr-RAM_START))>>1), fd);
+
+
 
 #endif
   std::fclose(fd);

@@ -62,7 +62,8 @@ uint32_t add(decode_result const *decoded)
       for (int n = 0 ; n < decoded->n; n++) {
           opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
           opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
-          result = result + opA + opB;
+          result = opA + opB;
+          setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
       }
   }
   else {
@@ -133,6 +134,7 @@ uint32_t dadd(decode_result const *decoded)
   // compute
   uint32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
   uint32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+
   uint16_t carry = cpu_get_flag_c();
   uint32_t result = (opA & 0xFF) + ((opA & 0xFF00)>>8)*10 +
                     (opB & 0xFF) + ((opB & 0xFF00)>>8)*10 +
@@ -175,8 +177,10 @@ uint32_t sub(decode_result const *decoded)
 
   // compute
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
-  opA = ~(opA);
+
   int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+
+  opA = ~(opA);
   int32_t result = opA + opB + 1;
 
   // update result & flags
@@ -208,8 +212,9 @@ uint32_t subc(decode_result const *decoded)
 
   // compute
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
-  opA = ~(opA);
   int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+
+  opA = ~(opA);
   uint16_t carry = cpu_get_flag_c();
   int32_t result = opA + opB + carry;
 
@@ -248,14 +253,21 @@ uint32_t cmp(decode_result const *decoded)
   int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
 
   if (!decoded->isAddrWord) {
-    if (opA >> 16 > 0) {
+    if (opA >> 15 > 0) {
       opA = (int16_t)opA;
     }
-    if (opB >> 16 >0 ) {
+    if (opB >> 15 >0 ) {
       opB = (int16_t)opB;
     }
   }
   else {
+    if (opA >> 19 >0 ) {
+        opA = (opA & 0xFFFF) - (opA & 0x1FFFFF);
+    }
+    if (opB >> 19 >0) {
+        opB = (opB & 0xFFFF) - (opB & 0x1FFFFF);
+    }
+
     printf("needs to finish"); //TODO: needs to do the negative version of that
   }
 

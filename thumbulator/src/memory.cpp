@@ -4,7 +4,7 @@
 
 #include "cpu_flags.hpp"
 #include "exit.hpp"
-
+#include "peripheral.hpp"
 namespace thumbulator {
 
 uint16_t RESET_VECTOR;
@@ -81,6 +81,8 @@ void fetch_instruction(uint32_t address, uint16_t *value)
 
 }
 
+
+
 void load(uint32_t address, uint32_t *value, uint16_t false_read)
 {
   //TODO: support byte level load
@@ -120,7 +122,20 @@ void load(uint32_t address, uint32_t *value, uint16_t false_read)
     }
   }
   else {
-    // accessing either peripherals or special function registers
+    if (address>= 0x100 && address <= 0xAFF) { //accessing either peripherals or special function registers
+          if (address>= 0x04C0 && address <= 0x4EF) {
+             *value = hardwareMultiplier(*value, address);
+          }
+          else {
+              fprintf(
+                      stderr, "Error: Using other peripherals 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+              terminate_simulation(1);
+          }
+    }
+    else {
+      fprintf(stderr, "Error: I don't know where you are trying to look but its wrong: 0x%8.8X, pc =%x\n",address,cpu_get_pc());
+    }
+
   }
 }
 
@@ -165,7 +180,19 @@ void store(uint32_t address, uint16_t value, bool isByte)
     ram_store(address, value, isByte);
   }
   else {
-    // accessing either peripherals or special function registers
+      if (address>= 0x100 && address <= 0xAFF) { //accessing either peripherals or special function registers
+          if (address>= 0x04C0 && address <= 0x4EF) {
+              hardwareMultiplier(value, address);
+          }
+          else {
+              fprintf(
+                      stderr, "Error: Using other peripherals 0x%8.8X, pc=%x\n", address, cpu_get_pc());
+              terminate_simulation(1);
+          }
+      }
+      else {
+          fprintf(stderr, "Error: I don't know where you are trying to look but its wrong: 0x%8.8X, pc =%x\n",address,cpu_get_pc());
+      }
   }
 }
 }
