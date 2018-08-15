@@ -3,12 +3,12 @@
 #include "cpu_flags.hpp"
 #include <assert.h>
 
-namespace thumbulator {
-
 //TODO: better print
 std::string addrModeString[7] = {
-  "REG", "IDX", "SYM", "ABS", "IDREG", "IDAUTO+", "IMM"
+        "REG", "IDX", "SYM", "ABS", "IDREG", "IDAUTO+", "IMM"
 };
+
+namespace thumbulator {
 
 AddrMode getAddrMode(uint8_t addrMode, uint8_t reg, bool isSource) {
   AddrMode mode;
@@ -120,21 +120,21 @@ uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte,
   // adjust value based on type
   if(isByte)
       val &= 0xFF;
+  else if (!isAddrWord)
+      val &= 0xFFFF;
   return val;
 }
 
 void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isAddrWord, uint32_t val) {
   AddrMode mode = getAddrMode(addrMode, reg, false);
-  if (isAddrWord) {
-      val = val & 0xFFFFF;
-  }
-  else {
-      val = val & 0xFFFF;
-  }
+
 
   if(mode==REGISTER) { 
     if(isByte) {
       val &= 0xFF;
+    }
+    else if (!isAddrWord) {
+        val &= 0xFFFF;
     }
     cpu_set_gpr(reg, val);
   }

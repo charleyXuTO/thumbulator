@@ -17,7 +17,7 @@ static int testzero(int hm)
   return hm > 0;
 }
 */
-
+/*
 static void testSimple() {
 //#pragma PERSISTENT(x);
 //int x[10] ={1,2,3,5,6,7,8,9};
@@ -44,18 +44,19 @@ static void testSimple() {
   if((a>b)==0) {
       r++;
   }
-a =1;
-b =2;
-c =-4;
-a = a + c*b;
-int64_t w = 0;
+double a2 = 2.2;
+double c2 = 1.2;
+double b2 = 3.96;
 
-int32_t z = 3000000;
-int32_t f = 3000000;
+b2 = b2 + 0;
+//a2 = c2*b2;
+//int32_t w = 0;
 
-w = z*f;
+//int16_t z = 3000;
+//int16_t f = 3000;
+//w = z*f;
 
-  if (r == 4 && w == 9000000000000) {
+  if (r == 4 && b2 == 3.96) {
   }
   else { 
    while (1) {
@@ -71,11 +72,22 @@ w = z*f;
 
   //assertFalse(testzero(0));
 }
-
+*/
 int main(void)
 {
-  testSimple();
+ // testSimple();
  // printf("EXIT\n");
+
+
+double x = 1.1;
+x = 3.3 + x;
+if (x == 4.4) {
+x = 1.0;
+}
+else {
+x = 0.0;
+}
+
   return 0;
 }
 

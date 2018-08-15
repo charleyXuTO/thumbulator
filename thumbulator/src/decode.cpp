@@ -218,7 +218,7 @@ decode_result decode_extended(const uint16_t pInsn)
     uint16_t opcode = (pInsn>>4 & 0x3F);
     bool isAddrWord = (opcode & 0x01 != 0x01);
     uint8_t Rdst = (pInsn & 0xF);
-    uint8_t n = (pInsn >> 10 & 0x11) + 1;
+    uint8_t n = ((pInsn >> 10) & 0x3)+1;
 
 
     decoded.opcode = opcode;
@@ -296,7 +296,10 @@ decode_result decode(uint16_t* instruction)
     cpu_set_pc(cpu_get_pc() + 0x2);
 
   }
-   return decodeJumpTable[*instruction >> 12](*instruction);
+   // if (cpu_get_pc() == 0x41c4) {
+     // printf("Hello");
+ // }
+  return decodeJumpTable[*instruction >> 12](*instruction);
 }
 }
 ;

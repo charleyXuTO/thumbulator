@@ -48,9 +48,9 @@ AS		        := $(GCC_BIN_DIR)/msp430-elf-as
 GDB			    := $(GCC_BIN_DIR)/msp430-elf-gdb
 ######################################
 #CFLAGS          := -Os -D__$(DEVICE)__ -mmcu=$(DEVICE) -g -ffunction-sections -fdata-sections -DDEPRECATED
-#LDFLAGS         := -T $(LDDIR).ld -L $(GCC_MSP_INC_DIR) -mmcu=$(DEVICE) -g -Wl,--gc-sections
-CFLAGS          := -O0 -D__$(DEVICE)__ -mmcu=$(DEVICE) -ffunction-sections -fdata-sections -DDEPRECATED -nostartfiles -ffreestanding -std=c99 -fomit-frame-pointer -fno-optimize-sibling-calls
-LDFLAGS         := -T $(LDDIR).ld -L $(GCC_MSP_INC_DIR) -mmcu=$(DEVICE) -Wl,--gc-sections
+#LDFLAGS         := -T $(LDDIR).ld -L $(GCC_MSP_INC_DIR) -mmcu=$(DEVICE) -g -Wl,--gc-sections 
+CFLAGS          := -O0 -D__$(DEVICE)__ -mmcu=$(DEVICE) -ffunction-sections -fdata-sections -DDEPRECATED -nostartfiles -ffreestanding -std=c99 -fomit-frame-pointer -fno-optimize-sibling-calls -mhwmult=none
+LDFLAGS         := -T $(LDDIR).ld -L $(GCC_MSP_INC_DIR) -mmcu=$(DEVICE) -Wl,--gc-sections -mhwmult=none
 INCLUDES        := -I $(GCC_MSP_INC_DIR) -I $(GCC_INC_DIR)
 ######################################
 SRC             := src/$(EXAMPLE).c

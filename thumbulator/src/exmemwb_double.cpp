@@ -9,8 +9,8 @@ namespace thumbulator {
 // MOV
 uint32_t mov(decode_result const *decoded)
 {
-  TRACE_INSTRUCTION("mov %s%u, %s%u\n", addrModeString[decoded->As].c_str(), decoded->Rs,
-                                        addrModeString[decoded->Ad].c_str(), decoded->Rd);
+  TRACE_INSTRUCTION("mov %s%u %d, %s%u %d\n", addrModeString[decoded->As].c_str(), decoded->Rs, decoded->srcWord,
+                                        addrModeString[decoded->Ad].c_str(), decoded->Rd, decoded->dstWord);
 
   // compute
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord,true);
@@ -26,8 +26,12 @@ uint32_t mov(decode_result const *decoded)
 
   // update result & flags
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
-
-  if (!decoded->isAddrWord) {
+  fprintf(stderr, "Result: 0x%4.4x (%u)\n", result, result);
+  for (int i =0; i<16; i++) {
+      fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
+  }
+/*
+  if (!decoded->isAdd11174rWord) {
     do_nflag(result);
     do_zflag(result);
     cpu_set_flag_c(!(cpu_get_flag_z()));
@@ -39,7 +43,7 @@ uint32_t mov(decode_result const *decoded)
     cpu_set_flag_c(!(cpu_get_flag_z()));
     cpu_set_flag_v(0);
   }
-
+*/
   // update Rs if it's in autoincrement mode
   updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
 
@@ -52,8 +56,8 @@ uint32_t mov(decode_result const *decoded)
 // ADD
 uint32_t add(decode_result const *decoded)
 {
-  TRACE_INSTRUCTION("add %s%u, %s%u\n", addrModeString[decoded->As].c_str(), decoded->Rs,
-                                        addrModeString[decoded->Ad].c_str(), decoded->Rd);
+  TRACE_INSTRUCTION("add %s%u %d, %s%u %d\n", addrModeString[decoded->As].c_str(), decoded->Rs, decoded->srcWord,
+                                        addrModeString[decoded->Ad].c_str(), decoded->Rd, decoded->dstWord);
   int32_t opA;
   int32_t opB;
   int32_t result = 0;
@@ -86,6 +90,11 @@ uint32_t add(decode_result const *decoded)
     do_cflagx(opA, opB, 0);
     do_vflagx(opA, opB, result);
   }
+
+    fprintf(stderr, "Result: 0x%4.4x (%u)\n", result, result);
+    for (int i =0; i<16; i++) {
+        fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
+    }
 
   // update Rs if it's in autoincrement mode
   updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
@@ -172,13 +181,15 @@ uint32_t dadd(decode_result const *decoded)
 
 uint32_t sub(decode_result const *decoded)
 {
-  TRACE_INSTRUCTION("sub %s%u, %s%u\n", addrModeString[decoded->As].c_str(), decoded->Rs,
-                                        addrModeString[decoded->Ad].c_str(), decoded->Rd);
+  TRACE_INSTRUCTION("sub %s%u %d, %s%u %d\n", addrModeString[decoded->As].c_str(), decoded->Rs, decoded->srcWord,
+                                        addrModeString[decoded->Ad].c_str(), decoded->Rd, decoded->dstWord);
 
   // compute
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
 
   int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+
+  fprintf(stderr, "sub opA: %d, opB: %d\n", opA, opB);
 
   opA = ~(opA);
   int32_t result = opA + opB + 1;
@@ -198,6 +209,12 @@ uint32_t sub(decode_result const *decoded)
     do_cflagx(opA, opB, 1);
     do_vflagx((opA), opB, result);
   }
+
+    fprintf(stderr, "Result: 0x%4.4x (%u)\n", result, result);
+    for (int i =0; i<16; i++) {
+        fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
+    }
+
 
   // update Rs if it's in autoincrement mode
   updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
@@ -245,8 +262,8 @@ uint32_t subc(decode_result const *decoded)
 
 uint32_t cmp(decode_result const *decoded)
 {
-  TRACE_INSTRUCTION("cmp %s%u, %s%u\n", addrModeString[decoded->As].c_str(), decoded->Rs,
-                                        addrModeString[decoded->Ad].c_str(), decoded->Rd);
+  TRACE_INSTRUCTION("cmp %s%u %d, %s%u %d\n", addrModeString[decoded->As].c_str(), decoded->Rs, decoded->srcWord,
+                                        addrModeString[decoded->Ad].c_str(), decoded->Rd, decoded->dstWord);
 
   // compute
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
@@ -287,7 +304,10 @@ uint32_t cmp(decode_result const *decoded)
     do_cflag(opA, opB, 1);
     do_vflagx(opA, opB, result);
   }
-
+    fprintf(stderr, "Result: 0x%4.4x (%u)\n", result, result);
+    for (int i =0; i<16; i++) {
+        fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
+    }
   // update Rs if it's in autoincrement mode
   updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
 

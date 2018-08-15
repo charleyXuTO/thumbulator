@@ -8,6 +8,8 @@
 
 namespace thumbulator {
 
+//std::string addrModeString[7];
+
 uint16_t insn;
 
 bool BRANCH_WAS_TAKEN = false;
