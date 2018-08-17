@@ -79,13 +79,15 @@ int main(void)
  // printf("EXIT\n");
 
 
-double x = 1.1;
-x = 3.3 + x;
-if (x == 4.4) {
+double x =1.1;
+x = 3.3- x;
+if (x == 2.2) {
 x = 1.0;
 }
 else {
+
 x = 0.0;
+
 }
 
   return 0;

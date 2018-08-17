@@ -42,6 +42,7 @@ uint32_t rrc(decode_result const *decoded)
       do_zflagx(result);
       cpu_set_flag_v(0);
   }
+    fprintf(stderr, "Result: 0x%4.4x (%u) C flag: %u N flag: %u, V flag: %u, Z flag: %u\n", result, result, cpu_get_flag_c(), cpu_get_flag_n(), cpu_get_flag_v(), cpu_get_flag_z());
 
 
 
@@ -110,6 +111,7 @@ uint32_t rra(decode_result const *decoded)
     do_zflagx(result);
     cpu_set_flag_v(0);
   }
+    fprintf(stderr, "Result: 0x%4.4x (%d) C flag: %u N flag: %u, V flag: %u, Z flag: %u\n", result, result, cpu_get_flag_c(), cpu_get_flag_n(), cpu_get_flag_v(), cpu_get_flag_z());
 
   ////// update Rs if it's in autoincrement mode
   ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
@@ -131,7 +133,7 @@ uint32_t sxt(decode_result const *decoded) // TODO: Needs to re-read the documen
 
   ////// update Rs if it's in autoincrement mode
   ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
-
+// TODO: status bits
   return getSingleOperandCycleCount(decoded);
 }
 

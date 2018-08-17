@@ -10,6 +10,9 @@ std::string addrModeString[7] = {
 
 namespace thumbulator {
 
+bool upperByte;
+
+
 AddrMode getAddrMode(uint8_t addrMode, uint8_t reg, bool isSource) {
   AddrMode mode;
   switch(addrMode) {
@@ -50,6 +53,7 @@ AddrMode getAddrMode(uint8_t addrMode, uint8_t reg, bool isSource) {
 uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) {
   uint32_t retVal = 0;
   AddrMode mode = getAddrMode(addrMode, reg, false); // false since this shouldn't be called if CG was used
+  upperByte = false;
   switch(mode) {
     case REGISTER: {
       assert(0 && "should not call getAddressBaseOnMode in register mode");
@@ -58,6 +62,9 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) 
     }
     case INDEXED: {
       int32_t x = nextWord;
+      if ((x&0x01)==0x01) { // check if the address is an odd number (for upper byte storage)
+        upperByte = true;
+      }
       uint32_t Rn = cpu_get_gpr(reg);
       int32_t addr = Rn + x;
       retVal = addr;
@@ -65,6 +72,7 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) 
     }
     case SYMBOLIC: {
       int32_t x = nextWord;
+      // TODO:: isn't this the PC
       uint32_t Rn = cpu_get_gpr(reg); // this is PC
       int32_t addr = Rn + x;
       retVal = addr;
@@ -107,7 +115,7 @@ uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte,
   else {
     uint32_t addr = getAddressBaseOnMode(addrMode, reg, nextWord);
     if (!isAddrWord) {
-        load(addr, &val, 0);
+      load(addr, &val, 0);
     }
     else {
         uint32_t val1916 = 0;
@@ -118,6 +126,8 @@ uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte,
     }
   }
   // adjust value based on type
+  if (isByte && upperByte)
+    val = (val >> 8) &0xFF;
   if(isByte)
       val &= 0xFF;
   else if (!isAddrWord)
@@ -145,16 +155,17 @@ void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, boo
     uint32_t addr = getAddressBaseOnMode(addrMode, reg, nextWord);
     //if(isByte) {
     //  //TODO: this would effect load count?? double check false_read
+            // TODO:: I don't understand whats happening here
     //  uint16_t oldVal;
     //  load(addr, &oldVal, 1);
     //  val = (val & 0xFF) | (oldVal & 0xFF00);
     //}
     if (!isAddrWord) {
-      store(addr, val, isByte);
+      store(addr, val, isByte); // TODO needs to implement upper byte store
     }
     else {
       store(addr-2, (val >> 16) & 0xF, false);
-      store(addr, val & 0xFFFF, false); //TODO: figure out what value you should increase the addr by
+      store(addr, val & 0xFFFF, false);
     }
   }
   return;

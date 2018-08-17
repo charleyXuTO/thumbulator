@@ -26,12 +26,12 @@ uint32_t mov(decode_result const *decoded)
 
   // update result & flags
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
-  fprintf(stderr, "Result: 0x%4.4x (%u)\n", result, result);
+  fprintf(stderr, "Result: 0x%4.4x (%u) C flag: %u N flag: %u, V flag: %u, Z flag: %u\n", result, result, cpu_get_flag_c(), cpu_get_flag_n(), cpu_get_flag_v(), cpu_get_flag_z());
   for (int i =0; i<16; i++) {
       fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
   }
 /*
-  if (!decoded->isAdd11174rWord) {
+  if (!decoded->isAddrWord) {
     do_nflag(result);
     do_zflag(result);
     cpu_set_flag_c(!(cpu_get_flag_z()));
@@ -91,7 +91,7 @@ uint32_t add(decode_result const *decoded)
     do_vflagx(opA, opB, result);
   }
 
-    fprintf(stderr, "Result: 0x%4.4x (%u)\n", result, result);
+    fprintf(stderr, "Result: 0x%4.4x (%u) C flag: %u N flag: %u, V flag: %u, Z flag: %u\n", result, result, cpu_get_flag_c(), cpu_get_flag_n(), cpu_get_flag_v(), cpu_get_flag_z());
     for (int i =0; i<16; i++) {
         fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
     }
@@ -210,7 +210,7 @@ uint32_t sub(decode_result const *decoded)
     do_vflagx((opA), opB, result);
   }
 
-    fprintf(stderr, "Result: 0x%4.4x (%u)\n", result, result);
+    fprintf(stderr, "Result: 0x%4.4x (%u) C flag: %u N flag: %u, V flag: %u, Z flag: %u\n", result, result, cpu_get_flag_c(), cpu_get_flag_n(), cpu_get_flag_v(), cpu_get_flag_z());
     for (int i =0; i<16; i++) {
         fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
     }
@@ -304,7 +304,7 @@ uint32_t cmp(decode_result const *decoded)
     do_cflag(opA, opB, 1);
     do_vflagx(opA, opB, result);
   }
-    fprintf(stderr, "Result: 0x%4.4x (%u)\n", result, result);
+    fprintf(stderr, "Result: 0x%4.4x (%u) C flag: %u N flag: %u, V flag: %u, Z flag: %u\n", result, result, cpu_get_flag_c(), cpu_get_flag_n(), cpu_get_flag_v(), cpu_get_flag_z());
     for (int i =0; i<16; i++) {
         fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
     }
@@ -343,7 +343,10 @@ uint32_t bit(decode_result const *decoded)
     cpu_set_flag_c(!(cpu_get_flag_z()));
     cpu_set_flag_v(0);
   }
-
+    fprintf(stderr, "Result: 0x%4.4x (%u) C flag: %u N flag: %u, V flag: %u, Z flag: %u\n", result, result, cpu_get_flag_c(), cpu_get_flag_n(), cpu_get_flag_v(), cpu_get_flag_z());
+    for (int i =0; i<16; i++) {
+        fprintf(stderr, "  Register %d : 0x%4.4x (%u)\n", i, cpu.gpr[i], cpu.gpr[i]);
+    }
   // update Rs if it's in autoincrement mode
   updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
 
@@ -406,8 +409,8 @@ uint32_t xorOp(decode_result const *decoded)
 
   // update result & flags
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
-  if (!decoded->isAddrWord) {
 
+  if (!decoded->isAddrWord) {
     do_nflag(result);
     do_zflag(result);
     cpu_set_flag_c(!(cpu_get_flag_z()));

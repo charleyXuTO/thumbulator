@@ -19,6 +19,8 @@ uint32_t jne(decode_result const *decoded)
     cpu_set_pc(result);
     BRANCH_WAS_TAKEN = 1;
   }
+
+  fprintf(stderr, "Z flag: %u\n", z);
   return getJumpCycleCount(decoded);
 }
 
@@ -34,6 +36,7 @@ uint32_t jeq(decode_result const *decoded)
     cpu_set_pc(result);
     BRANCH_WAS_TAKEN = 1;
   }
+  fprintf(stderr, "Z flag: %u\n", z);
   return getJumpCycleCount(decoded);
 }
 
@@ -49,6 +52,7 @@ uint32_t jnc(decode_result const *decoded)
     cpu_set_pc(result);
     BRANCH_WAS_TAKEN = 1;
   }
+  fprintf(stderr, "C flag: %u\n", c);
   return getJumpCycleCount(decoded);
 }
 
@@ -64,6 +68,7 @@ uint32_t jc(decode_result const *decoded)
     cpu_set_pc(result);
     BRANCH_WAS_TAKEN = 1;
   }
+  fprintf(stderr, "C flag: %u\n", c);
   return getJumpCycleCount(decoded);
 }
 
@@ -79,6 +84,7 @@ uint32_t jn(decode_result const *decoded)
     cpu_set_pc(result);
     BRANCH_WAS_TAKEN = 1;
   }
+  fprintf(stderr, "N flag: %u\n", n);
   return getJumpCycleCount(decoded);
 }
 
@@ -95,6 +101,7 @@ uint32_t jge(decode_result const *decoded)
     cpu_set_pc(result);
     BRANCH_WAS_TAKEN = 1;
   }
+  fprintf(stderr, "N flag: %u V flag: %u\n", n , v);
   return getJumpCycleCount(decoded);
 }
 
@@ -111,6 +118,7 @@ uint32_t jl(decode_result const *decoded)
     cpu_set_pc(result);
     BRANCH_WAS_TAKEN = 1;
   }
+    fprintf(stderr, "N flag: %u V flag: %u\n", n , v);
   return getJumpCycleCount(decoded);
 }
 
