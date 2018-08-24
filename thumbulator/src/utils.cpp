@@ -72,7 +72,7 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) 
     }
     case SYMBOLIC: {
       int32_t x = nextWord;
-      // TODO:: isn't this the PC
+      // TODO:: isn't this the PC also might need to add upperByte support
       uint32_t Rn = cpu_get_gpr(reg); // this is PC
       int32_t addr = Rn + x;
       retVal = addr;

@@ -66,6 +66,7 @@ uint32_t jmp(decode_result const *);
 uint32_t rrum(decode_result const *);
 uint32_t pushm(decode_result const *);
 uint32_t popm(decode_result const *);
+uint32_t mova(decode_result const *);
 
 
 uint32_t exmemwb_error(decode_result const *decoded)
@@ -146,19 +147,19 @@ uint32_t extended2(decode_result const *decoded)
 
 
 uint32_t (*executeExtendedTableOp[16])(decode_result const *) = {
-    exmemwb_error, // mova 0
-    exmemwb_error, // mova 1
-    exmemwb_error, // mova 2
-    exmemwb_error, // mova 3
+    mova, // mova 0
+    mova, // mova 1
+    mova, // mova 2
+    mova, // mova 3
     extended2,     // RR.. A 4
     extended2,     // RR.. W 5
-    exmemwb_error, // mova 6
-    exmemwb_error, // mova 7
-    exmemwb_error, // mova 8
+    mova, // mova 6
+    mova, // mova 7
+    mova, // mova 8
     exmemwb_error, // cmpa 9
     exmemwb_error, // adda 10
     exmemwb_error, // suba 11
-    exmemwb_error, // mova 12
+    mova, // mova 12
     exmemwb_error, // cmpa 13
     exmemwb_error, // adda 14
     exmemwb_error // suba 15

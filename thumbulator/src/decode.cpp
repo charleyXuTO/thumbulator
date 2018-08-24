@@ -137,14 +137,14 @@ decode_result decode_single(const uint16_t pInsn)
   if ((pInsn >> 10 & 0x1) == 0x1) { // for pushm and popm
       isByte = false;
       isAddrWord = (pInsn>>8 & 0x1) != 0x1;
-      dstWord = pInsn >> 4 & 0xF;
+      n = pInsn >> 4 & 0xF;
       if ((pInsn >> 9 & 0x1) == 0x1 ) {
           Rdst = (pInsn & 0xF);
       }
       else {
           Rdst = (pInsn & 0xF);
       }
-      dstWord = dstWord + 0x1;
+      n = n + 0x1;
   }
   else {
       opcode = (pInsn & 0xFF80);
@@ -214,17 +214,115 @@ decode_result decode_jump(const uint16_t pInsn)
 decode_result decode_extended(const uint16_t pInsn)
 {
     decode_result decoded;
+    uint16_t opcode=0;
+    bool isAddrWord=false;
+    bool isByte = false;
+    uint8_t Rdst=0;
+    uint8_t n =0;
+    uint8_t Ad=0;
+    uint8_t As =0;
+    uint8_t Rsrc =0;
+    uint16_t extended =0;
+    uint32_t srcWord = 0;
+    uint32_t dstWord = 0;
+    if (((pInsn>>4) & 0xF) == 4 || ((pInsn>>4) & 5)) { // If the instruction is RR..
+        opcode = (pInsn >> 4) & 0x3F;
+        isAddrWord = ((opcode & 0x01) != 0x01);
+        Rdst = (pInsn & 0xF);
+        n = ((pInsn >> 10) & 0x3) + 1;
+    }
 
-    uint16_t opcode = (pInsn>>4 & 0x3F);
-    bool isAddrWord = (opcode & 0x01 != 0x01);
-    uint8_t Rdst = (pInsn & 0xF);
-    uint8_t n = ((pInsn >> 10) & 0x3)+1;
+    else if ((((pInsn>>4)& 0xF) >=0 && ((pInsn>>4)&0xF)<=3) || (((pInsn>>4)& 0xF) >=6 && ((pInsn>>4)&0xF)<=8) || ((pInsn >>4)&0xF) == 12) {//If the instruction is MOVA
+        opcode = (pInsn >> 4) & 0xF;
+        switch (opcode) {
+            case 0:
+                As = 2;
+                Ad = 0;
+                Rsrc = (pInsn >> 8) & 0xF;
+                Rdst = (pInsn & 0xF);
+                break;
+            case 1:
+                As = 3; //TODO:: AUTO increment mode for MOVA might not be correct
+                Ad = 0;
+                Rsrc = (pInsn >> 8) & 0xF;
+                Rdst = (pInsn & 0xF);
+                break;
+            case 2:
+                As = 1;
+                Ad = 0;
+                Rdst = (pInsn & 0xF);
+                fetch_instruction(cpu_get_pc(), &extended);
+                srcWord = (((pInsn >> 8) & 0xF) << 16 | (extended));
+                break;
+            case 3:
+                As = 1;
+                Ad = 0;
+                Rdst = (pInsn & 0xF);
+                Rsrc = (pInsn >> 8) & 0xF;
+                fetch_instruction(cpu_get_pc(), &extended);
+                srcWord = extended;
+                isAddrWord = false;
+                break;
+            case 6:
+                As = 0;
+                Ad = 1;
+                Rsrc = (pInsn >> 8) & 0xF;
+                fetch_instruction(cpu_get_pc(), &extended);
+                dstWord = ((pInsn & 0xF) << 16 | (extended));
+                break;
+            case 7:
+                As = 0;
+                Ad = 1;
+                Rsrc = (pInsn >> 8) & 0xF;
+                Rdst = (pInsn & 0xF);
+                fetch_instruction(cpu_get_pc(), &extended);
+                dstWord = (extended);
+                break;
+            case 8:
+                As = 3;
+                Ad = 0;
+                Rdst = (pInsn & 0xF);
+                isAddrWord = true;
+                fetch_instruction(cpu_get_pc(), &extended);
+                srcWord = (((pInsn >> 8) & 0xF) << 16 | (extended));
+                break;
+            case 12:
+                As = 0;
+                Ad = 0;
+                Rdst = (pInsn & 0xF);
+                Rsrc = (pInsn >> 8) & 0xF;
+                break;
+        }
+    }
+    else {
+        opcode = (pInsn >> 4) & 0xF;
+        if ((opcode >> 3) == 1) { //doesn't need to fetch more instruction
+            As = 0;
+            Ad = 0;
+            Rdst = (pInsn & 0xF);
+            Rsrc = (pInsn >> 8) & 0xF;
+        }
+        else {
+            As = 3;
+            Ad = 0;
+            Rdst = (pInsn & 0xF);
+            isAddrWord = true;
+            fetch_instruction(cpu_get_pc(), &extended);
+            srcWord = (((pInsn >> 8) & 0xF) << 16 | (extended));
+        }
+    }
 
 
     decoded.opcode = opcode;
     decoded.isAddrWord = isAddrWord;
     decoded.Rd = Rdst;
-    decoded.dstWord = n;
+    decoded.Rs = Rsrc;
+    decoded.Ad = Ad;
+    decoded.As = As;
+    decoded.dstWord = dstWord;
+    decoded.srcWord = srcWord;
+    decoded.isByte = isByte;
+    decoded.n= n;
 
     return decoded;
 }

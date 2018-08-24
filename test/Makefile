@@ -10,7 +10,7 @@
 # MSP430afe253 -- msp430, 16KB flash, 512B RAM
 # MSP430FR5994 -- msp430, 256KB flash, 512000B RAM
 DEVICE:=MSP430FR5994
-EXAMPLE:=test
+EXAMPLE:=main
 # Require DEVICE to be specified
 ifndef DEVICE
 $(info Please specify a device, e.g. DEVICE=MSP430F5529)
@@ -49,13 +49,18 @@ GDB			    := $(GCC_BIN_DIR)/msp430-elf-gdb
 ######################################
 #CFLAGS          := -Os -D__$(DEVICE)__ -mmcu=$(DEVICE) -g -ffunction-sections -fdata-sections -DDEPRECATED
 #LDFLAGS         := -T $(LDDIR).ld -L $(GCC_MSP_INC_DIR) -mmcu=$(DEVICE) -g -Wl,--gc-sections 
-CFLAGS          := -O0 -D__$(DEVICE)__ -mmcu=$(DEVICE) -ffunction-sections -fdata-sections -DDEPRECATED -nostartfiles -ffreestanding -std=c99 -fomit-frame-pointer -fno-optimize-sibling-calls -mhwmult=none
-LDFLAGS         := -T $(LDDIR).ld -L $(GCC_MSP_INC_DIR) -mmcu=$(DEVICE) -Wl,--gc-sections -mhwmult=none
+CFLAGS          := -O0 -D__$(DEVICE)__ -mmcu=$(DEVICE) -ffunction-sections -fdata-sections -DDEPRECATED -nostartfiles -ffreestanding -std=c99 -fomit-frame-pointer -fno-optimize-sibling-calls 
+LDFLAGS         := -T $(LDDIR).ld -L $(GCC_MSP_INC_DIR) -mmcu=$(DEVICE) -Wl,--gc-sections 
 INCLUDES        := -I $(GCC_MSP_INC_DIR) -I $(GCC_INC_DIR)
 ######################################
 SRC             := src/$(EXAMPLE).c
 EXOBJECT        := $(EXAMPLE)/$(EXAMPLE).o
 EXOUTPUT        := $(EXAMPLE)/$(EXAMPLE).out
+
+SRC2             := src/aes.c
+EXOBJECT2        := $(EXAMPLE)/aes.o
+EXOUTPUT2        := $(EXAMPLE)/aes.out
+
 ######################################
 
 all: $(EXOUTPUT)
@@ -69,12 +74,19 @@ $(EXOBJECT): ${SRC}
 	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
 	$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
 
-$(EXOUTPUT): $(EXAMPLE) $(EXOBJECT)
+$(EXOBJECT2): ${SRC2}
+	@echo ============================================
+	@echo Compiling aes.c
+	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
+	$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
+
+$(EXOUTPUT): $(EXAMPLE) $(EXOBJECT) $(EXOBJECT2)
 	@echo ============================================
 	@echo Linking objects and generating output binary
-	$(CC) $(LDFLAGS) $(EXOBJECT) -o $@
+	$(CC) $(LDFLAGS) $(EXOBJECT) $(EXOBJECT2) -o $@
 	$(OBJDUMP) --source -D -g -S -x -z -a $@ > $@.objdump
 	hexdump -e '16/1 "%02x " "\n"' -v $@ > $@.hexdump
+
 debug: all
 	$(GDB) $(EXAMPLE)/$(EXAMPLE).out
 

@@ -1,5 +1,8 @@
 	.file	"test.c"
-	.global	__mspabi_subd
+	.section	.rodata
+.LC0:
+	.string	"EXIT\n"
+	.global	__mspabi_addd
 	.global	__eqdf2
 	.section	.text.main,"ax",@progbits
 	.balign 2
@@ -18,19 +21,21 @@ main:
 	PUSHM.W	#3, R10
 	SUB.W	#16, R1
 	; end of prologue
+	MOV.W	#.LC0, @R1
+	CALL	#printf
 	MOV.W	#-26214, 8(R1)
 	MOV.W	#-26215, 10(R1)
 	MOV.W	#-26215, 12(R1)
 	MOV.W	#16369, 14(R1)
-	MOV.W	8(R1), R12
-	MOV.W	10(R1), R13
-	MOV.W	12(R1), R14
-	MOV.W	14(R1), R15
-	MOV.W	#26214, R8
-	MOV.W	#26214, R9
-	MOV.W	#26214, R10
-	MOV.W	#16394, R11
-	CALL	#__mspabi_subd
+	MOV.W	#26214, R12
+	MOV.W	#26214, R13
+	MOV.W	#26214, R14
+	MOV.W	#16394, R15
+	MOV.W	8(R1), R8
+	MOV.W	10(R1), R9
+	MOV.W	12(R1), R10
+	MOV.W	14(R1), R11
+	CALL	#__mspabi_addd
 	MOV.W	R12, R8
 	MOV.W	R13, R9
 	MOV.W	R14, R10
@@ -42,7 +47,7 @@ main:
 	MOV.W	#-26214, @R1
 	MOV.W	#-26215, 2(R1)
 	MOV.W	#-26215, 4(R1)
-	MOV.W	#16385, 6(R1)
+	MOV.W	#16401, 6(R1)
 	MOV.W	8(R1), R12
 	MOV.W	10(R1), R13
 	MOV.W	12(R1), R14

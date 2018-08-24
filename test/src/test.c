@@ -76,18 +76,16 @@ b2 = b2 + 0;
 int main(void)
 {
  // testSimple();
- // printf("EXIT\n");
+  printf("EXIT\n");
 
 
-double x =1.1;
-x = 3.3- x;
-if (x == 2.2) {
+double x = 1.1;
+x = 3.3 + x;
+if (x == 4.4) {
 x = 1.0;
 }
 else {
-
 x = 0.0;
-
 }
 
   return 0;
