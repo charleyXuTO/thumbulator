@@ -135,6 +135,7 @@ void load(uint32_t address, uint32_t *value, uint16_t false_read)
     }
     else {
       fprintf(stderr, "Error: I don't know where you are trying to look but its wrong: 0x%8.8X, pc =%x\n",address,cpu_get_pc());
+      terminate_simulation(1);
     }
 
   }
@@ -193,6 +194,7 @@ void store(uint32_t address, uint16_t value, bool isByte)
       }
       else {
           fprintf(stderr, "Error: I don't know where you are trying to look but its wrong: 0x%8.8X, pc =%x\n",address,cpu_get_pc());
+         terminate_simulation(1);
       }
   }
 }

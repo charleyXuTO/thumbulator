@@ -11,6 +11,7 @@
 # MSP430FR5994 -- msp430, 256KB flash, 512000B RAM
 DEVICE:=MSP430FR5994
 EXAMPLE:=main
+FOLDER:= crc
 # Require DEVICE to be specified
 ifndef DEVICE
 $(info Please specify a device, e.g. DEVICE=MSP430F5529)
@@ -53,13 +54,22 @@ CFLAGS          := -O0 -D__$(DEVICE)__ -mmcu=$(DEVICE) -ffunction-sections -fdat
 LDFLAGS         := -T $(LDDIR).ld -L $(GCC_MSP_INC_DIR) -mmcu=$(DEVICE) -Wl,--gc-sections 
 INCLUDES        := -I $(GCC_MSP_INC_DIR) -I $(GCC_INC_DIR)
 ######################################
-SRC             := src/$(EXAMPLE).c
+SRC             := $(FOLDER)/$(EXAMPLE).c
 EXOBJECT        := $(EXAMPLE)/$(EXAMPLE).o
 EXOUTPUT        := $(EXAMPLE)/$(EXAMPLE).out
 
-SRC2             := src/aes.c
-EXOBJECT2        := $(EXAMPLE)/aes.o
-EXOUTPUT2        := $(EXAMPLE)/aes.out
+SRC2             := $(FOLDER)/crc.c
+EXOBJECT2        := $(EXAMPLE)/crc.o
+EXOUTPUT2        := $(EXAMPLE)/crc.out
+
+SRC3             := $(FOLDER)/isqrt.c
+EXOBJECT3        := $(EXAMPLE)/isqrt.o
+EXOUTPUT3        := $(EXAMPLE)/isqrt.out
+
+SRC4             := $(FOLDER)/rad2deg.c
+EXOBJECT4        := $(EXAMPLE)/rad2deg.o
+EXOUTPUT4        := $(EXAMPLE)/rad2deg.out
+
 
 ######################################
 
@@ -76,14 +86,26 @@ $(EXOBJECT): ${SRC}
 
 $(EXOBJECT2): ${SRC2}
 	@echo ============================================
-	@echo Compiling aes.c
+	@echo Compiling crc.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
 	$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
 
-$(EXOUTPUT): $(EXAMPLE) $(EXOBJECT) $(EXOBJECT2)
+#$(EXOBJECT3): ${SRC3}
+	#@echo ============================================
+	#@echo Compiling isqrt.c
+	#$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
+	#$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
+
+#$(EXOBJECT4): ${SRC4}
+	#@echo ============================================
+	#@echo Compiling rad2deg.c
+	#$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
+	#$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
+
+$(EXOUTPUT): $(EXAMPLE) $(EXOBJECT) $(EXOBJECT2) 
 	@echo ============================================
 	@echo Linking objects and generating output binary
-	$(CC) $(LDFLAGS) $(EXOBJECT) $(EXOBJECT2) -o $@
+	$(CC) $(LDFLAGS) $(EXOBJECT) $(EXOBJECT2) -o $@ -lm
 	$(OBJDUMP) --source -D -g -S -x -z -a $@ > $@.objdump
 	hexdump -e '16/1 "%02x " "\n"' -v $@ > $@.hexdump
 

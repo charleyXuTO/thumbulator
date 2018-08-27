@@ -294,7 +294,7 @@ decode_result decode_extended(const uint16_t pInsn)
                 break;
         }
     }
-    else {
+    else { //If the instruction is
         opcode = (pInsn >> 4) & 0xF;
         if ((opcode >> 3) == 1) { //doesn't need to fetch more instruction
             As = 0;

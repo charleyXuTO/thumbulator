@@ -20,7 +20,7 @@ static void test_decrypt_cbc(void);
 
 int main(void)
 {
-    printf("hello");
+  
     test_encrypt_cbc();
     test_decrypt_cbc();
     test_decrypt_ecb();
@@ -96,7 +96,9 @@ static void test_encrypt_ecb(void)
   }
   else
   {
-    
+    while(1) {
+int i =0;
+}
   }
 }
 
@@ -129,7 +131,9 @@ static void test_decrypt_cbc(void)
   }
   else
   {
-    
+    while(1) {
+int i = 0;
+}
   }
 }
 
@@ -152,11 +156,16 @@ static void test_encrypt_cbc(void)
  
 
   if(0 == strncmp((char*) out, (char*) buffer, 64))
-  {
-   
+ {
+  
   }
+
+
   else
   {
+      while (1) {
+         int i = 0;
+}
     
   }
 }
@@ -179,7 +188,9 @@ static void test_decrypt_ecb(void)
   }
   else
   {
-
+	while (1) {
+		int i = 0;
+}
   }
 }
 

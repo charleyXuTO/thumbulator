@@ -62,9 +62,6 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) 
     }
     case INDEXED: {
       int32_t x = nextWord;
-      if ((x&0x01)==0x01) { // check if the address is an odd number (for upper byte storage)
-        upperByte = true;
-      }
       uint32_t Rn = cpu_get_gpr(reg);
       int32_t addr = Rn + x;
       retVal = addr;
@@ -100,11 +97,16 @@ uint32_t getAddressBaseOnMode(uint8_t addrMode, uint8_t reg, uint32_t nextWord) 
     default:
       assert(0 && "unknown addressing mode!");
   }
+  if ((retVal& 0x01) == 0x01) {
+      upperByte = true;
+  }
   return retVal;
 }
 
 uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isAddrWord, bool isSource) {
+  upperByte = false; //reset the upper byte level check
   uint32_t val = 0;
+
   AddrMode mode = getAddrMode(addrMode, reg, isSource);
   if(mode==REGISTER) {
     val = cpu_get_gpr(reg);
@@ -136,7 +138,8 @@ uint32_t getValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte,
 }
 
 void setValue(uint8_t addrMode, uint8_t reg, uint32_t nextWord, bool isByte, bool isAddrWord, uint32_t val) {
-  AddrMode mode = getAddrMode(addrMode, reg, false);
+
+    AddrMode mode = getAddrMode(addrMode, reg, false);
 
 
   if(mode==REGISTER) { 

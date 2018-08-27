@@ -76,7 +76,7 @@ b2 = b2 + 0;
 int main(void)
 {
  // testSimple();
-  printf("EXIT\n");
+//  printf("EXIT\n");
 
 
 double x = 1.1;
