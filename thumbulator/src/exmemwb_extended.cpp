@@ -396,7 +396,7 @@ uint32_t calla(decode_result const*decoded) {
     sp = cpu_get_sp()-2;
     cpu_set_sp(sp);
 
-    store(sp, (pc&0xFFFF), false);//sotre the low bits of the pc
+    store(sp, (pc&0xFFFF), false);//store the low bits of the pc
 
     // update result
     cpu_set_pc(opA);

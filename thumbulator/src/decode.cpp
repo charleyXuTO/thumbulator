@@ -30,8 +30,10 @@ bool isIndirectAutoIncrement(uint8_t As, uint8_t Rsrc) {
 
 decode_result decode_double(const uint16_t pInsn)
 {
+
+  //getting all the information from the instruction
   decode_result decoded;
-  uint16_t opcode = (pInsn & 0xF000); //
+  uint16_t opcode = (pInsn & 0xF000);
   uint8_t Rsrc = (pInsn >> 8) & 0xF;
   uint8_t Rdst = pInsn & 0xF;
   uint8_t As = (pInsn >> 4) & 0x3;
@@ -41,24 +43,26 @@ decode_result decode_double(const uint16_t pInsn)
 
   bool isByte = (pInsn & 0x40)==0x40;
   bool isAddrWord = false;
+
   uint16_t srcWord150 = 0;
   uint16_t dstWord150 = 0;
   uint16_t srcWord1916 = 0;
   uint16_t dstWord1916 = 0;
   uint32_t srcWord = 0;
   uint32_t dstWord = 0;
-  if (extendedInstruction) {
+
+  if (extendedInstruction) { // if it is an extended instruction, extended instruction have an additional before this
     fetch_instruction(cpu_get_pc()- 0x4, &extended);
-    bool al = (extended &0x40) == 0x40;
-    n = (extended &0xF) + 1;
-    if (al == false && isByte == true) {
+    bool al = ((extended & 0x40) == 0x40);
+    n = (extended & 0xF) + 1;
+    if (al == false && isByte == true) { //checking for address words
       isAddrWord = true;
       isByte = false;
     }
   }
 
   // [0] check if using CG1 or CG2
-  bool useCG = (GPR_CG2 == Rsrc) || ((GPR_CG1 == Rsrc) && (As & 0x2));
+  bool useCG = (GPR_CG2 == Rsrc) || ((GPR_CG1 == Rsrc) && (As & 0x2)); // if it is using a special register to generate constants
   if(GPR_CG1 == Rsrc) {
     if(0x2 == As) srcWord = 0x4;
     else if(0x3 == As) srcWord = 0x8;
@@ -67,7 +71,7 @@ decode_result decode_double(const uint16_t pInsn)
     if(0x0 == As) srcWord = 0x0;
     else if(0x1 == As) srcWord = 0x1;
     else if(0x2 == As) srcWord = 0x2;
-    else if(0x3 == As) srcWord = 0xFFFF;
+    else if(0x3 == As) srcWord = 0xFFFF; // negative 1
   }
 
   // [1] fetch any extra word needed for src
@@ -75,7 +79,7 @@ decode_result decode_double(const uint16_t pInsn)
     // indirect autoincrement doesn't need next word
     if(!isIndirectAutoIncrement(As, Rsrc)) {
       if (isAddrWord) {
-        srcWord1916 = (extended >> 7) & 0xF;
+        srcWord1916 = (extended >> 7) & 0xF; // fetching the upper bit
       }
       fetch_instruction(cpu_get_pc(), &srcWord150);
       cpu_set_pc(cpu_get_pc() + 0x2);
@@ -88,7 +92,7 @@ decode_result decode_double(const uint16_t pInsn)
   // [2] fetch any extra word needed for dst
   if (Ad==0x1) { // indexed, symbolic, absolute
     if (isAddrWord) {
-      dstWord1916 = (extended & 0xF);
+      dstWord1916 = (extended & 0xF); //fetching the upper bit
     }
     fetch_instruction(cpu_get_pc(), &dstWord150);
     cpu_set_pc(cpu_get_pc() + 0x2);
@@ -134,15 +138,10 @@ decode_result decode_single(const uint16_t pInsn)
 
   if (((pInsn >> 10) & 0x1) == 0x1) { // for pushm and popm
       isByte = false;
-      isAddrWord = (pInsn>>8 & 0x1) != 0x1;
-      n = pInsn >> 4 & 0xF;
-      if ((pInsn >> 9 & 0x1) == 0x1 ) {
-          Rdst = (pInsn & 0xF);
-      }
-      else {
-          Rdst = (pInsn & 0xF);
-      }
-      n = n + 0x1;
+      isAddrWord = (pInsn>>8 & 0x1) != 0x1; //checking for address word
+      n = pInsn >> 4 & 0xF; // number of pops/pushes
+      Rdst = (pInsn & 0xF);
+      n = n + 0x1; //adding one for the for loop
   }
   else if ((((pInsn >> 7) & 0x7) >  0x300) && (((pInsn >> 7) & 0x7) <= 0x3FF)) { //for calla
       isByte = false; //it would never be byte stuff
@@ -198,7 +197,7 @@ decode_result decode_single(const uint16_t pInsn)
           fetch_instruction(cpu_get_pc() - 0x4, &extended);
           bool al = (extended & 0x40) == 0x40;
           n = (extended & 0xF) +1;
-          if (al == false && isByte == true) {
+          if (al == false && isByte == true) { //checking for address word
               isAddrWord = true;
               isByte = false;
           }
@@ -208,12 +207,11 @@ decode_result decode_single(const uint16_t pInsn)
           // indirect autoincrement doesn't need next word
           if (!isIndirectAutoIncrement(Ad, Rdst)) {
               if (isAddrWord) {
-                  dstWord1916 = extended & 0xF;
+                  dstWord1916 = extended & 0xF; //fetching the upper bit
               }
               fetch_instruction(cpu_get_pc(), &dstWord150);
               cpu_set_pc(cpu_get_pc() + 0x2);
               dstWord = ((dstWord1916 & 0xF) << 16) ^ dstWord150;
-
           }
       }
   }
@@ -239,7 +237,7 @@ decode_result decode_jump(const uint16_t pInsn)
   decode_result decoded;
 
   uint16_t opcode = (pInsn & 0xFC00);
-  int16_t offset = (pInsn & 0x3FF);
+  int16_t offset = (pInsn & 0x3FF); //getting the offset
   bool isNeg = (pInsn & 0x200);
 
   decoded.opcode = opcode;
@@ -263,34 +261,34 @@ decode_result decode_extended(const uint16_t pInsn)
     uint32_t dstWord = 0;
     if (((pInsn>>4) & 0xF) == 4 || ((pInsn>>4) & 5)) { // If the instruction is RR..
         opcode = (pInsn >> 4) & 0x3F;
-        isAddrWord = ((opcode & 0x01) != 0x01);
+        isAddrWord = ((opcode & 0x01) != 0x01); //checking for address word
         Rdst = (pInsn & 0xF);
-        n = ((pInsn >> 10) & 0x3) + 1;
+        n = ((pInsn >> 10) & 0x3) + 1; //n should be (<=4, >=1)
     }
 
     else if ((((pInsn>>4)& 0xF) >=0 && ((pInsn>>4)&0xF)<=3) || (((pInsn>>4)& 0xF) >=6 && ((pInsn>>4)&0xF)<=8) || ((pInsn >>4)&0xF) == 12) {//If the instruction is MOVA
         opcode = (pInsn >> 4) & 0xF;
         switch (opcode) {
-            case 0:
+            case 0: //Rsrc = Index Register, Rdst = Register
                 As = 2;
                 Ad = 0;
                 Rsrc = (pInsn >> 8) & 0xF;
                 Rdst = (pInsn & 0xF);
                 break;
-            case 1:
+            case 1: //Rsrc = Index Auto, Rdst = Register
                 As = 3; //TODO:: AUTO increment mode for MOVA might not be correct
                 Ad = 0;
                 Rsrc = (pInsn >> 8) & 0xF;
                 Rdst = (pInsn & 0xF);
                 break;
-            case 2:
+            case 2: //Rsrc = absolute, Rdst = Register
                 As = 1;
                 Ad = 0;
                 Rdst = (pInsn & 0xF);
                 fetch_instruction(cpu_get_pc(), &extended);
                 srcWord = (((pInsn >> 8) & 0xF) << 16 | (extended));
                 break;
-            case 3:
+            case 3: //Rsrc = Index, Rdst = Register
                 As = 1;
                 Ad = 0;
                 Rdst = (pInsn & 0xF);
@@ -299,14 +297,14 @@ decode_result decode_extended(const uint16_t pInsn)
                 srcWord = extended;
                 isAddrWord = false;
                 break;
-            case 6:
+            case 6: //Rsrc = Register, Rdst = absolute
                 As = 0;
                 Ad = 1;
                 Rsrc = (pInsn >> 8) & 0xF;
                 fetch_instruction(cpu_get_pc(), &extended);
                 dstWord = ((pInsn & 0xF) << 16 | (extended));
                 break;
-            case 7:
+            case 7: //Rsrc = Register, Rdst = index
                 As = 0;
                 Ad = 1;
                 Rsrc = (pInsn >> 8) & 0xF;
@@ -314,7 +312,7 @@ decode_result decode_extended(const uint16_t pInsn)
                 fetch_instruction(cpu_get_pc(), &extended);
                 dstWord = (extended);
                 break;
-            case 8:
+            case 8: // Rsrc = immediate, Rdst = Register
                 As = 3;
                 Ad = 0;
                 Rdst = (pInsn & 0xF);
@@ -322,7 +320,7 @@ decode_result decode_extended(const uint16_t pInsn)
                 fetch_instruction(cpu_get_pc(), &extended);
                 srcWord = (((pInsn >> 8) & 0xF) << 16 | (extended));
                 break;
-            case 12:
+            case 12: // Rsrc = Register, Rdst = Register
                 As = 0;
                 Ad = 0;
                 Rdst = (pInsn & 0xF);
@@ -330,15 +328,15 @@ decode_result decode_extended(const uint16_t pInsn)
                 break;
         }
     }
-    else { //If the instruction is
+    else { //If the instruction is cmpa, adda or suba
         opcode = (pInsn >> 4) & 0xF;
-        if ((opcode >> 3) == 1) { //doesn't need to fetch more instruction
+        if ((opcode >> 3) == 1) { //doesn't need to fetch more instruction its Rsrc = Register and Rdst = Register
             As = 0;
             Ad = 0;
             Rdst = (pInsn & 0xF);
             Rsrc = (pInsn >> 8) & 0xF;
         }
-        else {
+        else { // needs to fetch more instruction because its Rsrc = immediate and Rdst = Register
             As = 3;
             Ad = 0;
             Rdst = (pInsn & 0xF);
@@ -401,7 +399,7 @@ decode_result decode(uint16_t* instruction)
 
   extendedInstruction = false;
 
-  if (*instruction >= 0x1800 && *instruction <= 0x2000) {
+  if (*instruction >= 0x1800 && *instruction <= 0x2000) { //checking if the instruction is an extended
 
     // | 15  9 |  8  |  7  |  6  | 5  4 | 3    0 |
     // |-----------------------------------------|
@@ -427,12 +425,9 @@ decode_result decode(uint16_t* instruction)
 
     fetch_instruction(cpu_get_pc(), instruction); //fetch new instruction
 
-    cpu_set_pc(cpu_get_pc() + 0x2);
+    cpu_set_pc(cpu_get_pc() + 0x2); //increment the pc
 
   }
-   // if (cpu_get_pc() == 0x41c4) {
-     // printf("Hello");
- // }
   return decodeJumpTable[*instruction >> 12](*instruction);
 }
 }

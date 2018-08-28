@@ -19,7 +19,7 @@ uint32_t mov(decode_result const *decoded)
   uint32_t result = opA;
 
   // hack to identify exit
-  if(0==decoded->Rd) {
+  if(0==decoded->Rd) { //used only by julie, i have never seen this being used once
     if(cpu_get_pc()==(result + 4)) {
       EXIT_INSTRUCTION_ENCOUNTERED = true;
     }
@@ -47,7 +47,6 @@ uint32_t mov(decode_result const *decoded)
 */
   // update Rs if it's in autoincrement mode
   updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
-
 
   return getDoubleOperandCycleCount(decoded);
 }
@@ -187,12 +186,11 @@ uint32_t sub(decode_result const *decoded)
 
   // compute
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
-
   int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
 
   fprintf(stderr, "sub opA: %d, opB: %d\n", opA, opB);
 
-  opA = ~(opA);
+  opA = ~(opA); //using one's compliment
   int32_t result = opA + opB + 1;
 
   // update result & flags
@@ -232,7 +230,7 @@ uint32_t subc(decode_result const *decoded)
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
   int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
 
-  opA = ~(opA);
+  opA = ~(opA); //using one's compliment
   uint16_t carry = cpu_get_flag_c();
   int32_t result = opA + opB + carry;
 
@@ -270,8 +268,8 @@ uint32_t cmp(decode_result const *decoded)
   int32_t opA = getValue(decoded->As, decoded->Rs, decoded->srcWord, decoded->isByte, decoded->isAddrWord, true);
   int32_t opB = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
 
-  if (!decoded->isAddrWord) {
-    if ((opA >> 15) > 0) {
+  if (!decoded->isAddrWord) { //checking of address word
+    if ((opA >> 15) > 0) { //making sure that negatives stays negative
       opA = (int16_t)opA;
     }
     if ((opB >> 15) >0 ) {
@@ -285,14 +283,10 @@ uint32_t cmp(decode_result const *decoded)
     if ((opB >> 19) >0) {
         opB = (opB & 0xFFFF) - (opB & 0x1FFFFF);
     }
-    printf("needs to finish"); //TODO: needs to do the negative version of that
   }
 
-  opA = ~(opA);
+  opA = ~(opA); //using one's compliment
   int32_t result = opA + opB + 1;
-
-
-
 
   // update flags
   if (!decoded->isAddrWord) {

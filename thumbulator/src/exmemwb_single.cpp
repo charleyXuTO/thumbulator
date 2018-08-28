@@ -11,26 +11,28 @@ uint32_t rrc(decode_result const *decoded)
   TRACE_INSTRUCTION("rrc %s%u\n", addrModeString[decoded->Ad].c_str(), decoded->Rd);
   int result;
   // compute
-  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
-  uint32_t carry = cpu_get_flag_c();
-  uint16_t lsb = opA & 0x1;
-  if (!decoded->extended) {
+  uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false); //fetching the operand
+  uint32_t carry = cpu_get_flag_c(); //getting carry
+  uint16_t lsb = opA & 0x1; //gettig least significant bit
+
+  if (!decoded->extended) { //checking for extended instruction
       result = opA >> 1;
   }
   else {
       result = opA >> decoded->n;
   }
 
-  if (!decoded->isAddrWord) {
+  if (!decoded->isAddrWord) { //checking for address word
     result |= (carry << 15);
   }
   else {
     result |= (carry << 19);
   }
-  cpu_set_flag_c(lsb);
+
 
   // update result & flags
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
+  cpu_set_flag_c(lsb);
 
   if (!decoded->isAddrWord) {
       do_nflag(result);
@@ -43,8 +45,6 @@ uint32_t rrc(decode_result const *decoded)
       cpu_set_flag_v(0);
   }
     fprintf(stderr, "Result: 0x%4.4x (%u) C flag: %u N flag: %u, V flag: %u, Z flag: %u\n", result, result, cpu_get_flag_c(), cpu_get_flag_n(), cpu_get_flag_v(), cpu_get_flag_z());
-
-
 
   ////// update Rs if it's in autoincrement mode
   ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
@@ -61,14 +61,14 @@ uint32_t swpb(decode_result const *decoded)
   uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint32_t result;
 
-  if (!decoded->isAddrWord) {
+  if (!decoded->isAddrWord) { //checking for address word
     result = (opA >> 8) | ((opA & 0xFF) << 8);
   }
   else {
     result = ((opA & 0xFFF) >> 8) |  ((opA & 0xFF) << 8);
   }
 
-  // update resultSWPB
+  // update result
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
 
   ////// update Rs if it's in autoincrement mode
@@ -85,8 +85,8 @@ uint32_t rra(decode_result const *decoded)
   // compute
   int32_t result;
   int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
-  uint16_t lsb = opA & 0x1;
-  if (!decoded->extended) {
+  uint16_t lsb = opA & 0x1; //getting the least significant bit
+  if (!decoded->extended) { //checking for extended instructions
      result = (opA >> 1) | (opA & 0x8000);
   }
   else {
@@ -97,10 +97,10 @@ uint32_t rra(decode_result const *decoded)
       }
   }
 
-  cpu_set_flag_c(lsb);
-
   // update result & flags
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
+  cpu_set_flag_c(lsb);
+
   if (!decoded->isAddrWord) {
     do_nflag(result);
     do_zflag(result);
@@ -146,19 +146,9 @@ uint32_t push(decode_result const *decoded)
   int32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
   uint32_t sp;
 
-  if (!decoded->isAddrWord) {
-    sp = cpu_get_sp() - 2;
-    cpu_set_sp(sp);
-    store(sp, opA, decoded->isByte);
-  }
-  else {
-    sp = cpu_get_sp() -2;
-    cpu_set_sp(sp);
-    store(sp, (opA >> 16) , decoded->isByte);
-    sp = cpu_get_sp() - 2;
-    cpu_set_sp(sp);
-    store(sp, (opA & 0xFFFF), decoded->isByte);
-  }
+  sp = cpu_get_sp() - 2;
+  cpu_set_sp(sp);
+  store(sp, opA, decoded->isByte);
 
   // update result
   //if(decoded->isByte) {
@@ -167,7 +157,6 @@ uint32_t push(decode_result const *decoded)
   //  load(sp, &oldVal, false_read);
   //  opA = (opA & 0xFF) | (oldVal & 0xFF00);
   //}
-
 
   ////// update Rs if it's in autoincrement mode
   ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);

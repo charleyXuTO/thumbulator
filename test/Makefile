@@ -10,7 +10,7 @@
 
 DEVICE:=MSP430FR5994
 EXAMPLE:=main
-FOLDER:= src
+FOLDER:=src
 # Require DEVICE to be specified
 ifndef DEVICE
 $(info Please specify a device, e.g. DEVICE=MSP430F5529)
@@ -85,7 +85,7 @@ $(EXOBJECT): ${SRC}
 
 $(EXOBJECT2): ${SRC2}
 	@echo ============================================
-	@echo Compiling rc4test.c
+	@echo Compiling crc.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
 	$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
 
