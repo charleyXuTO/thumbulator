@@ -191,13 +191,8 @@ uint32_t call(decode_result const *decoded)
     store(sp, pc, false);
   }
   else {
-    sp = cpu_get_sp() - 2;
-    cpu_set_sp(sp);
-    pc = cpu_get_pc();
-    store(sp, pc >> 16, false);
-    sp =  cpu_get_sp() -2;
-    cpu_set_sp(sp);
-    store(sp, (pc & 0xFFFF), false);
+    // if should never be an addrWord here, its handled by calla
+      fprintf(stderr, "Using addrWord for Call function, it should be calla something is wrong");
   }
 
   // update result

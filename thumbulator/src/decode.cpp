@@ -28,8 +28,6 @@ bool isIndirectAutoIncrement(uint8_t As, uint8_t Rsrc) {
 // |----------------------------------------|
 
 
-
-
 decode_result decode_double(const uint16_t pInsn)
 {
   decode_result decoded;
@@ -134,7 +132,7 @@ decode_result decode_single(const uint16_t pInsn)
   uint16_t extended;
   uint8_t n = 0;
 
-  if ((pInsn >> 10 & 0x1) == 0x1) { // for pushm and popm
+  if (((pInsn >> 10) & 0x1) == 0x1) { // for pushm and popm
       isByte = false;
       isAddrWord = (pInsn>>8 & 0x1) != 0x1;
       n = pInsn >> 4 & 0xF;
@@ -146,6 +144,47 @@ decode_result decode_single(const uint16_t pInsn)
       }
       n = n + 0x1;
   }
+  else if ((((pInsn >> 7) & 0x7) >  0x300) && (((pInsn >> 7) & 0x7) <= 0x3FF)) { //for calla
+      isByte = false; //it would never be byte stuff
+      opcode = (pInsn >> 4) & 0x7;
+      switch (opcode) {
+          case 0: //absolute
+              Ad = 1;
+              fetch_instruction(cpu_get_pc(), &extended);
+              dstWord = ((pInsn & 0xF) << 16) ^ extended;
+              break;
+          case 1:
+              Ad = 1; //symbolic
+              fetch_instruction(cpu_get_pc(), &extended);
+              dstWord = ((pInsn & 0xF) << 16) ^ extended;
+              break;
+          case 3: // immediate
+              Ad = 3;
+              fetch_instruction(cpu_get_pc(), &extended);
+              dstWord = ((pInsn& 0xF) << 16) & extended;
+              break;
+          case 4: // Register
+              Ad = 0;
+              Rdst = pInsn & 0xF;
+              break;
+          case 5: // Index
+              Ad = 1;
+              Rdst = pInsn & 0xF;
+              fetch_instruction(cpu_get_pc(), &extended);
+              dstWord = extended;
+              break;
+          case 6: //Index Register
+              Ad = 2;
+              Rdst = pInsn & 0xF;
+              break;
+          case 7: //Index Auto, this one needs to be implemented properly in calla
+              Ad = 3;
+              Rdst = pInsn & 0xF;
+              break;
+          default: //should never be here
+              terminate_simulation(1);
+      }
+  }
   else {
       opcode = (pInsn & 0xFF80);
       Rdst = pInsn & 0xF;
@@ -155,7 +194,6 @@ decode_result decode_single(const uint16_t pInsn)
       dstWord = 0;
       dstWord1916 = 0;
       dstWord150 = 0;
-
       if (extendedInstruction) {
           fetch_instruction(cpu_get_pc() - 0x4, &extended);
           bool al = (extended & 0x40) == 0x40;
@@ -168,15 +206,13 @@ decode_result decode_single(const uint16_t pInsn)
       // [1] fetch any extra word needed (indexed, symbolic, absolute, immediate)
       if (Ad & 0x1) { // indexed, symbolic, absolute, indirect autoincrement, immediate
           // indirect autoincrement doesn't need next word
-
           if (!isIndirectAutoIncrement(Ad, Rdst)) {
               if (isAddrWord) {
                   dstWord1916 = extended & 0xF;
-
               }
               fetch_instruction(cpu_get_pc(), &dstWord150);
               cpu_set_pc(cpu_get_pc() + 0x2);
-              dstWord = (dstWord1916 & 0xF) << 16 ^ dstWord150;
+              dstWord = ((dstWord1916 & 0xF) << 16) ^ dstWord150;
 
           }
       }

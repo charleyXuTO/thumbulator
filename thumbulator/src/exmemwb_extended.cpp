@@ -381,6 +381,32 @@ uint32_t adda (decode_result const* decoded) {
 
     return 1;
 }
+uint32_t calla(decode_result const*decoded) {
+
+    uint32_t opA = getValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, false);
+    uint32_t sp;
+    uint32_t pc;
+
+    sp = cpu_get_sp() - 2;
+    cpu_set_sp(sp);
+
+    pc = cpu_get_pc();
+    store(sp, ((pc>>16)&0xF), false); //store the upper bits of the pc
+
+    sp = cpu_get_sp()-2;
+    cpu_set_sp(sp);
+
+    store(sp, (pc&0xFFFF), false);//sotre the low bits of the pc
+
+    // update result
+    cpu_set_pc(opA);
+
+    ////// update Rs if it's in autoincrement mode NEEDS TO DO THIS PART
+    ////updateAutoIncrementReg(decoded->As, decoded->Rs, decoded->isAddrWord, decoded->isByte);
+
+
+    return 1;
+}
 
 
 }

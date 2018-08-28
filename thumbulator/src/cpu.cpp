@@ -31,6 +31,8 @@ void cpu_reset()
   cpu_set_pc(startAddr);
 }
 
+
+
 cpu_state cpu;
 
 uint32_t mov(decode_result const *);
@@ -73,6 +75,16 @@ uint32_t mova(decode_result const *);
 uint32_t cmpa(decode_result const *);
 uint32_t suba(decode_result const *);
 uint32_t adda(decode_result const *);
+uint32_t calla(decode_result const *);
+
+uint32_t morejump (decode_result const*decoded) {
+    if ((insn & 0x7F) != 0) {
+       return calla(decoded);
+    }
+    else {
+        return reti(decoded);
+    }
+}
 
 uint32_t exmemwb_error(decode_result const *decoded)
 {
@@ -95,8 +107,8 @@ uint32_t (*executeJumpTableSingleOp[8])(decode_result const *) = {
     sxt,
     push,
     call,
-    reti,
-    exmemwb_error // calla
+    morejump, //could be calla or reti
+    calla
 };
 
 
