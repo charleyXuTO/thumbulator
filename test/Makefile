@@ -61,13 +61,13 @@ SRC2             := $(FOLDER)/aes.c
 EXOBJECT2        := $(EXAMPLE)/aes.o
 EXOUTPUT2        := $(EXAMPLE)/aes.out
 
-SRC3             := $(FOLDER)/lzfx_decomp_test.c
-EXOBJECT3        := $(EXAMPLE)/lzfx_decomp_test.o
-EXOUTPUT3        := $(EXAMPLE)/lzfx_decomp_test.out
+SRC3             := $(FOLDER)/isqrt.c
+EXOBJECT3        := $(EXAMPLE)/isqrt.o
+EXOUTPUT3        := $(EXAMPLE)/isqrt.out
 
-SRC4             := $(FOLDER)/uart.c
-EXOBJECT4        := $(EXAMPLE)/uart.o
-EXOUTPUT4        := $(EXAMPLE)/uart.out
+SRC4             := $(FOLDER)/rad2deg.c
+EXOBJECT4        := $(EXAMPLE)/rad2deg.o
+EXOUTPUT4        := $(EXAMPLE)/rad2deg.out
 
 
 ######################################
@@ -85,23 +85,23 @@ $(EXOBJECT): ${SRC}
 
 $(EXOBJECT2): ${SRC2}
 	@echo ============================================
-	@echo Compiling crc.c
+	@echo Compiling cubic.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
 	$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
 
 #$(EXOBJECT3): ${SRC3}
-	#@echo ============================================
-	#@echo Compiling uart.c
-	#$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
-	#$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
+#	@echo ============================================
+#	@echo Compiling isqrt.c
+#	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
+#	$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
 
 #$(EXOBJECT4): ${SRC4}
-	#@echo ============================================
-	#@echo Compiling rad2deg.c
-	#$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
-	#$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
+#	@echo ============================================
+#	@echo Compiling rad2deg.c
+#	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
+#	$(CC) $(INCLUDES) $(CFLAGS) -S $< -o $@.asm
 
-$(EXOUTPUT): $(EXAMPLE) $(EXOBJECT) $(EXOBJECT2)
+$(EXOUTPUT): $(EXAMPLE) $(EXOBJECT) $(EXOBJECT2) 
 	@echo ============================================
 	@echo Linking objects and generating output binary
 	$(CC) $(LDFLAGS) $(EXOBJECT) $(EXOBJECT2) -o $@ -lm

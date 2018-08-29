@@ -194,7 +194,7 @@ uint32_t sub(decode_result const *decoded)
   int32_t result = opA + opB + 1;
 
   // update result & flags
-  cpu_set_gpr(decoded->Rd, result);
+
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
   if (!decoded->isAddrWord) {
     do_nflag(result);
@@ -235,7 +235,7 @@ uint32_t subc(decode_result const *decoded)
   int32_t result = opA + opB + carry;
 
   // update result & flags
-  //cpu_set_gpr(decoded->Rd, result);
+
   setValue(decoded->Ad, decoded->Rd, decoded->dstWord, decoded->isByte, decoded->isAddrWord, result);
 
   if (!decoded->isAddrWord) {
