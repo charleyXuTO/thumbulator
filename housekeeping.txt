@@ -1,0 +1,81 @@
+Date:2018-08-28
+Weather: partly cloudy
+
+List of documentation I looked at 
+memory layout
+-http://www.ti.com/lit/ds/symlink/msp430fr5994.pdf
+-chapter 6.15 has memory map and peripheral map
+
+instruction sets
+-http://www.ti.com/lit/ug/slau391f/slau391f.pdf
+-contains detailed description of each instruction/opcode
+
+msp430 gcc compilier
+-http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPGCC/5_01_02_00/index_FDS.html
+-https://github.com/gcc-mirror/gcc
+-used the 6.4.0 64 linux verison
+-might also need to download all the support library, but when you try to compile it, it should have instruction telling you how to do that
+-I always used O0 option and some of the benchmarks needs -lm for math library
+
+peripheral documentation 
+-http://www.ti.com/lit/ug/slau367o/slau367o.pdf
+-contains information specifically different behaviors of peripherials (HW muliplier is chapter 5)
+
+Benchmarks used MiBench2 without any printfs
+-https://github.com/impedimentToProgress/MiBench2
+-without any printfs
+-use the second last commit and delete barebench in makefile
+
+elf header offset library
+-http://elfio.sourceforge.net/
+-the functions they provide doesn't really help but i added stuff in their code that gets the offset, its kinda ugly and uses a bunch of global variables
+-i try to load in some sections directly instead of from beginning to the end
+-some sections that might have the wrong offset using the library is .heap .persistent etc
+
+Benchmarks that run to completion without printf
+rsa
+aes
+crc
+limits
+basicmath to long, hopefully
+
+Benchmarks that didn't get built properly
+rc4 (section .bss cannot fit in RAM) (overflow by 40 bytes)
+lzfx (declaring arrays that are too big, 0x8000 size)
+regress (contains their own assembly that might be able to be converted into msp430 instructions)
+
+Various concerns/problems with the simulator
+- starting address location might still be wrong, sections like the heap doesn't seem to have the correct offset
+- still little bit concern of the cycle counts im getting, doesn't seem to use that many new instructions but the cycle counts are still very far apart, its also not always less than hardware
+- concerned about the extend sign instruction (sxt) might not work with the cpux version, but i didn't find a time where it used that so
+- the loading and storing odd address locations for bytes instructions might still have problems, some edge cases maybe
+- floating point numbers, still sometimes slightly off (4.3999999 vs 4.4). Hardware is also sometimes off but its with different numbers
+- Interrupt capabilities have not been tested at all, not confident in functions like reti (return from interrupt)
+- HW multiplier not using the correct functions but it seems like its a compilier problem
+- HW multiplier can also be disabled using an compilier option
+- it seems like the pushm/popm documentaion is wrong (the order of subtracting/adding the stack point seems to be wrong) 
+
+printf in the benchmarks
+- tried to replace basic printf(fputc etc) function with empty ones but it didn't seems to replace them properly
+- running benchmarks by deleting all printfs
+- aes benchmark running printf was giving me errors, like the program itself is exiting prematurely 
+
+Things that still needs to be done
+- cycle counts for various instructions
+	- all extended instructions (under exmemwb_extended)
+        - HW multiplier needs to be added cycle counts (not just mov instruction cycle counts)
+        - all cpux instructions (ex. movx, addx)
+- instructions that needs to be checked again
+        - reti
+        - sxt (specifically the cpux version)
+	- haven't seen alot of cpux instructions (movx, addx etc) so make sure the loading and storing is done correctly
+        - calla (haven't seen this one being used at all)
+- instructions that needs to be implemented 
+        - calla specially the part of auto increment index
+- Useful peripherals that might need to be implemented
+        - timers
+        - uart 
+        - adc
+        - comparator
+
+      
