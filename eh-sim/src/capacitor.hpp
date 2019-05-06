@@ -15,137 +15,144 @@ namespace ehsim {
  *
  * @return The energy in nJ.
  */
-inline double calculate_energy(double const voltage, double const capacitance)
-{
-  return 0.5 * capacitance * voltage * voltage * 1e9;
-}
 
 class capacitor {
 public:
   /**
-   * Create a capacitor.
-   *
-   * @param capacitance The capacitance in farads (F).
-   * @param maximum_voltage The maximum voltage the capacitor can sustain.
-   */
-  capacitor(double const capacitance, double const maximum_voltage, double const maximum_current)
-      : C(capacitance)
-      , maxV(maximum_voltage)
-      , maxI(maximum_current)
-      , V(0)
-      , maximum_energy(calculate_energy(maximum_voltage, C))
-      , energy(0)
-  {
-    assert(maximum_energy > 0);
-  }
+     * Create a capacitor.
+     *
+     * @param capacitance The capacitance in farads (F).
+     * @param maximum_voltage The maximum voltage the capacitor can sustain.
+     */
+  capacitor(double const capacitance, double const maximum_voltage, double const maximum_current);
 
   /**
-   * @return The capacitance in farads (F).
-   */
+     * @return The capacitance in farads (F).
+     */
   double capacitance() const
   {
-    return C;
+    return m_capacitance;
   }
 
   /**
-   * @return The maximum voltage in volts (V).
-   */
+     * @return The maximum voltage in volts (V).
+     */
   double max_voltage() const
   {
-    return maxV;
+    return m_max_voltage;
   }
 
   /**
-   * @return The maximum current in Ampheres (A).
-   */
+     * @return The maximum current in Ampheres (A).
+     */
   double max_current() const
   {
-    return maxI;
+    return m_max_current;
+  }
+  /**
+     * @return The maximum amount of energy (J) this capacitor can store.
+     */
+
+  double maximum_energy_stored() const
+  {
+    return m_max_energy;
   }
 
   /**
-   * @return The voltage in volts (V).
-   */
+     * @return The voltage in volts (V).
+     */
   double voltage() const
   {
-    return V;
+    return m_voltage;
   }
 
   /**
-   * Updates the current voltage across capacitor based on current energy stored
-   */
-  void update_voltage()
-  {
-    V = sqrt(2 * energy * 1e-9 / C);
-  }
-
-  /**
-   * @return The amount of stored energy in nJ.
+   * @return The amount of stored energy in J.
    */
   double energy_stored() const
   {
-    return energy;
+    return m_energy;
   }
 
   /**
-   * @return The maximum amount of energy (nJ) this capacitor can store.
-   */
-  double maximum_energy_stored() const
+     * Updates the current voltage across capacitor based on current energy stored
+     */
+  void update_voltage()
   {
-    return maximum_energy;
+    m_voltage = sqrt(2 * m_energy / m_capacitance);
   }
 
   /**
-   * Consume energy from the capacitor.
+   * Charge the capacitor with the given current (Amperes) for an amount of time (seconds).
    *
-   * @param energy_to_consume The amount of energy to consume in nJ.
+   * This will impact the voltage across the capacitor.
    */
-  void consume_energy(double const energy_to_consume)
-  {
-    assert(energy_to_consume >= 0);
-    assert(energy - energy_to_consume >= 0);
-
-    energy -= energy_to_consume;
-    update_voltage();
-  }
+  void charge(double current, double time);
 
   /**
+   * Remove charge (Coulombs) from the capacitor.
+   *
+   * This will impact the voltage across the capacitor.
+   */
+  void drain(double current, double time);
+
+  /**
+  * Consume energy from the capacitor.
+  *
+  * @param energy_to_consume The amount of energy to consume in J.
+  */
+  void consume_energy(double const energy_to_consume);
+
+/**
    * Add energy to the capacitor.
    *
-   * @param energy_harvested The amount of energy to harvest in nJ.
+   * @param energy_harvested The amount of energy to harvest in J.
    *
    * @return The amount of energy that could be stored.
    */
-  double harvest_energy(double const energy_harvested)
-  {
-    assert(energy_harvested >= 0);
-
-    double can_harvest = energy_harvested;
-    if(energy + energy_harvested > maximum_energy) {
-      can_harvest = maximum_energy - energy;
-    }
-
-    // clamp to maximum energy, avoiding floating point precision errors
-    energy = std::min(energy + can_harvest, maximum_energy);
-    update_voltage();
-
-    return can_harvest;
-  }
+  double harvest_energy(double const energy_harvested);
 
 private:
   // capacitance
-  double const C;
-  // maximum energy that can be stored in nJ
-  double const maximum_energy;
+  double const m_capacitance;
   // maximum voltage
-  double maxV;
+  double m_max_voltage;
   // maximum current
-  double maxI;
+  double m_max_current;
   // voltage across the capacitor
-  double V;
-  // stored energy in nJ
-  double energy;
+  double m_voltage;
+  // max energy
+  double m_max_energy;
+  // stored energy in J
+  double m_energy;
+
+  /**
+ * Calculate the energy (Joules) stored in the capacitor.
+ */
+  inline double calculate_energy(double const voltage, double const capacitance)
+  {
+    return 0.5 * capacitance * voltage * voltage;
+  }
+
+  /**
+ * Get the charge (Coulombs) stored in the capacitor.
+ */
+  inline double calculate_charge(capacitor const &c)
+  {
+    return c.capacitance() * c.voltage();
+  }
+
+  /**
+ * Given a load (Amperes and Volts), calculate the time (seconds) to drain the capacitor.
+ */
+  inline double calculate_time(capacitor const &c, double voltage, double current)
+  {
+    if(voltage > c.voltage()) {
+      return 0.0;
+    }
+    return calculate_charge(c) / current;
+  }
 };
-}
+} // namespace ehsim
 
 #endif //EH_SIM_CAPACITOR_HPP

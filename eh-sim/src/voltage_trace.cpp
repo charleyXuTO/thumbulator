@@ -19,7 +19,7 @@ voltage_trace::voltage_trace(std::string const &path_to_trace, std::chrono::mill
     }
 
     maximum_time = std::chrono::milliseconds(voltages.size());
-    std::cout << "maximum_time: " << maximum_time.count() << "\n";
+    std::cout << "Size of voltage trace (ms): " << maximum_time.count() << "\n";
   }
 }
 

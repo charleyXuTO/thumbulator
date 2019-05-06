@@ -1,5 +1,5 @@
-#ifndef EH_SIM_BACKUP_EVERY_CYCLE_HPP
-#define EH_SIM_BACKUP_EVERY_CYCLE_HPP
+#ifndef EH_SIM_TASK_BASED_HPP
+#define EH_SIM_TASK_BASED_HPP
 
 #include "scheme/eh_scheme.hpp"
 #include "scheme/data_sheet.hpp"
@@ -9,13 +9,12 @@
 namespace ehsim {
 
 /**
- * Based on Architecture Exploration for Ambient Energy Harvesting Nonvolatile Processors.
+ * Tester scheme for dual purpose predictor
  *
- * See the data relating to the BEC scheme.
  */
-class backup_every_cycle : public eh_scheme {
+class task_based : public eh_scheme {
 public:
-  backup_every_cycle() : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE, MEMENTOS_MAX_CURRENT)
+  task_based() : battery(NVP_CAPACITANCE, MEMENTOS_MAX_CAPACITOR_VOLTAGE, MEMENTOS_MAX_CURRENT)
   {
   }
 
@@ -50,14 +49,16 @@ public:
 
   bool is_active(stats_bundle *stats) override
   {
-    auto required_energy = NVP_INSTRUCTION_ENERGY + NVP_BEC_BACKUP_ENERGY;
-
-    if(stats->cpu.instruction_count != 0) {
-      // we only need to restore if an instruction has been executed
-      required_energy += NVP_BEC_RESTORE_ENERGY;
+    auto required_energy = NVP_INSTRUCTION_ENERGY + NVP_BEC_BACKUP_ENERGY + NVP_BEC_RESTORE_ENERGY;
+    if(battery.energy_stored() >  battery.maximum_energy_stored() - required_energy)
+    {
+      active = true;
     }
-    std::cout << "Required energy:" << required_energy*1e9 << "\n";
-    return battery.energy_stored() > required_energy;
+    else if (battery.energy_stored() < required_energy)
+    {
+      active = false;
+    }
+    return active;
   }
 
   bool will_backup(stats_bundle *stats) const override
@@ -95,14 +96,15 @@ public:
   double estimate_progress(eh_model_parameters const &eh) const override
   {
     return estimate_eh_progress(eh, dead_cycles::best_case, NVP_BEC_OMEGA_R, NVP_BEC_SIGMA_R, NVP_BEC_A_R,
-        NVP_BEC_OMEGA_B, NVP_BEC_SIGMA_B, NVP_BEC_A_B);
+                                NVP_BEC_OMEGA_B, NVP_BEC_SIGMA_B, NVP_BEC_A_B);
   }
 
 private:
   capacitor battery;
 
   uint64_t last_backup_cycle = 0u;
+  bool active = false;
 };
 }
 
-#endif //EH_SIM_BACKUP_EVERY_CYCLE_HPP
+#endif //EH_SIM_TASK_BASED_HPP

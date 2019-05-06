@@ -8,9 +8,11 @@
 #include "scheme/backup_every_cycle.hpp"
 #include "scheme/clank.hpp"
 #include "scheme/parametric.hpp"
+#include "scheme/task_based.hpp"
 
 #include "simulate.hpp"
 #include "voltage_trace.hpp"
+#include "input_source.hpp"
 
 void print_usage(std::ostream &stream, argagg::parser const &arguments)
 {
@@ -54,16 +56,18 @@ int main(int argc, char *argv[])
 {
   argagg::parser arguments{{{"help", {"-h", "--help"}, "display help information", 0},
       {"voltages", {"--voltage-trace"}, "path to voltage trace", 1},
-      {"rate", {"--voltage-rate"}, "sampling rate of voltage trace (microseconds)", 1},
+      {"rate", {"--voltage-rate"}, "sampling rate of voltage trace (milliseconds)", 1},
       {"harvest", {"--always-harvest"}, "harvest during active periods", 1},
       {"scheme", {"--scheme"}, "the checkpointing scheme to use", 1},
       {"tau_B", {"--tau-b"}, "the backup period for the parametric scheme", 1},
       {"binary", {"-b", "--binary"}, "path to application binary", 1},
       {"output", {"-o", "--output"}, "output file", 1}}};
 
+
+
   try {
     auto const options = arguments.parse(argc, argv);
-    if(options["help"]) {
+    if (options["help"]) {
       print_usage(std::cout, arguments);
       return EXIT_SUCCESS;
     }
@@ -75,6 +79,12 @@ int main(int argc, char *argv[])
 
     auto const path_to_voltage_trace = options["voltages"];
     std::chrono::milliseconds sampling_period(options["rate"]);
+
+    //double const trace_period = 0.001;
+    //double const trace_resistance = 30000;
+
+    //auto input_source = ehsim::input_source(path_to_voltage_trace, trace_period, trace_resistance);
+
 
     std::unique_ptr<ehsim::eh_scheme> scheme = nullptr;
     auto const scheme_select = options["scheme"].as<std::string>("bec");
@@ -89,6 +99,8 @@ int main(int argc, char *argv[])
     } else if(scheme_select == "parametric") {
       auto const tau_b = options["tau_B"].as<int>(1000);
       scheme = std::make_unique<ehsim::parametric>(tau_b);
+    } else if(scheme_select == "task") {
+      scheme = std::make_unique<ehsim::task_based>();
     } else {
       throw std::runtime_error("Unknown scheme selected.");
     }
@@ -136,10 +148,12 @@ int main(int argc, char *argv[])
       out << std::setprecision(3) << model.progress << ", ";
       out << std::setprecision(3) << model.eh_progress << "\n";
     }
+
   } catch(std::exception const &e) {
     std::cerr << "Error: " << e.what() << "\n";
     return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;
+
 }

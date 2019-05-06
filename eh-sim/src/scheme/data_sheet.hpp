@@ -3,7 +3,7 @@
 
 namespace ehsim {
 
-// all energy units are in nJ
+// all energy units are in J
 
 // Mementos numbers are for an MSP430F1232 (http://www.ti.com/product/msp430f1232)
 // see: https://www.usenix.org/legacy/event/hotpower08/tech/full_papers/ransford/ransford_html/
@@ -15,7 +15,7 @@ constexpr double MEMENTOS_ACTIVE_LOAD_RESISTANCE = 20e3;
 constexpr double MEMENTOS_RC_CONSTANT = 0.2;
 constexpr double MEMENTOS_MAX_CURRENT = 238e-6;
 
-constexpr double MEMENTOS_INSTRUCTION_ENERGY = 2.0;
+constexpr double MEMENTOS_INSTRUCTION_ENERGY = 2.0e-9;
 // memory naming scheme is MEMENTOS_DESTINATION_SOURCE
 constexpr double MEMENTOS_REG_REG = 1.1;
 constexpr double MEMENTOS_REG_FLASH = 5.2;
@@ -37,11 +37,11 @@ constexpr uint32_t NVP_CPU_FREQUENCY = 8000;
 // see Section V from paper - capacitor used in the system is 470 nF
 constexpr double NVP_CAPACITANCE = 470e-9;
 // see Figure 11 from paper
-constexpr auto NVP_INSTRUCTION_ENERGY = 0.03125;
-constexpr auto NVP_ODAB_BACKUP_ENERGY = 0.75;
-constexpr auto NVP_ODAB_RESTORE_ENERGY = 0.25;
-constexpr auto NVP_BEC_BACKUP_ENERGY = 0.125;
-constexpr auto NVP_BEC_RESTORE_ENERGY = 0.25;
+constexpr auto NVP_INSTRUCTION_ENERGY = 0.03125e-9;
+constexpr auto NVP_ODAB_BACKUP_ENERGY = 0.75e-9;
+constexpr auto NVP_ODAB_RESTORE_ENERGY = 0.25e-9;
+constexpr auto NVP_BEC_BACKUP_ENERGY = 0.125e-9;
+constexpr auto NVP_BEC_RESTORE_ENERGY = 0.25e-9;
 // see Figure 10 from paper
 constexpr uint64_t NVP_ODAB_BACKUP_TIME = 35;
 constexpr uint64_t NVP_ODAB_RESTORE_TIME = 35;
@@ -63,9 +63,9 @@ constexpr double CORTEX_M0PLUS_CURRENT = 1.3e-3;
 constexpr double CORTEX_M0PLUS_VOLTAGE = 1.8;
 // this includes the fetching of the instruction
 constexpr double CORTEX_M0PLUS_INSTRUCTION_ENERGY_PER_CYCLE =
-    1e9 * (CORTEX_M0PLUS_CURRENT * CORTEX_M0PLUS_VOLTAGE) / CORTEX_M0PLUS_FREQUENCY;
+    (CORTEX_M0PLUS_CURRENT * CORTEX_M0PLUS_VOLTAGE) / CORTEX_M0PLUS_FREQUENCY;
 // Table 43 - energy per byte
-constexpr double CORTEX_M0PLUS_ENERGY_FLASH = 1e9 * 0.7e-6 * 3.6 * 3.94e-3;
+constexpr double CORTEX_M0PLUS_ENERGY_FLASH = 0.7e-6 * 3.6 * 3.94e-3;
 
 // based on Clank: Architectural Support for Intermittent Computation
 constexpr uint64_t CLANK_BACKUP_ARCH_TIME = 40;
